@@ -1,5 +1,13 @@
+global using Superchef.Models;
+using Microsoft.AspNetCore.Mvc;
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
+
+builder.Services.AddSqlServer<DB>($@"
+    Data Source=(LocalDB)\MSSQLLocalDB;
+    AttachDbFilename={builder.Environment.ContentRootPath}\Superchef.mdf;
+");
 
 var app = builder.Build();
 app.UseHttpsRedirection();

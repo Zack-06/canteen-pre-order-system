@@ -1,1 +1,3 @@
-dotnet watch run --profile "http"
+cls
+
+dotnet watch run --launch-profile "no_browser"

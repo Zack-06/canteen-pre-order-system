@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Superchef")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+cae38079cae11cca68e135e6be3e5ae3ad3945a1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+64534025f344dcce61296e1aa020387de3ad7816")]
 [assembly: System.Reflection.AssemblyProductAttribute("Superchef")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Superchef")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
