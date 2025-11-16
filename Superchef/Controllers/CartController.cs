@@ -2,20 +2,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Superchef.Controllers;
 
-public class HomeController : Controller
+public class CartController : Controller
 {
     public IActionResult Index()
     {
+        // display stores
+
         return View();
     }
 
-    public IActionResult Vendor()
+    public IActionResult Store(int id)
     {
-        return View();
-    }
+        // display items for store with id
 
-    public IActionResult Admin()
-    {
         return View();
     }
 }

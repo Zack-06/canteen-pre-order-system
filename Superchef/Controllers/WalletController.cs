@@ -2,19 +2,14 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Superchef.Controllers;
 
-public class HomeController : Controller
+public class WalletController : Controller
 {
     public IActionResult Index()
     {
         return View();
     }
 
-    public IActionResult Vendor()
-    {
-        return View();
-    }
-
-    public IActionResult Admin()
+    public IActionResult Reload()
     {
         return View();
     }

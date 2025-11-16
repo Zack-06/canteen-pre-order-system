@@ -2,19 +2,19 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Superchef.Controllers;
 
-public class HomeController : Controller
+public class AdminController : Controller
 {
-    public IActionResult Index()
+    public IActionResult Manage()
     {
         return View();
     }
 
-    public IActionResult Vendor()
+    public IActionResult Add()
     {
         return View();
     }
 
-    public IActionResult Admin()
+    public IActionResult Edit()
     {
         return View();
     }
