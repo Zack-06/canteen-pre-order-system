@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@ViewBag.Title</title>
-    <link rel="shortcut icon" href="/img/favicon.png" type="image/x-icon">
+    <link rel="shortcut icon" href="/img/logo/favicon.png" type="image/x-icon">
     <link rel="stylesheet" href="/css/pager.css">
     <link rel="stylesheet" href="/css/app.css" asp-append-version="true">
     <script>
@@ -32,29 +32,32 @@
         <partial name="_AdminHeader" />
     } *@
 
-    <partial name="_Header" />
+    <div class="page">
+        <partial name="_Header" />
 
-    <main>
-        @RenderBody()
-    </main>
+        <main>
+            @RenderBody()
+        </main>
+    </div>
 
     <footer>
-        <div id="footer-container" class="container">
-            <div id="footer-copyright">Copyright © @DateTime.Now.Year Superchef Canteen Pre-Order System. All Rights Reserved
-            </div>
-            <div id="footer-links">
+        <span>Copyright © @DateTime.Now.Year Superchef Canteen Pre-Order System. All Rights Reserved</span>
+        
+        <div class="info-links-wrapper">
+            <div class="info-links">
                 <a href="/Info/About" target="_blank">About Superchef</a>
                 <a href="/Info/Privacy" target="_blank">Privacy Policy</a>
                 <a href="/Info/Contact" target="_blank">Contact Us</a>
             </div>
-            <div id="footer-social-media">
-                <a style="background-image: url('/img/facebook.svg'); " href="
+        </div>
+
+        <div class="social-media-icons">
+            <a style="background-image: url('/img/facebook.svg'); " href="
                     https://www.facebook.com/malaysia_superchef" target="_blank"></a>
-                <a style="background-image: url('/img/instagram.svg'); "
-                    href=" https://www.instagram.com/malaysia_superchef" target="_blank"></a>
-                <a style="background-image: url('/img/youtube.svg'); "
-                    href="@("https://www.youtube.com/@malaysia_superchef")" target="_blank"></a>
-            </div>
+            <a style="background-image: url('/img/instagram.svg'); "
+                href=" https://www.instagram.com/malaysia_superchef" target="_blank"></a>
+            <a style="background-image: url('/img/youtube.svg'); "
+                href="@("https://www.youtube.com/@malaysia_superchef")" target="_blank"></a>
         </div>
     </footer>
 

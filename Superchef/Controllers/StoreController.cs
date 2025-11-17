@@ -22,6 +22,12 @@ public class StoreController : Controller
         return View();
     }
 
+    public IActionResult Slots(int id, string? type = "recurring")
+    {
+        // manage store slots
+        return View();
+    }
+
     public IActionResult Report(int id)
     {
         // view sales report

@@ -1,0 +1,11 @@
+cart
+admin
+manage accounts
+category
+inventory
+receipt long
+paid
+place
+qr code scanner
+store
+search

@@ -172,6 +172,8 @@ public class Store
     public int Id { get; set; }
     [MaxLength(50)]
     public string Name { get; set; }
+    [MaxLength(100)]
+    public string Slug { get; set; }
     [MaxLength(500)]
     public string Description { get; set; }
     [MaxLength(50)]
@@ -194,6 +196,8 @@ public class Item
     public int Id { get; set; }
     [MaxLength(50)]
     public string Name { get; set; }
+    [MaxLength(100)]
+    public string Slug { get; set; }
     [MaxLength(500)]
     public string Description { get; set; }
     [MaxLength(50)]

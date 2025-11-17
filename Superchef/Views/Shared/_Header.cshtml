@@ -1,0 +1,38 @@
+<header>
+    <div class="wrapper">
+        <a href="/" class="header-nav-link app-logo">
+            <img src="/img/logo/normal.png" alt="SUPERCHEF">
+            <img src="/img/logo/small.png" alt="S" class="small">
+        </a>
+        <span id="back-button" class="header-nav-link">
+            <img src="/img/header_icon/back.png" alt="Back">
+        </span>
+    </div>
+
+    <form class="search-container" method="get" action="@Url.Action("Index", "Search")">
+        <input type="text" name="query" placeholder="Search">
+        <button type="reset">
+            <img src="/img/cross.png" alt="Clear" height="20">
+        </button>
+        <button type="submit">
+            <img src="/img/search_black.png" alt="Search" height="23">
+        </button>
+    </form>
+
+
+    <div class="wrapper">
+        <div id="search-button" href="/" class="header-nav-link">
+            <img src="/img/header_icon/search.png" alt="Cart">
+        </div>
+        <a href="/" class="header-nav-link">
+            <img src="/img/header_icon/cart.png" alt="Cart">
+        </a>
+        <button class="header-nav-link pfp">
+            <img src="/img/pfp.png" alt="Pfp">
+            <div class="dropdown-menu">
+                <a href="/Auth/Login">Login</a>
+                <a href="/Auth/Register">Register</a>
+            </div>
+        </button>
+    </div>
+</header>

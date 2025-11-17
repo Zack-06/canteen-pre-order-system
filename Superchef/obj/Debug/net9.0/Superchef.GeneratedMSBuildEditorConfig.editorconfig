@@ -200,8 +200,16 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/ThinkPad/Documents/TAR UMT/Diploma Year 2 Sem 2/Assignment/MP/Source Code/Superchef/Views/Shared/_VendorHeader.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WZW5kb3JIZWFkZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/ThinkPad/Documents/TAR UMT/Diploma Year 2 Sem 2/Assignment/MP/Source Code/Superchef/Views/Store/Add.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcQWRkLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ThinkPad/Documents/TAR UMT/Diploma Year 2 Sem 2/Assignment/MP/Source Code/Superchef/Views/Store/CustomSlots.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcQ3VzdG9tU2xvdHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/ThinkPad/Documents/TAR UMT/Diploma Year 2 Sem 2/Assignment/MP/Source Code/Superchef/Views/Store/Edit.cshtml]
@@ -210,6 +218,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/ThinkPad/Documents/TAR UMT/Diploma Year 2 Sem 2/Assignment/MP/Source Code/Superchef/Views/Store/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/ThinkPad/Documents/TAR UMT/Diploma Year 2 Sem 2/Assignment/MP/Source Code/Superchef/Views/Store/RecurringSlots.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RvcmVcUmVjdXJyaW5nU2xvdHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/ThinkPad/Documents/TAR UMT/Diploma Year 2 Sem 2/Assignment/MP/Source Code/Superchef/Views/Store/Report.cshtml]
