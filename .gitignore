@@ -1,5 +1,5 @@
-/bin
-/obj
-/.vs
-.vs
-/Superchef_log.ldf
+/Superchef/bin/
+/Superchef/obj/
+/Superchef/.vs/
+/.vs/
+/Superchef/Superchef_log.ldf
