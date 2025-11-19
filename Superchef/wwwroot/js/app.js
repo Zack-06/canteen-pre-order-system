@@ -20,3 +20,22 @@ function showToast(message) {
 		setTimeout(() => toast.remove(), 500)
 	}, 4000)
 }
+
+function confirmation(question = "", okay = "Yes", cancel = "Cancel") {
+	return new Promise((resolve) => {
+		$("#confirmation-popup .title").text(question)
+		$("#confirmation-popup-confirm").text(okay)
+		$("#confirmation-popup-cancel").text(cancel)
+		$("#confirmation-popup").addClass("show")
+		$("#confirmation-popup-confirm").on("click", function () {
+			$("#confirmation-popup").removeClass("show")
+			resolve(true)
+		})
+		$("#confirmation-popup-cancel").on("click", function () {
+			$("#confirmation-popup").removeClass("show")
+			resolve(false)
+		})
+	})
+}
+
+window.confirmation = confirmation
