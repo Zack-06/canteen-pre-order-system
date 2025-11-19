@@ -615,6 +615,11 @@ main > .container.container-center {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
 }
+main:has(.container-center) {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
 
 /* Forms */
 .form-group {
@@ -704,7 +709,7 @@ main > .container.container-center {
 	display: flex;
 	flex-direction: row;
 	justify-content: space-between;
-    align-items: center;
+	align-items: center;
 }
 
 /* Password Eye Button */
