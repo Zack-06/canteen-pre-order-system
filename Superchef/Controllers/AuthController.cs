@@ -39,4 +39,15 @@ public class AuthController : Controller
     {
         return View();
     }
+
+    // ==========REMOTE==========
+    public bool CheckEmailLogin(string email)
+    {
+        return true;
+    }
+
+    public bool CheckEmailRegister(string email)
+    {
+        return true;
+    }
 }

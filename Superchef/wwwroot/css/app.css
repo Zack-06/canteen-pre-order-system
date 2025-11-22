@@ -29,19 +29,14 @@
 
 	/* ------------------------Buttons------------------------ */
 	/* Primary button */
-	--btn-primary-bg: var(--color-primary);
-	--btn-primary-text: var(--text-inverse);
-	--btn-primary-hover: #7a5538;
-
-	/* Secondary button */
-	--btn-secondary-bg: var(--color-secondary);
-	--btn-secondary-text: var(--text-secondary);
-	--btn-secondary-hover: #d1c3a8;
+	--btn-primary-bg: #b89a8b;
+	--btn-primary-text: #ffffff;
+	--btn-primary-hover: #936e5b;
 
 	/* Accent button */
-	--btn-accent-bg: var(--color-accent);
+	--btn-accent-bg: #f0ad4e;
 	--btn-accent-text: #ffffff;
-	--btn-accent-hover: #8dd75a;
+	--btn-accent-hover: #be8836;
 
 	/* Danger / Error button */
 	--btn-danger-bg: #d9534f;
@@ -59,9 +54,9 @@
 	--btn-info-hover: #31b0d5;
 
 	/* Disabled button */
-	--btn-disabled-bg: #6c757d;
-	--btn-disabled-text: #ffffff;
-	--btn-disabled-hover: #6c757d;
+	--btn-disabled-bg: #e7e6e6;
+	--btn-disabled-text: #a3a3a3;
+	--btn-disabled-hover: #e7e6e6;
 
 	/* Status Colors */
 	--status-success: #5cb85c;
@@ -82,9 +77,8 @@
 	--border-active: #a57753;
 
 	/* Shadows / Effects */
-	--shadow-light: 0 0 0 3px rgba(97, 60, 37, 0.1);
-	--shadow-medium: 0 0 0 2px rgba(97, 60, 37, 0.2);
-	--shadow-heavy: 0 0 0 2px rgba(97, 60, 37, 0.5);
+	--shadow-primary: 0 0 0 2px rgba(97, 60, 37, 0.2);
+	--shadow-danger: 0 0 0 2px rgba(224, 69, 98, 0.4);
 
 	/* Font families */
 	--font-primary: "Bahnschrift", sans-serif; /* UI / body */
@@ -194,10 +188,10 @@ a:hover,
 /* Buttons */
 button,
 [data-button] {
-	--_btn-color-bg: var(--btn-color-bg, var(--bg-default));
-	--_btn-color-text: var(--btn-color-text, var(--text-primary));
-	--_btn-color-hover-bg: var(--btn-color-hover-bg, var(--bg-hover));
-	--_btn-color-hover-text: var(--btn-color-hover-text, var(--text-secondary));
+	--_btn-color-bg: var(--btn-color-bg, var(--btn-primary-bg));
+	--_btn-color-text: var(--btn-color-text, var(--btn-primary-text));
+	--_btn-color-hover-bg: var(--btn-color-hover-bg, var(--btn-primary-hover));
+	--_btn-color-hover-text: var(--btn-color-hover-text, var(--btn-primary-text));
 
 	padding: 0.5rem 1rem;
 	text-decoration: none !important;
@@ -399,7 +393,7 @@ header .search-container {
 	transition: all 0.3s ease;
 }
 header .search-container:focus-within {
-	box-shadow: var(--shadow-medium);
+	box-shadow: var(--shadow-primary);
 }
 header .search-container input {
 	border: none;
@@ -524,6 +518,7 @@ main {
 
 /* Footer */
 footer {
+	width: 100%;
 	background-color: var(--bg-footer);
 	padding: 1rem 1.5rem;
 	color: var(--text-secondary);
@@ -580,7 +575,7 @@ footer .social-media-icons a:hover {
 .container {
 	margin: auto;
 	overflow: hidden;
-	width: clamp(18rem, 80%, 100rem);
+	width: clamp(18rem, 95%, 100rem);
 	height: max-content;
 	background-color: var(--bg-pure);
 	border-radius: 0.25rem;
@@ -675,7 +670,7 @@ main:has(.container-center) {
 }
 .form-group .form-input:focus-within {
 	border-color: var(--border-active);
-	box-shadow: var(--shadow-medium);
+	box-shadow: var(--shadow-primary);
 }
 .form-group .form-input:has(input[readonly]) {
 	box-shadow: none;
@@ -694,11 +689,11 @@ main:has(.container-center) {
 .form-group textarea:focus {
 	outline: none;
 	border-color: var(--border-active);
-	box-shadow: var(--shadow-medium);
+	box-shadow: var(--shadow-primary);
 }
 .form-group .form-input:focus-within {
 	border-color: var(--border-active);
-	box-shadow: var(--shadow-medium);
+	box-shadow: var(--shadow-primary);
 }
 .form-group .input-group {
 	display: flex;
@@ -710,7 +705,7 @@ main:has(.container-center) {
 	margin-right: 0;
 }
 .form-group .field-validation-error {
-	display: inline-block;
+	display: block;
 	color: var(--text-error);
 	background-color: var(--bg-error);
 	font-size: 1rem;
@@ -721,6 +716,15 @@ main:has(.container-center) {
 .form-group:has(input[type="date"]) .field-validation-error,
 .form-group:has(input[type="datetime-local"]) .field-validation-error {
 	display: block;
+}
+.form-group:has(.field-validation-error) .form-input,
+.form-group:has(.field-validation-error) textarea {
+	border-color: var(--text-error);
+}
+.form-group:has(.field-validation-error) textarea:focus,
+.form-group:has(.field-validation-error) .form-input:focus-within {
+	border-color: var(--text-error);
+	box-shadow: var(--shadow-danger);
 }
 
 /* Wrapper Container */
@@ -846,7 +850,7 @@ main:has(.container-center) {
 	font-size: 1.25rem;
 	font-weight: var(--font-weight-medium);
 	margin-bottom: 1.25rem;
-    font-family: var(--font-display);
+	font-family: var(--font-display);
 }
 
 /* Upload Overlay */

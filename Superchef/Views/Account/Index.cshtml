@@ -1,1 +1,77 @@
-﻿
+﻿@* <div id="account-container" class="container">
+    <div class="title">My Account</div>
+
+    <form id="account-form" enctype="multipart/form-data" method="post">
+        <div class="profile-container">
+            <div id="profile-info">
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <div class="form-input">
+                        <input type="text" id="name" value="@Model.Name" />
+                    </div>
+                    <span asp-validation-for="Name"></span>
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-group">
+                        <div class="form-input">
+                            <input type="password" id="email" value="@Model.Email" readonly />
+                            <input type="checkbox" class="password-show-button">
+
+                            <a data-ajax="true" data-ajax-loading="#change-email-button-loader"
+                                data-ajax-url="/Account/RequestChangeEmail" data-ajax-method="post"
+                                data-ajax-confirm="Are you sure you want to change your email address?"
+                                data-ajax-begin="changeEmailBegin" data-ajax-complete="changeEmailComplete"
+                                data-ajax-success="changeEmailSuccess" id="change-email-button"></a>
+                            <div id="change-email-button-loader" style="display: none;"></div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" id="account-submit-button" class="button-full" data-button="green"
+                        disabled>Save Changes</button>
+                    <a href="/Account/ChangePassword" class="button-full" data-button="blue">Change
+                        Password</a>
+
+                    <a data-ajax="true" data-ajax-method="post" data-ajax-url="/Account/RequestDeleteAccount"
+                        data-ajax-confirm="Are you sure you want to delete your account?"
+                        data-ajax-begin="deleteAccountBegin" data-ajax-complete="deleteAccountComplete"
+                        data-ajax-success="deleteAccountSuccess" id="delete-account-button" class="button-full"
+                        data-button="red">Delete
+                        Account</a>
+
+                </div>
+            </div>
+
+            <div class="divider-vertical"></div>
+
+            <div id="profile-picture">
+                <input type="file" id="profile-picture-file" asp-for="Image" accept="image/jpeg, image/png" hidden />
+                <input id="remove-image-checkbox" asp-for="RemoveImage" hidden />
+                <input id="change-image-checkbox" name="change-image-checkbox" type="checkbox" hidden>
+                <input id="image-x" asp-for="ImageX" hidden>
+                <input id="image-y" asp-for="ImageY" hidden>
+                <input id="image-scale" asp-for="ImageScale" hidden>
+                <input asp-for="PreviewWidth" hidden>
+                <input asp-for="PreviewHeight" hidden>
+
+                <div id="profile-preview-container"
+                    style="width: @(Model.PreviewWidth)px; height: @(Model.PreviewHeight)px">
+                    <img id="profile-preview" src="@ViewBag.AccountImageUrl" class="vertical-fit" />
+                </div>
+                <div class="form-group">
+                    <span asp-validation-for="Image"></span>
+                </div>
+                <div class="button-group-inline">
+                    <button type="button" id="upload-profile-picture-button" data-button="yellow">Upload</button>
+                    <button type="button" id="remove-profile-picture-button" data-button="red" @(ViewBag.AccountImageUrl
+                                                                                                                       == "/img/pfp.png" ? "disabled" : "")>Remove</button>
+                    <button type="button" id="reset-profile-picture-button" data-button="blue" disabled>Reset</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div> *@
