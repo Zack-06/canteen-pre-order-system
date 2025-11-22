@@ -1,6 +1,6 @@
 @model LoginVM
 
-<div class="container container-center">
+<div class="container container-center" data-form-container>
     <div class="title">Welcome to Superchef</div>
 
     <form method="post">
@@ -21,14 +21,14 @@
             <span asp-validation-for="Password"></span>
         </div>
 
-        <div class="form-group wrapper-container">
+        <div class="form-group space-between">
             <button type="submit">Login</button>
             <a class="" href="@Url.Action("ForgotPassword", "Auth")">Forgot Password?</a>
         </div>
 
         <div class="form-group">
-            <span style="margin-right: 0.5rem;">New User?</span>
-            <a href="@Url.Action("Register", "Auth")">Register</a>
+            <span>New User?&nbsp</span>
+            <a href="@Url.Action("Register", "Auth")" data-preserve-search-params>Register</a>
         </div>
     </form>
 </div>

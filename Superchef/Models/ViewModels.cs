@@ -83,3 +83,44 @@ public class ChangeEmailVM
     [DisplayName("Confirm Email")]
     public string ConfirmEmail { get; set; }
 }
+
+public class AccountProfileVM
+{
+    [StringLength(50, ErrorMessage = "Name must not exceed {0} characters.")]
+    public string Name { get; set; }
+    [RegularExpression(@"^01\d-\d{7,8}$", ErrorMessage = "{0} must be in the format 01X-XXXXXXX")]
+    [DisplayName("Phone Number")]
+    public string? PhoneNumber { get; set; }
+    public string? Email { get; set; }
+    public bool RemoveImage { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
+    public double ImageScale { get; set; }
+    public double ImageX { get; set; }
+    public double ImageY { get; set; }
+    public double PreviewWidth { get; set; }
+    public double PreviewHeight { get; set; }
+    public IFormFile? Image { get; set; }
+}
+
+public class ChangePasswordVM
+{
+    [StringLength(100)]
+    [DataType(DataType.Password)]
+    [DisplayName("Current Password")]
+    public string CurrentPassword { get; set; }
+
+    [StringLength(100, ErrorMessage = "Password must not exceed {0} characters.")]
+    [RegularExpression(
+        @"(?=.{6,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).+",
+        ErrorMessage = "Password must have at least 6 characters, one number, one uppercase letter, one lowercase letter and one special character."
+    )]
+    [DataType(DataType.Password)]
+    [DisplayName("New Password")]
+    public string NewPassword { get; set; }
+
+    [StringLength(100, ErrorMessage = "Password must not exceed {0} characters.")]
+    [Compare("NewPassword", ErrorMessage = "Passwords do not match.")]
+    [DataType(DataType.Password)]
+    [DisplayName("Confirm New Password")]
+    public string ConfirmPassword { get; set; }
+}
