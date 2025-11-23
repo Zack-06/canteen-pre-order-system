@@ -2,7 +2,7 @@ using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
 using System.Text.RegularExpressions;
 
-namespace Supershow.Services;
+namespace Superchef.Services;
 
 public class ImageService
 {

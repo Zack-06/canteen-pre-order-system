@@ -27,6 +27,7 @@
 	--bg-pure: #ffffff;
 	--bg-toast: #8e8e8e;
 	--bg-upload: rgba(165, 42, 42, 0.1);
+	--bg-wrapper: rgba(0, 0, 0, 0.05);
 
 	/* ------------------------Buttons------------------------ */
 	/* Primary button */
@@ -617,7 +618,7 @@ footer .social-media-icons a:hover {
 	margin-left: auto;
 	margin-right: auto;
 }
-.container[data-form-container] {
+.container[data-limit-container] {
 	max-width: 40rem;
 }
 .container .container {
@@ -625,7 +626,7 @@ footer .social-media-icons a:hover {
 	margin-right: 0;
 	width: 100%;
 }
-.container .title {
+.container > .title {
 	font-family: var(--font-display);
 	font-size: 1.25rem;
 	font-weight: var(--font-weight-semibold);
@@ -832,7 +833,7 @@ main:has(.container-center) {
 	margin-bottom: 2rem;
 	min-width: 12.5rem;
 }
-.overlay .title {
+.overlay > title {
 	font-family: var(--font-display);
 	font-size: 1.25rem;
 	font-weight: var(--font-weight-semibold);
