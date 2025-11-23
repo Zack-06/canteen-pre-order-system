@@ -1,0 +1,404 @@
+@section head {
+    <style>
+        .sales-container .title {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        .sales-container table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background-color: var(--manage-container-background-color);
+            margin-bottom: 50px;
+            margin-top: 20px;
+        }
+
+        .sales-act-btns {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .sales-act-btns label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border: 2px solid #ccc;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        /* hide radio */
+        .sales-act-btns label input {
+            display: none;
+        }
+
+        .custom-tick-text {
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* Selected state */
+        .sales-act-btns label input:checked+.custom-tick-text {
+            background: var(--btn-secondary-bg);
+            color: var(--btn---btn-secondary-text);
+        }
+
+        /*change border of full button */
+        .sales-act-btns label:has(input:checked) {
+            border-color: var(--btn---btn-secondary-bg);
+            background-color: var(--btn-secondary-bg);
+        }
+
+        .sales-container th,
+        .sales-container td {
+            padding: 12px 16px;
+            text-align: left;
+        }
+
+        .sales-container th {
+            background-color: var(--manage-container-header-background-color);
+            font-weight: normal;
+            white-space: nowrap;
+            padding-right: 35px;
+        }
+
+        .sales-container tr td {
+            border-bottom: 1px solid var(--secondary-color);
+        }
+
+        .sales-container tr:last-child td {
+            border-bottom: none;
+        }
+
+        .sales-container th:first-child {
+            width: 1%;
+        }
+
+        .sales-container:has(input[type="radio"][value="annually"]:checked) .quarterly-table {
+            display: none;
+        }
+
+        .sales-container:has(input[type="radio"][value="quarterly"]:checked) .annually-table {
+            display: none;
+        }
+
+        .table-header-row th {
+            border-bottom: 2px solid var(--primary-color);
+            background-color: var(--bg-header);
+        }
+
+        .annually-table th:first-child,
+        .quarterly-table th:first-child {
+            background: var(--bg-header);
+            font-weight: bold;
+        }
+
+        /* Make entire table look neat */
+        .annually-table,
+        .quarterly-table {
+            border-collapse: collapse;
+            margin: 20px auto;
+            width: 80%;
+        }
+
+        .annually-table th,
+        .quarterly-table th {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+
+        /* Column color coding */
+        .annually-table th:nth-child(2),
+        .quarterly-table th:nth-child(2) {
+            background: #e6f7ff;
+            /* light blue */
+        }
+
+        .annually-table th:nth-child(3),
+        .quarterly-table th:nth-child(3) {
+            background: #e8ffe6;
+            /* light green */
+        }
+
+        .annually-table th:nth-child(4),
+        .quarterly-table th:nth-child(4) {
+            background: #fff0e6;
+            /* light orange */
+        }
+
+        .annually-table th:nth-child(5),
+        .quarterly-table th:nth-child(5) {
+            background: #f3e6ff;
+            /* light purple */
+        }
+    </style>
+}
+
+<div class="container sales-container">
+    <div class="title">Daily Sales Summary</div>
+    <div class="sales-act-btns">
+        <label>
+            <input type="radio" name="sales_report" value="annually" checked>
+            <div class="custom-tick-text">Anually</div>
+        </label>
+        <label>
+            <input type="radio" name="sales_report" value="quarterly">
+            <div class="custom-tick-text">Quarterly</div>
+        </label>
+    </div>
+
+    <table class="annually-table">
+        <thead>
+            <tr>
+                <th>Total Orders</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Total Revenew</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Total Items Sold</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Peck pickup slot</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Best selling item</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+        </thead>
+    </table>
+    <table class="quarterly-table">
+        <thead>
+            <tr>
+                <th>Total Orders</th>
+                <th>200</th>
+                <th>222</th>
+                <th>333</th>
+                <th>444</th>
+            </tr>
+            <tr>
+                <th>Total Revenew</th>
+                <th>200</th>
+                <th>222</th>
+                <th>333</th>
+                <th>444</th>
+            </tr>
+            <tr>
+                <th>Total Items Sold</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Peck pickup slot</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Best selling item</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<div class="container sales-container">
+    <div class="title">Sales Report</div>
+    <div class="sales-act-btns">
+        <label>
+            <input type="radio" name="sales_by_movie_genre" value="annually" checked>
+            <div class="custom-tick-text">Anually</div>
+        </label>
+        <label>
+            <input type="radio" name="sales_by_movie_genre" value="quarterly">
+            <div class="custom-tick-text">Quarterly</div>
+        </label>
+    </div>
+
+    <table class="annually-table">
+        <thead>
+            <tr class="table-header-row">
+                <th></th>
+                <th>2025</th>
+                <th>2024</th>
+                <th>2023</th>
+                <th>2022</th>
+            </tr>
+            <tr>
+                <th>Total Revenew</th>
+                <th>200</th>
+                <th>222</th>
+                <th>333</th>
+                <th>444</th>
+            </tr>
+            <tr>
+                <th>Revenew Growth</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Total Order</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Average Order Value</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+        </thead>
+    </table>
+
+    <table class="quarterly-table">
+        <thead>
+            <tr class="table-header-row">
+                <th></th>
+                <th>2025</th>
+                <th>2024</th>
+                <th>2023</th>
+                <th>2022</th>
+            </tr>
+            <tr>
+                <th>Total Revenew</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Revenew Growth</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Total Order</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+            <tr>
+                <th>Average Order Value</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+                <th>100</th>
+            </tr>
+        </thead>
+    </table>
+</div>
+
+<div class="container sales-container">
+    <div class="title">Sales By Items</div>
+    <div class="sales-act-btns">
+        <label>
+            <input type="radio" name="sales_by_fnb_category" value="annually" checked>
+            <div class="custom-tick-text">Anually</div>
+        </label>
+        <label>
+            <input type="radio" name="sales_by_fnb_category" value="quarterly">
+            <div class="custom-tick-text">Quarterly</div>
+        </label>
+    </div>
+
+    <table class="annually-table">
+        <thead>
+            <tr class="table-header-row">
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price(RM)</th>
+                <th>Quantity</th>
+                <th>Total(RM)</th>
+            </tr>
+            <tr>
+                <th>001</th>
+                <th>Burger</th>
+                <th>Western</th>
+                <th>5.00</th>
+                <th>100</th>
+                <th>500.00</th>
+            </tr>
+            <tr>
+                <th>002</th>
+                <th>Maggie goreng</th>
+                <th>Mamak</th>
+                <th>8.00</th>
+                <th>150</th>
+                <th>1200.00</th>
+            </tr>
+        </thead>
+        <tbody>
+
+        </tbody>
+    </table>
+
+    <table class="quarterly-table">
+        <thead>
+            <tr class="table-header-row">
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price(RM)</th>
+                <th>Quantity</th>
+                <th>Total(RM)</th>
+            </tr>
+            <tr>
+                <th>001</th>
+                <th>Burger</th>
+                <th>Western</th>
+                <th>5.00</th>
+                <th>100</th>
+                <th>300.00</th>
+            </tr>
+            <tr>
+                <th>002</th>
+                <th>Maggie goreng</th>
+                <th>Mamak</th>
+                <th>8.00</th>
+                <th>150</th>
+                <th>2000.00</th>
+            </tr>
+        </thead>
+
+    </table>
+</div>

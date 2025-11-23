@@ -1,0 +1,102 @@
+@{
+    ViewBag.Title = " '' - SuperChef";
+}
+
+@* 
+@section head {
+    <style>
+        .search-container {
+            width: 100%;
+            overflow: hidden;
+            height: max-content;
+            margin-bottom: 1.5rem;
+        }
+
+        .top-container {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .listing-category-container {
+            display: flex;
+            gap: 1.25rem;
+        }
+
+        .listing-category-container .title .filter {
+            font-size: 1.125rem;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .listing-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(8.75rem, 1fr));
+            gap: 1.25rem;
+        }
+
+        #search-result {
+            margin: 1.5rem 0;
+        }
+
+        #search-result>span {
+            font-size: 1.125rem;
+            font-weight: bold;
+        }
+    </style>
+} *@
+
+<div class="container" data-no-color data-no-padding>
+    <div class="custom-tick-container">
+        <label>
+            <input type="radio" name="Types" value="items" checked>
+            <div>
+                <div class="custom-tick-text">Items</div>
+            </div>
+        </label>
+
+        <label>
+            <input type="radio" name="Types" value="stores">
+            <div>
+                <div class="custom-tick-text">Stores</div>
+            </div>
+        </label>
+    </div>
+</div>
+
+
+
+<div class="container" data-no-color>
+
+
+    @* <div class="top-container">
+        <div class="listing-category-container">
+            <a href="" class="title" data-selectable-title>Items</a>
+            <a href="" class="title" data-selectable-title>Vendors</a>
+        </div>
+        <div id="filter" data-link>Filter by</div>
+    </div>
+
+    <div id="search-result">
+        <span>Search result for ''</span>
+    </div>
+
+    <div class="container" data-no-color>
+
+        @for (int i = 0; i < 10; i++)
+        {
+            <div class="product-container">
+                <img src="" alt="">
+                <div class="info">
+                    <div class="name"> ABC</div>
+                    <div class="price">100</div>
+                    <div class="detail">
+                        <img src="/img/star.png" alt="Star">
+                        <div class="rating-text">?</div>
+                        <div class="sold">100</div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div> *@
+</div>

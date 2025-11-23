@@ -1,0 +1,359 @@
+@section head {
+    <style>
+        .Warrapper {
+            width: 100%;
+            height: 100%;
+            background-color: #f2f2f2;
+        }
+
+        .containner {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+        }
+
+        .containner-header {
+            position: relative;
+            padding: 10px 30px 0px;
+            width: 60rem;
+        }
+
+        .contents {
+            display: flex;
+            min-height: 250px;
+            width: 100%;
+            flex-direction: column;
+            flex-wrap: nowrap;
+
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-right: -15px;
+            margin-left: -15px;
+        }
+
+        .content {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-evenly;
+
+        }
+
+        .vendor-box {
+            width: 15rem;
+            height: 20rem;
+            display: flex;
+            justify-content: center;
+            background-color: #ffffff;
+            align-items: center;
+            flex-direction: row;
+            margin-bottom: 1rem;
+            border-radius: 20px;
+        }
+
+        .vendor-info {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .vendor-detail {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .text {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+
+        }
+
+        .text h2 {
+            font-size: 1.5rem;
+            width: 100%;
+            margin: 5px;
+            align-content: center;
+            margin-left: 15px;
+        }
+
+        .text p {
+            font-size: 1rem;
+            margin: 5px;
+            margin-left: 15px;
+        }
+
+        .act-btns {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .act-box {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .act-box button {
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            border: none;
+            background-color: variable(--btn-info-bg);
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        .act-box button:hover {
+            background-color: variable(--btn-info-hover);
+        }
+
+        .act-box img {
+            width: 1.5rem;
+            height: 1.5rem;
+        }
+
+        .act-box small {
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+
+        .btn-edit {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .btn-delete {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .add-vendor {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 20px;
+            background-color: #ffffff;
+        }
+
+        .plus-icon {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+    </style>
+}
+
+<div class="Warrapper">
+    <div class="containner">
+        <div class="containner-header">
+            <h1>My Vendors</h1>
+        </div>
+        <div class="contents">
+            <div class="row">
+                <div class="content">
+                    <div class="vendor-box">
+                        <div class="vendor-info">
+                            <div class="vendor-detail">
+                                <img src="\img\vendor.jpg" alt="shop-img" style=" width: 5rem;" />
+                            </div>
+                            <div class="text">
+                                <h2>Vendor Name</h2>
+                                <p>Venue</p>
+                            </div>
+                            <div class="act-btns">
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/eye.png" alt="">
+                                    </button>
+                                    <small>View</small>
+                                </div>
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/edit.png" alt="">
+                                    </button>
+                                    <small>Edit</small>
+                                </div>
+                                <div class="act-box">
+                                    <button ">
+                                        <img src=" /img/delete.png" alt="">
+                                    </button>
+                                    <small>Delete</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vendor-box">
+                        <div class="vendor-info">
+                            <div class="vendor-detail">
+                                <img src="\img\vendor.jpg" alt="shop-img" style=" width: 5rem;" />
+                            </div>
+                            <div class="text">
+                                <h2>Vendor Name</h2>
+                                <p>Venue</p>
+                            </div>
+                            <div class="act-btns">
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/eye.png" alt="">
+                                    </button>
+                                    <small>View</small>
+                                </div>
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/edit.png" alt="">
+                                    </button>
+                                    <small>Edit</small>
+                                </div>
+                                <div class="act-box">
+                                    <button ">
+                                        <img src=" /img/delete.png" alt="">
+                                    </button>
+                                    <small>Delete</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vendor-box">
+                        <div class="vendor-info">
+                            <div class="vendor-detail">
+                                <img src="\img\vendor.jpg" alt="shop-img" style=" width: 5rem;" />
+                            </div>
+                            <div class="text">
+                                <h2>Vendor Name</h2>
+                                <p>Venue</p>
+                            </div>
+                            <div class="act-btns">
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/eye.png" alt="">
+                                    </button>
+                                    <small>View</small>
+                                </div>
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/edit.png" alt="">
+                                    </button>
+                                    <small>Edit</small>
+                                </div>
+                                <div class="act-box">
+                                    <button ">
+                                        <img src=" /img/delete.png" alt="">
+                                    </button>
+                                    <small>Delete</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vendor-box">
+                        <div class="vendor-info">
+                            <div class="vendor-detail">
+                                <img src="\img\vendor.jpg" alt="shop-img" style=" width: 5rem;" />
+                            </div>
+                            <div class="text">
+                                <h2>Vendor Name</h2>
+                                <p>Venue</p>
+                            </div>
+                            <div class="act-btns">
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/eye.png" alt="">
+                                    </button>
+                                    <small>View</small>
+                                </div>
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/edit.png" alt="">
+                                    </button>
+                                    <small>Edit</small>
+                                </div>
+                                <div class="act-box">
+                                    <button ">
+                                        <img src=" /img/delete.png" alt="">
+                                    </button>
+                                    <small>Delete</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vendor-box">
+                        <div class="vendor-info">
+                            <div class="vendor-detail">
+                                <img src="\img\vendor.jpg" alt="shop-img" style=" width: 5rem;" />
+                            </div>
+                            <div class="text">
+                                <h2>Indo Deli</h2>
+                                <p>Red Brick</p>
+                            </div>
+                            <div class="act-btns">
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/eye.png" alt="">
+                                    </button>
+                                    <small>View</small>
+                                </div>
+                                <div class="act-box">
+                                    <button>
+                                        <img src="/img/edit.png" alt="">
+                                    </button>
+                                    <small>Edit</small>
+                                </div>
+                                <div class="act-box">
+                                    <button ">
+                                        <img src=" /img/delete.png" alt="">
+                                    </button>
+                                    <small>Delete</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="vendor-box">
+                        <button class="add-vendor">
+                            <span>+</span> Add Vendor
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -28,6 +28,9 @@
 	--bg-toast: #8e8e8e;
 	--bg-upload: rgba(165, 42, 42, 0.1);
 	--bg-wrapper: rgba(0, 0, 0, 0.05);
+    --bg-custom-tick: rgba(0, 0, 0, 0.05);
+    --bg-custom-tick-hover: rgba(0, 0, 0, 0.1);
+    --bg-custom-tick-selected: #b89a8b;
 	--bg-manage-table: rgba(0, 0, 0, 0.05);
 	--bg-manage-table-th: #b89a8b;
 	--bg-manage-table-th-hover: #a68372;
@@ -1034,6 +1037,96 @@ main:has(.container-center) {
 .custom-select .select-items div:hover,
 .custom-select .same-as-selected {
 	background-color: var(--bg-hover);
+}
+
+
+/* Custom Tick Input */
+.custom-tick-container {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 1rem;
+}
+.custom-tick-container * {
+	text-decoration: none !important;
+}
+.custom-tick-container.small-text {
+	gap: 0.5rem;
+}
+.custom-tick-container.big-text {
+	gap: 2rem;
+}
+.custom-tick-container input[type="radio"],
+.custom-tick-container input[type="checkbox"] {
+	display: none;
+}
+.custom-tick-container label {
+	padding: 0.6rem;
+	border: 1px solid var(--border-primary);
+	border-radius: 0.25rem;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	display: flex;
+	align-items: center;
+	gap: 0.6rem;
+	color: var(--text-secondary);
+	background-color: var(--bg-custom-tick);
+}
+.custom-tick-container.rounded-border label {
+	border-radius: 2rem;
+}
+.custom-tick-container.small-text label {
+	padding: 0.3rem 0.6rem;
+}
+.custom-tick-container.big-text label {
+	padding: 0.6rem 1rem;
+}
+.custom-tick-container label:hover {
+    background-color: var(--bg-custom-tick-hover);
+}
+.custom-tick-container label:has(input[type="radio"]:checked),
+.custom-tick-container label:has(input[type="checkbox"]:checked) {
+	background-color: var(--bg-custom-tick-selected);
+	color: var(--text-inverse);
+}
+.custom-tick-container .custom-tick-image {
+	width: 2.5rem;
+	height: 2.5rem;
+	background-size: 100%;
+	background-repeat: no-repeat;
+	background-position: center;
+}
+.custom-tick-container .custom-tick-text {
+	font-size: 1rem;
+}
+.custom-tick-container.small-text .custom-tick-text {
+	font-size: 0.85rem;
+}
+.custom-tick-container.big-text .custom-tick-text {
+	font-size: 1.2rem;
+	text-transform: uppercase;
+	font-weight: bold;
+}
+.custom-tick-description {
+	font-size: 0.75rem;
+}
+.custom-tick-container.small-text .custom-tick-description {
+	font-size: 0.6rem;
+}
+.custom-tick-container.center-text label {
+	justify-content: center;
+}
+.custom-tick-container.center-items {
+	justify-content: center;
+}
+.custom-tick-container.flex label {
+	flex: 1;
+}
+.custom-tick-container.specified-width label {
+	flex: unset;
+	width: 5.5rem;
+}
+.custom-tick-container.specified-width.big-text label {
+	width: 8rem;
 }
 
 /* Manage Container Query */
