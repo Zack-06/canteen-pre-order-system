@@ -15,8 +15,15 @@ public class AuthController : Controller
         return View();
     }
 
-    public IActionResult Verify()
+    public IActionResult Verify(string? token, string? otp, string? ReturnUrl)
     {
+        ViewBag.ReturnUrl = ReturnUrl ?? "/";
+
+        // ViewBag.Status = "check";
+        // ViewBag.Status = "cross";
+        // ViewBag.Status = "incorrect";
+        // ViewBag.Status = "link";
+        // ViewBag.Status = "expired";
         return View();
     }
 
