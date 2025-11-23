@@ -7,6 +7,20 @@ $("header #back-button").on("click", () => {
 	$("header").removeClass("search-active")
 })
 
+// ==========Container Responsive Setup==========
+function responsiveSetup() {
+	const $responsiveContainer = $("[data-responsive-container]")
+	if ($responsiveContainer.length !== 1) return
+
+    $("main").removeClass("mobile")
+
+	if ($responsiveContainer[0].scrollWidth > $responsiveContainer[0].clientWidth) {
+		$("main").addClass("mobile")
+	}
+}
+responsiveSetup()
+window.addEventListener("resize", responsiveSetup)
+
 // ==========Toast Message==========
 const toast_message = $(".toast-container").data("toast-message")
 if (toast_message) {
@@ -336,243 +350,262 @@ function overlayPadder(overlayEle) {
 }
 
 window.addEventListener("resize", () => {
-    $(".overlay").each(function () {
+	$(".overlay").each(function () {
 		overlayPadder($(this))
 	})
 })
 
 // ==========Upload Overlay==========
 class UploadOverlay {
-    constructor(file_input_selector, outputWidth = 250, outputHeight = 250, upload_overlay_selector = "#upload-overlay") {
-        this.file_input_selector = file_input_selector;
-        this.upload_overlay_selector = upload_overlay_selector;
-        this.outputWidth = outputWidth;
-        this.outputHeight = outputHeight;
-        this.storedFiles = [];
+	constructor(file_input_selector, outputWidth = 250, outputHeight = 250, upload_overlay_selector = "#upload-overlay") {
+		this.file_input_selector = file_input_selector
+		this.upload_overlay_selector = upload_overlay_selector
+		this.outputWidth = outputWidth
+		this.outputHeight = outputHeight
+		this.storedFiles = []
 
-        // Drag-over effects
-        $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).on("dragover", (event) => {
-            event.preventDefault();
-            $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).addClass("drag-over");
-        });
+		// Drag-over effects
+		$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).on("dragover", (event) => {
+			event.preventDefault()
+			$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).addClass("drag-over")
+		})
 
-        $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).on("dragleave", (event) => {
-            event.preventDefault();
-            $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).removeClass("drag-over");
-        });
+		$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).on("dragleave", (event) => {
+			event.preventDefault()
+			$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).removeClass("drag-over")
+		})
 
-        // Click to open file input
-        $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).on("click", () => {
-            $(this.file_input_selector).val("").click();
-        });
+		// Click to open file input
+		$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).on("click", () => {
+			$(this.file_input_selector).val("").click()
+		})
 
-        $(this.file_input_selector).on("click", (event) => event.stopPropagation());
-    }
+		$(this.file_input_selector).on("click", (event) => event.stopPropagation())
+	}
 
-    assignFile() {
-        $(this.file_input_selector).val("");
-        if (this.storedFiles.length === 0) return;
-        const dataTransfer = new DataTransfer();
-        this.storedFiles.forEach(file => dataTransfer.items.add(file));
-        $(this.file_input_selector)[0].files = dataTransfer.files;
-    }
+	assignFile() {
+		$(this.file_input_selector).val("")
+		if (this.storedFiles.length === 0) return
+		const dataTransfer = new DataTransfer()
+		this.storedFiles.forEach((file) => dataTransfer.items.add(file))
+		$(this.file_input_selector)[0].files = dataTransfer.files
+	}
 
-    removeFile(index) {
-        if (index >= 0 && index < this.storedFiles.length) {
-            this.storedFiles.splice(index, 1);
-            this.assignFile();
-        }
-    }
+	removeFile(index) {
+		if (index >= 0 && index < this.storedFiles.length) {
+			this.storedFiles.splice(index, 1)
+			this.assignFile()
+		}
+	}
 
-    removeAllFiles() {
-        this.storedFiles = [];
-        this.assignFile();
-    }
+	removeAllFiles() {
+		this.storedFiles = []
+		this.assignFile()
+	}
 
-    open() {
-        const previewContainer = $(`${this.upload_overlay_selector}.upload-overlay .upload-preview-container`);
-        const aspectRatio = this.outputWidth / this.outputHeight;
+	open() {
+		const previewContainer = $(`${this.upload_overlay_selector}.upload-overlay .upload-preview-container`)
+		const aspectRatio = this.outputWidth / this.outputHeight
 
-        // Fit overlay container
-        fitUploadOverlayToScreen(previewContainer[0], aspectRatio);
-        window.addEventListener("resize", () => fitUploadOverlayToScreen(previewContainer[0], aspectRatio));
+		// Fit overlay container
+		fitUploadOverlayToScreen(previewContainer[0], aspectRatio)
+		window.addEventListener("resize", () => fitUploadOverlayToScreen(previewContainer[0], aspectRatio))
 
-        return new Promise((resolve) => {
-            const handleFile = (file) => {
-                if (file && file.type.startsWith("image/") && (file.type.endsWith("jpeg") || file.type.endsWith("png"))) {
-                    const reader = new FileReader();
-                    reader.onload = (event) => {
-                        const previewImage = $(`${this.upload_overlay_selector}.upload-overlay .upload-preview-image`);
-                        previewImage.attr("src", event.target.result);
+		return new Promise((resolve) => {
+			const handleFile = (file) => {
+				if (file && file.type.startsWith("image/") && (file.type.endsWith("jpeg") || file.type.endsWith("png"))) {
+					const reader = new FileReader()
+					reader.onload = (event) => {
+						const previewImage = $(`${this.upload_overlay_selector}.upload-overlay .upload-preview-image`)
+						previewImage.attr("src", event.target.result)
 
-                        previewImage.off("load").on("load", () => {
-                            $(`${this.upload_overlay_selector}.upload-overlay .upload-preview-zone`).addClass("show");
-                            $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).removeClass("show");
+						previewImage.off("load").on("load", () => {
+							$(`${this.upload_overlay_selector}.upload-overlay .upload-preview-zone`).addClass("show")
+							$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).removeClass("show")
 
-                            const imageRatio = previewImage.width() / previewImage.height();
-                            const containerRatio = previewContainer.width() / previewContainer.height();
-                            let horizontalFit = false;
+							const imageRatio = previewImage.width() / previewImage.height()
+							const containerRatio = previewContainer.width() / previewContainer.height()
+							let horizontalFit = false
 
-                            if (imageRatio < containerRatio) {
-                                horizontalFit = true;
-                                previewImage.addClass("horizontal-fit").removeClass("vertical-fit");
-                            } else {
-                                previewImage.addClass("vertical-fit").removeClass("horizontal-fit");
-                            }
+							if (imageRatio < containerRatio) {
+								horizontalFit = true
+								previewImage.addClass("horizontal-fit").removeClass("vertical-fit")
+							} else {
+								previewImage.addClass("vertical-fit").removeClass("horizontal-fit")
+							}
 
-                            previewImage.css("transform", `translate(-50%, -50%) scale(1)`);
+							previewImage.css("transform", `translate(-50%, -50%) scale(1)`)
 
-                            let imgX = 0; // %
-                            let imgY = 0; // %
-                            let scale = 1;
+							let imgX = 0 // %
+							let imgY = 0 // %
+							let scale = 1
 
-                            // ===== Drag & Touch Support =====
-                            const startDrag = (evt) => {
-                                evt.preventDefault();
-                                const startX = evt.type.startsWith("touch") ? evt.touches[0].clientX : evt.clientX;
-                                const startY = evt.type.startsWith("touch") ? evt.touches[0].clientY : evt.clientY;
-                                const startImgX = imgX;
-                                const startImgY = imgY;
+							// ===== Drag & Touch Support =====
+							const startDrag = (evt) => {
+								evt.preventDefault()
+								const startX = evt.type.startsWith("touch") ? evt.touches[0].clientX : evt.clientX
+								const startY = evt.type.startsWith("touch") ? evt.touches[0].clientY : evt.clientY
+								const startImgX = imgX
+								const startImgY = imgY
 
-                                previewImage.addClass("dragging");
+								previewImage.addClass("dragging")
 
-                                const moveHandler = (ev) => {
-                                    const clientX = ev.type.startsWith("touch") ? ev.touches[0].clientX : ev.clientX;
-                                    const clientY = ev.type.startsWith("touch") ? ev.touches[0].clientY : ev.clientY;
+								const moveHandler = (ev) => {
+									const clientX = ev.type.startsWith("touch") ? ev.touches[0].clientX : ev.clientX
+									const clientY = ev.type.startsWith("touch") ? ev.touches[0].clientY : ev.clientY
 
-                                    const deltaX = clientX - startX;
-                                    const deltaY = clientY - startY;
+									const deltaX = clientX - startX
+									const deltaY = clientY - startY
 
-                                    imgX = startImgX + (deltaX / previewContainer.width()) * 100;
-                                    imgY = startImgY + (deltaY / previewContainer.height()) * 100;
+									imgX = startImgX + (deltaX / previewContainer.width()) * 100
+									imgY = startImgY + (deltaY / previewContainer.height()) * 100
 
-                                    const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50;
-                                    const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50;
+									const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50
+									const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50
 
-                                    imgX = Math.min(maxX, Math.max(-maxX, imgX));
-                                    imgY = Math.min(maxY, Math.max(-maxY, imgY));
+									imgX = Math.min(maxX, Math.max(-maxX, imgX))
+									imgY = Math.min(maxY, Math.max(-maxY, imgY))
 
-                                    previewImage.css("transform", `translate(calc(-50% + ${imgX}%), calc(-50% + ${imgY}%)) scale(${scale})`);
-                                };
+									previewImage.css("transform", `translate(calc(-50% + ${imgX}%), calc(-50% + ${imgY}%)) scale(${scale})`)
+								}
 
-                                const endHandler = () => {
-                                    previewImage.removeClass("dragging");
-                                    $(document.body).off("mousemove touchmove", moveHandler);
-                                    $(document.body).off("mouseup touchend", endHandler);
-                                };
+								const endHandler = () => {
+									previewImage.removeClass("dragging")
+									$(document.body).off("mousemove touchmove", moveHandler)
+									$(document.body).off("mouseup touchend", endHandler)
+								}
 
-                                $(document.body).on("mousemove touchmove", moveHandler);
-                                $(document.body).on("mouseup touchend", endHandler);
-                            };
+								$(document.body).on("mousemove touchmove", moveHandler)
+								$(document.body).on("mouseup touchend", endHandler)
+							}
 
-                            previewImage.off("mousedown touchstart").on("mousedown touchstart", startDrag);
+							previewImage.off("mousedown touchstart").on("mousedown touchstart", startDrag)
 
-                            // ===== Pinch to Zoom (Mobile) + Slider Zoom (Desktop) =====
-                            let initialDistance = null;
-                            let initialScale = scale;
+							// ===== Pinch to Zoom (Mobile) + Slider Zoom (Desktop) =====
+							let initialDistance = null
+							let initialScale = scale
 
-                            previewContainer[0].addEventListener("touchstart", (e) => {
-                                if (e.touches.length === 2) {
-                                    e.preventDefault();
-                                    const dx = e.touches[0].clientX - e.touches[1].clientX;
-                                    const dy = e.touches[0].clientY - e.touches[1].clientY;
-                                    initialDistance = Math.sqrt(dx * dx + dy * dy);
-                                    initialScale = scale;
-                                }
-                            }, { passive: false });
+							previewContainer[0].addEventListener(
+								"touchstart",
+								(e) => {
+									if (e.touches.length === 2) {
+										e.preventDefault()
+										const dx = e.touches[0].clientX - e.touches[1].clientX
+										const dy = e.touches[0].clientY - e.touches[1].clientY
+										initialDistance = Math.sqrt(dx * dx + dy * dy)
+										initialScale = scale
+									}
+								},
+								{ passive: false }
+							)
 
-                            previewContainer[0].addEventListener("touchmove", (e) => {
-                                if (e.touches.length === 2 && initialDistance) {
-                                    e.preventDefault();
-                                    const dx = e.touches[0].clientX - e.touches[1].clientX;
-                                    const dy = e.touches[0].clientY - e.touches[1].clientY;
-                                    const distance = Math.sqrt(dx * dx + dy * dy);
-                                    const newScale = initialScale * (distance / initialDistance);
+							previewContainer[0].addEventListener(
+								"touchmove",
+								(e) => {
+									if (e.touches.length === 2 && initialDistance) {
+										e.preventDefault()
+										const dx = e.touches[0].clientX - e.touches[1].clientX
+										const dy = e.touches[0].clientY - e.touches[1].clientY
+										const distance = Math.sqrt(dx * dx + dy * dy)
+										const newScale = initialScale * (distance / initialDistance)
 
-                                    const scaleRatio = newScale / scale;
-                                    scale = newScale;
-                                    imgX *= scaleRatio;
-                                    imgY *= scaleRatio;
+										const scaleRatio = newScale / scale
+										scale = newScale
+										imgX *= scaleRatio
+										imgY *= scaleRatio
 
-                                    const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50;
-                                    const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50;
+										const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50
+										const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50
 
-                                    imgX = Math.min(maxX, Math.max(-maxX, imgX));
-                                    imgY = Math.min(maxY, Math.max(-maxY, imgY));
+										imgX = Math.min(maxX, Math.max(-maxX, imgX))
+										imgY = Math.min(maxY, Math.max(-maxY, imgY))
 
-                                    previewImage.css("transform", `translate(calc(-50% + ${imgX}%), calc(-50% + ${imgY}%)) scale(${scale})`);
-                                }
-                            }, { passive: false });
+										previewImage.css("transform", `translate(calc(-50% + ${imgX}%), calc(-50% + ${imgY}%)) scale(${scale})`)
+									}
+								},
+								{ passive: false }
+							)
 
-                            previewContainer[0].addEventListener("touchend", (e) => {
-                                if (e.touches.length < 2) initialDistance = null;
-                            });
+							previewContainer[0].addEventListener("touchend", (e) => {
+								if (e.touches.length < 2) initialDistance = null
+							})
 
-                            // Desktop zoom slider
-                            $(".zoom-slider").val(1);
-                            $(".zoom-slider").off("input").on("input", (evt) => {
-                                const prevScale = scale;
-                                scale = parseFloat(evt.target.value);
+							// Desktop zoom slider
+							$(".zoom-slider").val(1)
+							$(".zoom-slider")
+								.off("input")
+								.on("input", (evt) => {
+									const prevScale = scale
+									scale = parseFloat(evt.target.value)
 
-                                const scaleRatio = scale / prevScale;
-                                imgX *= scaleRatio;
-                                imgY *= scaleRatio;
+									const scaleRatio = scale / prevScale
+									imgX *= scaleRatio
+									imgY *= scaleRatio
 
-                                const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50;
-                                const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50;
+									const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50
+									const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50
 
-                                imgX = Math.min(maxX, Math.max(-maxX, imgX));
-                                imgY = Math.min(maxY, Math.max(-maxY, imgY));
+									imgX = Math.min(maxX, Math.max(-maxX, imgX))
+									imgY = Math.min(maxY, Math.max(-maxY, imgY))
 
-                                previewImage.css("transform", `translate(calc(-50% + ${imgX}%), calc(-50% + ${imgY}%)) scale(${scale})`);
-                            });
+									previewImage.css("transform", `translate(calc(-50% + ${imgX}%), calc(-50% + ${imgY}%)) scale(${scale})`)
+								})
 
-                            // Confirm upload
-                            $(".confirm-upload").off("click").on("click", () => {
-                                $(`${this.upload_overlay_selector}.upload-overlay`).removeClass("show");
-                                this.storedFiles.push(file);
-                                this.assignFile();
-                                resolve({
-                                    src: event.target.result,
-                                    scale: scale,
-                                    imgX: imgX,
-                                    imgY: imgY,
-                                    horizontalFit: horizontalFit,
-                                    index: this.storedFiles.length - 1
-                                });
-                            });
-                        });
-                    };
+							// Confirm upload
+							$(".confirm-upload")
+								.off("click")
+								.on("click", () => {
+									$(`${this.upload_overlay_selector}.upload-overlay`).removeClass("show")
+									this.storedFiles.push(file)
+									this.assignFile()
+									resolve({
+										src: event.target.result,
+										scale: scale,
+										imgX: imgX,
+										imgY: imgY,
+										horizontalFit: horizontalFit,
+										index: this.storedFiles.length - 1
+									})
+								})
+						})
+					}
 
-                    reader.readAsDataURL(file);
-                }
-            };
+					reader.readAsDataURL(file)
+				}
+			}
 
-            const overlay = $(`${this.upload_overlay_selector}.upload-overlay`);
-            $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).addClass("show");
-            overlay.addClass("show");
-            $(`${this.upload_overlay_selector}.upload-overlay .upload-preview-zone`).removeClass("show");
+			const overlay = $(`${this.upload_overlay_selector}.upload-overlay`)
+			$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).addClass("show")
+			overlay.addClass("show")
+			$(`${this.upload_overlay_selector}.upload-overlay .upload-preview-zone`).removeClass("show")
 
-            // Close overlay
-            overlay.find(".overlay-close").off("click").on("click", () => {
-                overlay.removeClass("show");
-                this.assignFile();
-                resolve(false);
-            });
+			// Close overlay
+			overlay
+				.find(".overlay-close")
+				.off("click")
+				.on("click", () => {
+					overlay.removeClass("show")
+					this.assignFile()
+					resolve(false)
+				})
 
-            // File input change
-            $(this.file_input_selector).off("change").on("change", (e) => {
-                handleFile(e.target.files[0]);
-            });
+			// File input change
+			$(this.file_input_selector)
+				.off("change")
+				.on("change", (e) => {
+					handleFile(e.target.files[0])
+				})
 
-            // Drop event
-            $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).off("drop").on("drop", (event) => {
-                event.preventDefault();
-                $(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).removeClass("drag-over");
-                handleFile(event.originalEvent.dataTransfer.files[0]);
-            });
-        });
-    }
+			// Drop event
+			$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`)
+				.off("drop")
+				.on("drop", (event) => {
+					event.preventDefault()
+					$(`${this.upload_overlay_selector}.upload-overlay .upload-drop-zone`).removeClass("drag-over")
+					handleFile(event.originalEvent.dataTransfer.files[0])
+				})
+		})
+	}
 }
 
 function fitUploadOverlayToScreen(uploadOverlay, aspectRatio) {
@@ -608,3 +641,61 @@ function reloadPage() {
 function redirectToPage(url) {
 	window.location.href = url
 }
+
+// ==========Custom Select==========
+$(".custom-select").each(function () {
+	let $this = $(this)
+	let $select = $this.find("select")
+	let $selected = $("<div>", { class: "select-selected" }).text($select.find("option:selected").text())
+	let $items = $("<div>", { class: "select-items" })
+
+	// Build option list
+	$select.find("option").each(function (i) {
+		let $opt = $("<div>").text($(this).text()).attr("data-value", $(this).val())
+
+		if ($(this).attr("selected")) {
+			$opt.addClass("same-as-selected")
+		}
+		$opt.on("click", function () {
+			$select.val($(this).attr("data-value")) // update real select tag
+			$selected.text($(this).text()) // update displayed text
+			setPlaceholder($select)
+			$items.find(".same-as-selected").removeClass("same-as-selected")
+			$(this).addClass("same-as-selected")
+			$items.hide()
+			$selected.removeClass("select-arrow-active")
+			$select.trigger("change")
+		})
+		$items.append($opt)
+	})
+
+	$this.append($selected)
+	$this.append($items)
+
+	// toggle dropdown
+	$selected.on("click", function (e) {
+		e.stopPropagation()
+		$(".select-items").not($items).hide()
+		$(".select-selected").not(this).removeClass("select-arrow-active")
+		$items.toggle()
+		$(this).toggleClass("select-arrow-active")
+	})
+})
+
+$(document).on("click", function () {
+	// Close dropdown if click outside
+	$(".select-items").hide()
+	$(".select-selected").removeClass("select-arrow-active")
+})
+
+// ==========Manage Container Search==========
+function setPlaceholder(selectElement) {
+	var selectedOption = selectElement.find(":selected")
+	var searchInput = selectElement.closest("[data-manage-container='query']").find(".form-input input")
+	if (searchInput.length == 0 || selectedOption.length == 0) return
+
+	searchInput.attr("placeholder", selectedOption.text())
+}
+$("[data-manage-container='query'] select").each(function () {
+	setPlaceholder($(this))
+})

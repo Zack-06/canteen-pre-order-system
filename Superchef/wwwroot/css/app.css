@@ -28,8 +28,15 @@
 	--bg-toast: #8e8e8e;
 	--bg-upload: rgba(165, 42, 42, 0.1);
 	--bg-wrapper: rgba(0, 0, 0, 0.05);
+	--bg-manage-table: rgba(0, 0, 0, 0.05);
+	--bg-manage-table-th: #b89a8b;
+	--bg-manage-table-th-hover: #a68372;
+	--bg-pagination: #f5f5f5;
+	--bg-pagination-hover: #e5e5e5;
+	--bg-pagination-active: #d4d4d4;
+	--bg-pagination-disabled: #fafafa;
 
-	/* ------------------------Buttons------------------------ */
+	/* ==========Buttons========== */
 	/* Primary button */
 	--btn-primary-bg: #b89a8b;
 	--btn-primary-text: #ffffff;
@@ -61,11 +68,16 @@
 	--btn-disabled-hover: #e7e6e6;
 
 	/* Status Colors */
-	--status-success: #5cb85c;
-	--status-error: #d9534f;
-	--status-warning: #f0ad4e;
-	--status-info: #5bc0de;
-	--status-disabled: #6c757d;
+	--status-info-bg: #8ec5fc;
+	--status-info-text: #2f76b7;
+	--status-warning-bg: #ffcc80;
+	--status-warning-text: #c27f1a;
+	--status-error-bg: #ffadad;
+	--status-error-text: #e04562;
+	--status-success-bg: #a8e6cf;
+	--status-success-text: #16a34a;
+	--status-disabled-bg: #a3a3a3;
+	--status-disabled-text: #4b5563;
 
 	/* Text Colors */
 	--text-primary: #1f2937;
@@ -73,18 +85,22 @@
 	--text-inverse: #ffffff;
 	--text-label: #4b5563;
 	--text-error: #e04562;
-    --text-status-code: #e8e6e6;
+	--text-status-code: #e8e6e6;
+	--text-pagination: #888787;
+	--text-pagination-disabled: #e1d2d2;
 
 	/* Borders */
 	--border-primary: #d1d5db;
-    --border-otp: #374151;
+	--border-otp: #374151;
 	--border-active: #a57753;
 	--border-divider: #d1d5db;
+	--border-pagination: #8e8d8d;
 
 	/* Shadows / Effects */
 	--shadow-primary: 0 0 0 2px rgba(97, 60, 37, 0.2);
 	--shadow-danger: 0 0 0 2px rgba(224, 69, 98, 0.4);
 	--shadow-pfp: 0 0 0 250px rgba(0, 0, 0, 0.5);
+	--shadow-dropdown: 0 4px 6px rgba(0, 0, 0, 0.1);
 
 	/* Font families */
 	--font-primary: "Bahnschrift", sans-serif; /* UI / body */
@@ -481,7 +497,7 @@ header .pfp .dropdown-menu {
 	background: var(--bg-pure);
 	display: none;
 	border-radius: 0.25rem;
-	box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+	box-shadow: var(--shadow-dropdown);
 }
 header .pfp:focus-within .dropdown-menu {
 	display: block;
@@ -531,7 +547,7 @@ main {
 	position: relative;
 	top: 0;
 	left: 0;
-	padding: 1.75rem 1.5rem;
+	padding: 2rem 1.5rem;
 }
 
 /* Footer */
@@ -592,7 +608,7 @@ footer .social-media-icons a:hover {
 /* Container */
 .container {
 	margin: auto;
-	overflow: hidden;
+	overflow: visible;
 	width: clamp(18rem, 100%, 100rem);
 	height: max-content;
 	background-color: var(--bg-pure);
@@ -602,8 +618,11 @@ footer .social-media-icons a:hover {
 	border: 1px solid var(--border-primary);
 }
 .container[data-no-color] {
-    background-color: transparent;
-    border: none;
+	background-color: transparent;
+	border: none;
+}
+.container[data-no-padding] {
+	padding: 0;
 }
 .container.horizontal-center {
 	margin-left: auto;
@@ -644,9 +663,6 @@ footer .social-media-icons a:hover {
 .container > *:last-child {
 	margin-bottom: 0 !important;
 }
-main > .container:first-child {
-	margin-top: 40px !important;
-}
 main > .container:last-child {
 	margin-bottom: 40px !important;
 }
@@ -658,6 +674,12 @@ main:has(.container-center) {
 	display: flex;
 	align-items: center;
 	justify-content: center;
+}
+*:has(data-responsive-container) {
+	overflow: hidden !important;
+}
+[data-responsive-container] {
+	overflow: hidden !important;
 }
 
 /* Forms */
@@ -955,4 +977,328 @@ main:has(.container-center) {
 }
 .upload-overlay .zoom-slider {
 	width: 100%;
+}
+
+/* Custom Select */
+.custom-select {
+	display: inline-block;
+	position: relative;
+	font-family: var(--font-primary);
+	min-width: 13rem;
+	border-radius: 0.25rem;
+	border: 1px solid var(--border-primary);
+	transition: all 0.3s ease;
+}
+.custom-select select {
+	display: none;
+}
+.custom-select .select-selected {
+	background-color: var(--bg-pure);
+	padding: 0.5rem 1rem;
+	padding-right: 1.6rem;
+	border: 1px solid transparent;
+	cursor: pointer;
+	user-select: none;
+	border-radius: 0.25rem;
+	position: relative;
+}
+.custom-select .select-selected::after {
+	content: "";
+	position: absolute;
+	top: calc(50% - 0.17rem);
+	right: 0.6rem;
+	border: 0.34rem solid transparent;
+	border-color: var(--text-primary) transparent transparent transparent;
+}
+.custom-select .select-selected.select-arrow-active::after {
+	border-color: transparent transparent var(--text-primary) transparent;
+	top: calc(50% - (0.17rem * 3));
+}
+.custom-select .select-items {
+	position: absolute;
+	background-color: var(--bg-pure);
+	top: 100%;
+	left: 0;
+	right: 0;
+	z-index: 1;
+	display: none;
+	max-height: 13rem;
+	overflow-y: auto;
+	border: 1px solid var(--border-primary);
+	box-shadow: var(--shadow-dropdown);
+}
+.custom-select .select-items div {
+	padding: 0.5rem 1rem;
+	cursor: pointer;
+}
+.custom-select .select-items div:hover,
+.custom-select .same-as-selected {
+	background-color: var(--bg-hover);
+}
+
+/* Manage Container Query */
+[data-manage-container="query"] {
+	margin-bottom: 2rem;
+}
+[data-manage-container="query"] .search-container {
+	gap: 1rem;
+	flex-wrap: wrap;
+}
+[data-manage-container="query"] .search-container button[type="submit"] {
+	background-color: transparent;
+	padding: 0;
+}
+[data-manage-container="query"] .search-container button[type="submit"] img {
+	height: 1.5rem;
+	transition: all 0.3s ease;
+	margin-right: 0.4rem;
+}
+[data-manage-container="query"] .search-container button[type="submit"]:hover img {
+	filter: brightness(3);
+}
+[data-manage-container="query"] .search-container > .form-input {
+	width: unset;
+	flex: 1;
+	min-width: 16rem;
+}
+
+/* Manage Container Table */
+[data-manage-container="table"] table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0;
+	background-color: var(--bg-manage-table);
+	border: 1px solid var(--border-primary);
+}
+[data-manage-container="table"] th,
+[data-manage-container="table"] td {
+	padding: 0.75rem 1rem;
+	text-align: left;
+	white-space: normal;
+}
+[data-manage-container="table"] th > a {
+	color: var(--text-inverse) !important;
+	text-decoration: none !important;
+	display: block;
+	padding: 0.75rem 1rem;
+	padding-right: 2rem;
+}
+[data-manage-container="table"] th:has(a) {
+	padding: 0;
+}
+[data-manage-container="table"] th {
+	color: var(--text-inverse);
+	background-color: var(--bg-manage-table-th);
+	cursor: pointer;
+	transition: all 0.3s ease;
+	font-weight: var(--font-weight-medium);
+	white-space: nowrap;
+	position: relative;
+	padding-right: 2rem;
+}
+[data-manage-container="table"] th:not(:has(a)) {
+	cursor: default;
+}
+[data-manage-container="table"] th:has(a):hover,
+[data-manage-container="table"] th.selected,
+[data-manage-container="table"] th.selected:hover {
+	background-color: var(--bg-manage-table-th-hover);
+}
+[data-manage-container="table"] th.selected::after {
+	content: "";
+	position: absolute;
+	top: calc(50% - 0.17rem);
+	right: 0.6rem;
+	border: 0.34rem solid transparent;
+	border-color: var(--text-inverse) transparent transparent transparent;
+}
+[data-manage-container="table"] th.selected.desc::after {
+	border-color: transparent transparent var(--text-inverse) transparent;
+	top: calc(50% - (0.17rem * 3));
+}
+[data-manage-container="table"] tr td {
+	border-bottom: 1px solid var(--border-primary);
+}
+[data-manage-container="table"] tr:last-child td {
+	border-bottom: none;
+}
+[data-manage-container="table"] .status-text-container {
+	width: max-content;
+}
+[data-manage-container="table"] th:last-child,
+[data-manage-container="table"] td:last-child {
+	width: max-content;
+}
+[data-manage-container="table"] button {
+	max-width: max-content;
+}
+
+/* Manage Container Table (Mobile) */
+main.mobile [data-manage-container="table"] table {
+    display: block;
+    background: none;
+    border: none;
+}
+main.mobile [data-manage-container="table"] thead {
+	display: block;
+    margin-bottom: 1.5rem;
+}
+main.mobile [data-manage-container="table"] thead tr {
+	display: flex;
+	width: 100%;
+	overflow: auto;
+	scroll-behavior: smooth;
+    anchor-name: --sort-heading;
+}
+main.mobile [data-manage-container="table"] thead tr::-webkit-scrollbar {
+	display: none;
+}
+main.mobile [data-manage-container="table"] thead tr::scroll-button(left),
+main.mobile [data-manage-container="table"] thead tr::scroll-button(right) {
+	content: "";
+	width: 1.75rem;
+	height: 1.75rem;
+	border: none;
+	border-radius: 50%;
+	cursor: pointer;
+	transition: all 0.3s ease;
+	background-color: var(--btn-accent-bg);
+	background-size: 90%;
+	background-position: center;
+	background-image: url("/img/left_white.png");
+    position: fixed;
+    position-anchor: --sort-heading;
+    position-area: left center;
+    translate: 50%;
+}
+main.mobile [data-manage-container="table"] thead tr::scroll-button(right) {
+	background-image: url("/img/right_white.png");
+    position-area: right center;
+    translate: -50%;
+}
+main.mobile [data-manage-container="table"] thead tr::scroll-button(left):hover,
+main.mobile [data-manage-container="table"] thead tr::scroll-button(right):hover {
+	background-color: var(--btn-accent-hover);
+}
+main.mobile [data-manage-container="table"] thead tr::scroll-button(left):disabled,
+main.mobile [data-manage-container="table"] thead tr::scroll-button(right):disabled {
+	background-color: var(--bg-muted);
+    opacity: 0;
+	pointer-events: none; 
+}
+main.mobile [data-manage-container="table"] thead tr th {
+	flex: 1;
+}
+main.mobile [data-manage-container="table"] thead tr th:not(:has(a)) {
+	display: none;
+}
+main.mobile [data-manage-container="table"] tbody {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+main.mobile [data-manage-container="table"] tbody tr {
+    background-color: var(--bg-wrapper);
+    display: grid;
+    padding: 1rem;
+    align-items: center;
+    gap: 0.5rem;
+}
+main.mobile [data-manage-container="table"] tr td {
+    border: none;
+    padding: 0;
+}
+main.mobile [data-manage-container="table"] tbody tr td:last-child {
+    justify-self: end;
+    align-self: end;
+}
+
+/* Status Text Container */
+.status-text-container {
+	--_status-text-container-bg: var(--status-text-container-bg, var(--status-disabled-bg));
+	--_status-text-container-color: var(--status-text-container-color, var(--status-disabled-text));
+
+	text-align: center;
+	padding: 0.4rem 1rem;
+	border-radius: 1rem;
+	white-space: nowrap;
+	background-color: var(--_status-text-container-bg);
+	color: var(--_status-text-container-color);
+}
+.status-text-container.active,
+.status-text-container.completed {
+	--status-text-container-bg: var(--status-success-bg);
+	--status-text-container-color: var(--status-success-text);
+}
+.status-text-container.deleted,
+.status-text-container.canceled {
+	--status-text-container-bg: var(--status-error-bg);
+	--status-text-container-color: var(--status-error-text);
+}
+.status-text-container.banned {
+	--status-text-container-bg: var(--status-disabled-bg);
+	--status-text-container-color: var(--status-disabled-text);
+}
+
+/* Pagination Container */
+.pagination-container {
+	display: flex;
+	justify-content: center;
+	user-select: none;
+}
+.pagination a,
+.pagination span {
+	background: var(--bg-pagination) !important;
+	color: var(--text-pagination) !important;
+	border: 1px solid var(--border-pagination) !important;
+	min-width: 2.5rem;
+	height: 2.5rem;
+	font-size: 1rem;
+	text-align: center;
+	padding: 0.6rem !important;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	z-index: 0 !important;
+	transition: all 0.3s ease;
+}
+.pagination a:has(.paging-symbol) {
+    width: 2.5rem;
+}
+.pagination a:hover,
+.pagination span:hover {
+	background: var(--bg-pagination-hover) !important;
+	cursor: pointer;
+}
+.pagination .active a,
+.pagination .active span {
+	background: var(--bg-pagination-active) !important;
+}
+.pagination .disabled a,
+.pagination .disabled span {
+	color: var(--text-pagination-disabled) !important;
+	background: var(--bg-pagination-disabled) !important;
+	cursor: not-allowed !important;
+}
+.pagination .paging-symbol {
+	width: 1.5rem;
+	height: 1.5rem;
+	background-size: 130%;
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.pagination .disabled .paging-symbol {
+	filter: brightness(5);
+}
+.pagination .paging-symbol.first {
+	background-image: url("/img/double_left.png");
+}
+.pagination .paging-symbol.prev {
+	background-image: url("/img/left.png");
+}
+.pagination .paging-symbol.next {
+	background-image: url("/img/right.png");
+}
+.pagination .paging-symbol.last {
+	background-image: url("/img/double_right.png");
 }
