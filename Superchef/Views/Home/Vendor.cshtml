@@ -1,12 +1,13 @@
-<div class="container">
-    <div class="title">My Store</div>
-    <div class="container" data-no="padding">
+<div class="container" data-no="padding color">
+    <div class="container" data-no="padding color" data-flex="gap between">
+        <div class="title" data-no="margin">My Store</div>
         <a href="" data-button="info">Add Store</a>
     </div>
 
+
     <partial name="_NoResults" model="@("You have no store")" />
 
-    <div class="container listing-container" data-no="padding" data-result-container>
+    <div class="container listing-container" data-no="padding color" data-result-container>
         @for (int i = 0; i < 10; i++)
         {
             var card = new StoreCard

@@ -183,7 +183,7 @@ $("[data-auto-submit]").on("change", function () {
 	if ($(this).data("auto-submit") == "clear") {
 		betterClearForm(this)
 	}
-    
+
 	$(this).closest("form").submit()
 })
 

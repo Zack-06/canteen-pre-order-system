@@ -143,9 +143,9 @@
 	--letter-spacing-wider: 0.1em;
 
 	/* Widths */
-	--width-item: 9rem;
-	--width-store: 9rem;
-	--width-category: 8.5rem;
+	--width-item: 10rem;
+	--width-store: 10rem;
+	--width-category: 7rem;
 }
 
 * {
@@ -671,6 +671,9 @@ footer .social-media-icons a:hover {
 	font-size: 1.25rem;
 	font-weight: var(--font-weight-semibold);
 	margin-bottom: 2rem;
+}
+.container > .title[data-no~="margin"] {
+	margin-bottom: 0;
 }
 .container > .title.normal {
 	font-family: var(--font-primary);
@@ -1627,4 +1630,174 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 .store-card .delete:hover,
 .item-card .delete:hover {
 	background-image: url("/img/delete_red.png");
+}
+
+/* Column Container */
+[data-column-container~="2"] {
+	display: grid;
+	grid-template-columns: max-content auto;
+	row-gap: 0.25rem;
+	column-gap: 1rem;
+}
+[data-column-container~="3"] {
+	display: grid;
+	grid-template-columns: max-content 1rem max-content 0.25rem auto;
+	row-gap: 0.6rem;
+	align-items: baseline;
+	height: max-content;
+}
+[data-column-container~="3"] > *:nth-child(3n + 1) {
+	grid-column: 1;
+}
+[data-column-container~="3"] > *:nth-child(3n + 2) {
+	grid-column: 3;
+}
+[data-column-container~="3"] > *:nth-child(3n + 3) {
+	grid-column: 5;
+}
+[data-column-container~="3"] .form-group {
+	margin-bottom: 0;
+}
+[data-column-container~="3"] > .form-group {
+	margin-bottom: 1rem;
+}
+[data-column-container~="3"] > .form-group .form-group:has(.field-validation-error) {
+	margin-bottom: 0.75rem;
+}
+[data-column-container~="3"] > .form-group:has(textarea),
+[data-column-container~="3"] > .form-group:has(input[type="file"]) {
+	align-self: flex-start;
+}
+[data-column-container~="3"] > .form-group:has(input[type="file"]):not(:has(img[src])) {
+	align-self: unset;
+}
+[data-column-container~="3"] .button-group-inline {
+	margin-top: 0;
+	display: inline-flex;
+	gap: 0.75rem;
+}
+[data-column-container~="3"] .button-group-inline > button {
+	margin-top: 0;
+}
+[data-column-container~="center"] {
+	align-items: center;
+}
+@media (max-width: 520px) {
+	[data-column-container~="responsive"] {
+		grid-template-columns: initial;
+		justify-items: center;
+	}
+}
+
+/* SUMMARY CONTAINER */
+#summary-container {
+	margin: 40px 0;
+	width: calc(100% - var(--content-width-margin) * 2);
+	position: sticky;
+	bottom: 0;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 30px var(--content-width-margin);
+	background-color: var(--footer-background-color);
+}
+#summary-container .summary-info {
+	display: flex;
+	gap: 10px;
+	font-size: 18px;
+	align-items: center;
+}
+#summary-container .summary-info .price {
+	font-weight: bold;
+}
+#summary-container #submit-button {
+	width: 200px;
+}
+#summary-container div:has(#submit-button) {
+	display: flex;
+	gap: 20px;
+}
+
+/* STEPS PROGRESS CONTAINER */
+.steps-progress-container {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	width: 80%;
+	max-width: 200px;
+	position: absolute;
+	top: 20px;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: 20px 60px;
+	padding-bottom: 45px;
+	background: rgba(0, 0, 0, 0.7);
+	border-radius: 10px;
+}
+.steps-progress-container .circle {
+	border-radius: 50%;
+	background-color: var(--step-progress-background-color);
+	z-index: 1;
+	position: relative;
+	overflow: visible;
+}
+.steps-progress-container .step-number {
+	width: 40px;
+	height: 40px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	color: var(--step-progress-number-color);
+}
+.steps-progress-container .line {
+	flex: 1;
+	height: 6px;
+	background: var(--step-progress-background-color);
+	margin: 0 -2px;
+}
+.steps-progress-container .step-label {
+	width: max-content;
+	position: absolute;
+	top: 50px;
+	left: 50%;
+	text-transform: uppercase;
+	transform: translateX(-50%);
+	color: var(--step-progress-label-color);
+}
+.steps-progress-container .circle.active,
+.steps-progress-container .circle.completed {
+	background-color: var(--step-active-progress-background-color);
+}
+.steps-progress-container .circle.completed + .line {
+	background-color: var(--step-active-progress-background-color);
+}
+.steps-progress-container .circle.active .step-number,
+.steps-progress-container .circle.completed .step-number {
+	color: var(--step-active-progress-number-color);
+}
+.steps-progress-container .circle.active .step-label {
+	color: var(--primary-color);
+}
+.steps-progress-container .circle.completed .step-label {
+	color: var(--step-completed-progress-label-color);
+}
+
+/* Order QR Container */
+#qr-container {
+	width: 50vw;
+    max-width: 10rem;
+	aspect-ratio: 1 / 1;
+	padding: 0.6rem;
+	background-color: white;
+}
+#qr-container > img {
+	width: 100%;
+}
+#qr-container > canvas {
+	display: none;
+}
+@media (max-width: 520px) {
+    #qr-container {
+        margin-bottom: 1rem;
+    }
 }

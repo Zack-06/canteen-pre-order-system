@@ -1,9 +1,9 @@
-<div class="container">
+<div class="container" data-no="padding color">
     <div class="title">My Cart</div>
 
     <partial name="_NoResults" model="@("Your cart is empty")" />
 
-    <div class="container listing-container" data-no="padding" data-result-container>
+    <div class="container listing-container" data-no="padding color" data-result-container>
         @for (int i = 0; i < 10; i++)
         {
             var card = new StoreCard
