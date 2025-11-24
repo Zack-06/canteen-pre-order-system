@@ -28,6 +28,7 @@
 	--bg-toast: #8e8e8e;
 	--bg-upload: rgba(165, 42, 42, 0.1);
 	--bg-wrapper: rgba(0, 0, 0, 0.05);
+    --bg-card: #e9e9e9;
 	--bg-custom-tick: rgba(0, 0, 0, 0.05);
 	--bg-custom-tick-hover: rgba(0, 0, 0, 0.1);
 	--bg-custom-tick-selected: #b89a8b;
@@ -142,9 +143,9 @@
 	--letter-spacing-wider: 0.1em;
 
 	/* Widths */
-	--width-item: 10rem;
-	--width-store: 10rem;
-	--width-category: 9rem;
+	--width-item: 9rem;
+	--width-store: 9rem;
+	--width-category: 8.5rem;
 }
 
 * {
@@ -664,6 +665,7 @@ footer .social-media-icons a:hover {
 	margin-left: 0;
 	margin-right: 0;
 	width: 100%;
+    border: none;
 }
 .container > .title {
 	font-family: var(--font-display);
@@ -1452,6 +1454,7 @@ main:has([data-result-container]):not(:has([data-result-container] *)) .paginati
 /* No Result */
 #no-results {
 	font-family: var(--font-display);
+    text-align: center;
 }
 #no-results .icon {
 	font-size: clamp(4rem, 10vw, 10rem);
@@ -1472,22 +1475,22 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	grid-template-columns: repeat(auto-fill, minmax(min(var(--_grid-min-col-size), 100%), 1fr));
 	gap: 1.1rem;
 }
-.listing-container:has(.item-container) {
+.listing-container:has(.item-card) {
 	--grid-min-col-size: var(--width-item);
 }
-.listing-container:has(.store-container) {
+.listing-container:has(.store-card) {
 	--grid-min-col-size: var(--width-store);
 }
-.listing-container:has(.category-container) {
+.listing-container:has(.category-card) {
 	--grid-min-col-size: var(--width-category);
 }
 
-/* Item Container, Store Container & Category Container */
-.item-container,
-.store-container,
-.category-container {
+/* Item Card, Store Card & Category Card */
+.item-card,
+.store-card,
+.category-card {
 	border: 1px solid var(--border-primary);
-	background-color: var(--bg-wrapper);
+	background-color: var(--bg-card);
 	border-radius: 0.25rem;
 	transition: all 0.3s ease;
 	overflow: hidden;
@@ -1497,27 +1500,27 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	font-family: var(--font-display);
 	color: var(--text-primary) !important;
 }
-.item-container:hover,
-.store-container:hover,
-.category-container:hover {
+.item-card:hover,
+.store-card:hover,
+.category-card:hover {
 	box-shadow: var(--shadow-primary);
 	transform: translateY(-2px);
 	border-color: var(--border-active);
 }
-.item-container > a:not(.delete),
-.store-container > a:not(.delete),
-.category-container > a:not(.delete) {
+.item-card > a:not(.delete),
+.store-card > a:not(.delete),
+.category-card > a:not(.delete) {
 	inset: 0;
 	position: absolute;
 }
-.item-container img[alt="Image"],
-.store-container img[alt="Image"],
-.category-container img[alt="Image"] {
+.item-card img[alt="Image"],
+.store-card img[alt="Image"],
+.category-card img[alt="Image"] {
 	width: 100%;
 	aspect-ratio: 1 / 1;
 	object-fit: cover;
 }
-.item-container .info {
+.item-card .info {
 	padding: 0.5rem;
 	display: grid;
 	align-items: center;
@@ -1529,7 +1532,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 		"rating sold";
 	gap: 0.3rem;
 }
-.store-container .info {
+.store-card .info {
 	padding: 0.5rem;
 	display: grid;
 	align-items: center;
@@ -1540,12 +1543,12 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 		"rating item";
 	gap: 0.3rem;
 }
-.category-container .info {
+.category-card .info {
 	padding: 0.5rem;
 }
-.item-container .name,
-.store-container .name,
-.category-container .name {
+.item-card .name,
+.store-card .name,
+.category-card .name {
 	grid-area: name;
 	font-size: 1rem;
 	display: -webkit-box;
@@ -1557,17 +1560,17 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	line-height: var(--line-height-sm);
 	height: calc(var(--line-height-sm) * 2em);
 }
-.category-container .name {
+.category-card .name {
 	text-align: center;
 }
-.item-container .price {
+.item-card .price {
 	grid-area: price;
 	color: var(--text-price);
 	text-shadow: var(--shadow-price);
 	font-size: 1.1rem;
 	font-weight: var(--font-weight-medium);
 }
-.item-container .price::before {
+.item-card .price::before {
 	content: "RM";
 	color: var(--text-price);
 	font-family: var(--font-primary);
@@ -1575,40 +1578,40 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	font-weight: var(--font-weight-bold);
 	margin-right: 0.25rem;
 }
-.item-container .rating,
-.store-container .rating {
+.item-card .rating,
+.store-card .rating {
 	grid-area: rating;
 	display: flex;
 	align-items: center;
 	gap: 0.25rem;
 	font-size: 0.8rem;
 }
-.item-container .rating > img,
-.store-container .rating > img {
+.item-card .rating > img,
+.store-card .rating > img {
 	height: 1rem;
 	margin-top: -2px;
 }
-.item-container .sold {
+.item-card .sold {
 	font-size: 0.8rem;
 	grid-area: sold;
 }
-.item-container .sold::after {
+.item-card .sold::after {
 	content: "sold";
 	margin-left: 0.2rem;
 }
-.store-container .item {
+.store-card .item {
 	font-size: 0.8rem;
 	grid-area: item;
 }
-.store-container .item::after {
+.store-card .item::after {
 	content: "items";
 	margin-left: 0.2rem;
 }
-.store-container .item[data-count="1"]::after {
+.store-card .item[data-count="1"]::after {
 	content: "item";
 }
-.store-container .delete,
-.item-container .delete {
+.store-card .delete,
+.item-card .delete {
 	display: block;
 	float: right;
 	margin: 0.5rem;
@@ -1621,7 +1624,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	transition: all 0.3s ease;
 	position: relative;
 }
-.store-container .delete:hover,
-.item-container .delete:hover {
+.store-card .delete:hover,
+.item-card .delete:hover {
 	background-image: url("/img/delete_red.png");
 }
