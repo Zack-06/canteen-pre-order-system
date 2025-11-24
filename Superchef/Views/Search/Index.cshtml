@@ -1,51 +1,24 @@
-@{
-    ViewBag.Title = " '' - SuperChef";
-}
-
-@* 
 @section head {
     <style>
-        .search-container {
-            width: 100%;
-            overflow: hidden;
-            height: max-content;
-            margin-bottom: 1.5rem;
-        }
-
-        .top-container {
+        .result-text {
             display: flex;
-            justify-content: space-between;
+            align-items: flex-start;
         }
 
-        .listing-category-container {
-            display: flex;
-            gap: 1.25rem;
+        .result-text img {
+            margin-top: -1px;
+            margin-right: 0.3rem;
+            height: 1.2rem;
+            flex-shrink: 0;
         }
 
-        .listing-category-container .title .filter {
-            font-size: 1.125rem;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
-
-        .listing-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(8.75rem, 1fr));
-            gap: 1.25rem;
-        }
-
-        #search-result {
-            margin: 1.5rem 0;
-        }
-
-        #search-result>span {
-            font-size: 1.125rem;
-            font-weight: bold;
+        #result-container {
+            --grid-min-col-size: var(--width-item);
         }
     </style>
-} *@
+}
 
-<div class="container" data-no-color data-no-padding>
+<div class="container" data-no="color padding" data-flex="between gap">
     <div class="custom-tick-container">
         <label>
             <input type="radio" name="Types" value="items" checked>
@@ -61,42 +34,101 @@
             </div>
         </label>
     </div>
+
+    <button type="button" id="filter-button">
+        Filter
+        <img src="/img/filter.png">
+    </button>
+</div>
+
+<div class="container" data-no="color padding">
+    <div class="result-text title normal">
+        <img src="/img/info.png">
+        Search result for &nbsp;&quot;<strong>lol</strong>&quot;
+    </div>
+</div>
+
+<div id="result-container" class="listing-container container" data-no="color padding">
+    <a href="/" class="item-container">
+        <img src="" alt="">
+
+        <div class="info">
+            <div class="name">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Pariatur, soluta.</div>
+            <div class="price">100.00</div>
+            <div class="rating">
+                <img src="/img/star.png" alt="Star">
+                4.9
+            </div>
+            <div class="sold">100</div>
+        </div>
+    </a>
+    @for (int i = 0; i < 10; i++)
+    {
+        <a href="/" class="item-container">
+            <img src="" alt="">
+
+            <div class="info">
+                <div class="name">item</div>
+                <div class="price">100.00</div>
+                <div class="rating">
+                    <img src="/img/star.png" alt="Star">
+                    4.9
+                </div>
+                <div class="sold">100</div>
+            </div>
+        </a>
+    }
+</div>
+
+<div id="result-container" class="listing-container container" data-no="color padding">
+    <a href="/" class="store-container">
+        <img src="" alt="">
+
+        <div class="info">
+            <div class="name">store</div>
+            <div class="rating">
+                <img src="/img/star.png" alt="Star">
+                4.9
+            </div>
+            <div class="item" data-count="1">1</div>
+        </div>
+    </a>
+    @for (int i = 0; i < 10; i++)
+    {
+        <a href="/" class="store-container">
+            <img src="" alt="">
+
+            <div class="info">
+                <div class="name">store</div>
+                <div class="rating">
+                    <img src="/img/star.png" alt="Star">
+                    4.9
+                </div>
+                <div class="item" data-count="100">100</div>
+            </div>
+        </a>
+    }
 </div>
 
 
-
-<div class="container" data-no-color>
-
-
-    @* <div class="top-container">
-        <div class="listing-category-container">
-            <a href="" class="title" data-selectable-title>Items</a>
-            <a href="" class="title" data-selectable-title>Vendors</a>
-        </div>
-        <div id="filter" data-link>Filter by</div>
-    </div>
-
-    <div id="search-result">
-        <span>Search result for ''</span>
-    </div>
-
-    <div class="container" data-no-color>
-
-        @for (int i = 0; i < 10; i++)
-        {
-            <div class="product-container">
-                <img src="" alt="">
-                <div class="info">
-                    <div class="name"> ABC</div>
-                    <div class="price">100</div>
-                    <div class="detail">
-                        <img src="/img/star.png" alt="Star">
-                        <div class="rating-text">?</div>
-                        <div class="sold">100</div>
-                    </div>
-                </div>
-            </div>
-        }
-
-    </div> *@
+<div class="pagination-container">
+    <ul class="pagination">
+        <li class="PagedList-skipToFirst disabled"><a>
+                <div class="paging-symbol first"></div>
+            </a></li>
+        <li class="PagedList-skipToPrevious"><a rel="prev">
+                <div class="paging-symbol prev"></div>
+            </a></li>
+        <li class="active"><span>1</span></li>
+        <li class=""><span>201</span></li>
+        <li class=""><span>2</span></li>
+        <li class=""><span>2</span></li>
+        <li class=""><span>2</span></li>
+        <li class="PagedList-skipToNext disabled"><a rel="next">
+                <div class="paging-symbol next"></div>
+            </a></li>
+        <li class="PagedList-skipToLast disabled"><a>
+                <div class="paging-symbol last"></div>
+            </a></li>
+    </ul>
 </div>
