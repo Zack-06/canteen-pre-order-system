@@ -1638,13 +1638,13 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 
 /* Column Container */
 [data-column-container] {
-    font-weight: var(--font-weight-semibold);
+	font-weight: var(--font-weight-semibold);
 }
 [data-column-container~="2"] {
 	display: grid;
 	grid-template-columns: max-content auto;
 	row-gap: 0.25rem;
-	column-gap: 1rem;
+	column-gap: 0.5rem;
 }
 [data-column-container~="3"] {
 	display: grid;
@@ -1810,7 +1810,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 
 /* Order Item Card */
 .order-item-card {
-    font-weight: var(--font-weight-semibold);
+	font-weight: var(--font-weight-semibold);
 	padding: 1rem;
 	background-color: var(--bg-wrapper);
 	display: grid;
@@ -1825,14 +1825,14 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 		"image . subtotal1 . subtotal2 . subtotal3"
 		"image . . . . . .";
 	row-gap: 0.3rem;
-    cursor: auto;
+	cursor: auto;
 }
 a.order-item-card {
 	color: var(--text-primary);
 	text-decoration: none;
 }
 a[href].order-item-card {
-    cursor: pointer;
+	cursor: pointer;
 }
 a[href].order-item-card:hover {
 	filter: brightness(0.95);
