@@ -77,6 +77,27 @@
     </div>
 </div>
 
+<div class="container" data-limit-container>
+    <div class="title">Ordered Items</div>
+
+    <div class="container" data-no="padding margin" data-flex="column gap">
+        @for (int i = 0; i < 10; i++)
+        {
+            var card = new OrderItemCard
+            {
+                Link = i == 0 ? null : "breh",
+                Image = "",
+                Id = i,
+                Name = "item",
+                Variant = "variant",
+                Quantity = i,
+                Subtotal = 100.00m
+            };
+            <partial name="_OrderItemCard" model="@card" />
+        }
+    </div>
+</div>
+
 @section foot {
     <script src="/js/qrcode.min.js"></script>
     <script>

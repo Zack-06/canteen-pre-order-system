@@ -1,0 +1,25 @@
+@model OrderItemCard
+
+<a @(Model.Link != null ? $"href={Model.Link}" : "") class="order-item-card">
+    <img src="" alt="">
+
+    <div style="grid-area: id1">Id</div>
+    <div style="grid-area: id2">:</div>
+    <div style="grid-area: id3">@Model.Id</div>
+
+    <div data-no-mobile style="grid-area: name1">Name</div>
+    <div data-no-mobile style="grid-area: name2">:</div>
+    <div data-mobile-bold style="grid-area: name3">@Model.Name</div>
+
+    <div data-no-mobile style="grid-area: variant1">Variant</div>
+    <div data-no-mobile style="grid-area: variant2">:</div>
+    <div data-mobile-bold style="grid-area: variant3">@Model.Name</div>
+
+    <div style="grid-area: quantity1">Quantity</div>
+    <div style="grid-area: quantity2">:</div>
+    <div style="grid-area: quantity3">@Model.Quantity</div>
+
+    <div style="grid-area: subtotal1">Subtotal</div>
+    <div style="grid-area: subtotal2">:</div>
+    <div style="grid-area: subtotal3">@FormatService.ToRMFormat(Model.Subtotal)</div>
+</a>

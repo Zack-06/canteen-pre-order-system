@@ -28,6 +28,7 @@
 	--bg-toast: #8e8e8e;
 	--bg-upload: rgba(165, 42, 42, 0.1);
 	--bg-wrapper: rgba(0, 0, 0, 0.05);
+	--bg-wrapper-hover: rgba(0, 0, 0, 0.1);
 	--bg-card: #e9e9e9;
 	--bg-custom-tick: rgba(0, 0, 0, 0.05);
 	--bg-custom-tick-hover: rgba(0, 0, 0, 0.1);
@@ -636,6 +637,9 @@ footer .social-media-icons a:hover {
 .container[data-no~="color"] {
 	background-color: transparent;
 	border: none;
+}
+.container[data-no~="margin"] {
+	margin: 0;
 }
 .container[data-no~="padding"] {
 	padding: 0;
@@ -1633,6 +1637,9 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 
 /* Column Container */
+[data-column-container] {
+    font-weight: var(--font-weight-semibold);
+}
 [data-column-container~="2"] {
 	display: grid;
 	grid-template-columns: max-content auto;
@@ -1641,7 +1648,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 [data-column-container~="3"] {
 	display: grid;
-	grid-template-columns: max-content 1rem max-content 0.25rem auto;
+	grid-template-columns: max-content 0.75rem max-content 0.25rem auto;
 	row-gap: 0.6rem;
 	align-items: baseline;
 	height: max-content;
@@ -1784,8 +1791,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 
 /* Order QR Container */
 #qr-container {
-	width: 50vw;
-    max-width: 10rem;
+	width: 10rem;
 	aspect-ratio: 1 / 1;
 	padding: 0.6rem;
 	background-color: white;
@@ -1797,7 +1803,63 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	display: none;
 }
 @media (max-width: 520px) {
-    #qr-container {
-        margin-bottom: 1rem;
-    }
+	#qr-container {
+		margin-bottom: 1rem;
+	}
+}
+
+/* Order Item Card */
+.order-item-card {
+    font-weight: var(--font-weight-semibold);
+	padding: 1rem;
+	background-color: var(--bg-wrapper);
+	display: grid;
+	align-items: center;
+	grid-template-columns: 10rem 1rem max-content 0.75rem max-content 0.25rem auto;
+	grid-template-areas:
+		"image . . . . . ."
+		"image . id1 . id2 . id3"
+		"image . name1 . name2 . name3"
+		"image . variant1 . variant2 . variant3"
+		"image . quantity1 . quantity2 . quantity3"
+		"image . subtotal1 . subtotal2 . subtotal3"
+		"image . . . . . .";
+	row-gap: 0.3rem;
+    cursor: auto;
+}
+a.order-item-card {
+	color: var(--text-primary);
+	text-decoration: none;
+}
+a[href].order-item-card {
+    cursor: pointer;
+}
+a[href].order-item-card:hover {
+	filter: brightness(0.95);
+	background-color: var(--bg-wrapper-hover);
+}
+.order-item-card img {
+	grid-area: image;
+	width: 100%;
+	aspect-ratio: 1 / 1;
+}
+@media (max-width: 520px) {
+	.order-item-card {
+		grid-template-columns: 7.5rem 0.7rem max-content 0.65rem max-content 0.2rem auto;
+		grid-template-areas:
+			"image . . . . . ."
+			"image . id1 . id2 . id3"
+			"image . subtotal1 . subtotal2 . subtotal3"
+			"image . quantity1 . quantity2 . quantity3"
+			"image . . . . . ."
+			". . . . . . ."
+			"name3 name3 name3 name3 name3 name3 name3"
+			"variant3 variant3 variant3 variant3 variant3 variant3 variant3";
+	}
+	.order-item-card [data-no-mobile] {
+		display: none;
+	}
+	.order-item-card [data-mobile-bold] {
+		font-weight: var(--font-weight-bold);
+	}
 }
