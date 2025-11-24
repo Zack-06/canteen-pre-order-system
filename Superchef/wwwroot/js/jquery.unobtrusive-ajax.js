@@ -78,7 +78,7 @@
 		var confirm, loading, method, duration
 
 		confirm = element.getAttribute("data-ajax-confirm")
-		if (confirm && !(await window.confirmation(confirm))) {
+		if (confirm && confirm != "" && !(await window.confirmation(confirm))) {
 			return
 		}
 

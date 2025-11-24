@@ -1,7 +1,9 @@
 @model StoreCard
 
-<a href="@Model.Link" class="store-container">
-    <img src="@Model.Image" alt="Store Image">
+<div class="store-container">
+    <a href="@Model.Link"></a>
+
+    <img src="@Model.Image" alt="Image">
 
     <div class="info">
         <div class="name">@Model.Name</div>
@@ -11,4 +13,11 @@
         </div>
         <div class="item" data-count="@Model.ItemCount">@Model.ItemCount</div>
     </div>
-</a>
+
+    @if (Model.DeleteLink != null)
+    {
+        <a class="delete" data-ajax="true" data-ajax-method="POST" data-ajax-failure="defaultOnFailure"
+            data-ajax-success="reloadPage()" data-ajax-url="@Model.DeleteLink" data-ajax-confirm="@Model.DeleteMsg">
+        </a>
+    }
+</div>

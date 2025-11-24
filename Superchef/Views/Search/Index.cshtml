@@ -49,24 +49,19 @@
         @for (int i = 0; i < 10; i++)
         {
             var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem      soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
-                var card = new ItemCard
-                {
-                    Link = "/",
-                    Image = "",
-                    Name = i == 0 ? superlongName : "item",
-                    IsFavorite = false,
-                    Price = 100.00m,
-                    Rating = 4.9m,
-                    Sold = 100
-                };
+            var card = new ItemCard
+            {
+                Link = "/",
+                Image = "",
+                Name = i == 0 ? superlongName : "item",
+                Price = 100.00m,
+                Rating = 4.9m,
+                Sold = 100
+            };
             <partial name="_ItemContainer" model="@card" />
         }
-    </div>
 
-    <partial name="_NoResult" />
-
-    @* <div class="listing-container container" data-no="color padding">
-        @for (int i = 0; i < 10; i++)
+        @* @for (int i = 0; i < 10; i++)
         {
             var card = new StoreCard
             {
@@ -77,8 +72,10 @@
                 ItemCount = i
             };
             <partial name="_StoreContainer" model="@card" />
-        }
-    </div> *@
+        } *@
+    </div>
+
+    <partial name="_NoResults" />
 
     <div class="pagination-container">
         <ul class="pagination">

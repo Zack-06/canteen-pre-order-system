@@ -1,7 +1,8 @@
 @model ItemCard
 
-<a href="@Model.Link" class="item-container">
-    <img src="@Model.Image" alt="Item Image">
+<div class="item-container">
+    <a href="@Model.Link"></a>
+    <img src="@Model.Image" alt="Image">
 
     <div class="info">
         <div class="name">@Model.Name</div>
@@ -11,10 +12,12 @@
             @FormatService.ToRatingFormat(Model.Rating)
         </div>
         <div class="sold">@Model.Sold</div>
-
-        @if (Model.IsFavorite)
-        {
-            <div class="remove"></div>
-        }
     </div>
-</a>
+
+    @if (Model.DeleteLink != null)
+    {
+        <a class="delete" data-ajax="true" data-ajax-method="POST" data-ajax-failure="defaultOnFailure"
+            data-ajax-success="reloadPage()" data-ajax-url="@Model.DeleteLink" data-ajax-confirm="@Model.DeleteMsg">
+        </a>
+    }
+</div>

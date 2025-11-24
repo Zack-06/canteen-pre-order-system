@@ -10,7 +10,8 @@ public record ItemCard
     public decimal Price { get; set; }
     public decimal Rating { get; set; }
     public int Sold { get; set; }
-    public bool IsFavorite { get; set; }
+    public string DeleteLink { get; set; }
+    public string DeleteMsg { get; set; }
 }
 
 public record StoreCard
@@ -20,6 +21,8 @@ public record StoreCard
     public string Name { get; set; }
     public decimal Rating { get; set; }
     public int ItemCount { get; set; }
+    public string DeleteLink { get; set; }
+    public string DeleteMsg { get; set; }
 }
 
 public record CategoryCard
