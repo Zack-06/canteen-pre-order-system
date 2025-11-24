@@ -1,0 +1,62 @@
+@model SearchVM
+
+<div class="container" data-no="color padding">
+    <div class="result-text title normal">
+        <img src="/img/info.png">
+        Search result for &nbsp;&quot;<strong>@Model.Query</strong>&quot;
+    </div>
+</div>
+
+<div class="listing-container container" data-no="color padding" data-result-container>
+    @for (int i = 0; i < 10; i++)
+    {
+        var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem soluta  nobis. Tempora sequi omnis odit dolorum rerum quam!";
+        var card = new ItemCard
+        {
+            Link = "/",
+            Image = "",
+            Name = i == 0 ? superlongName : "item",
+            Price = 100.00m,
+            Rating = 4.9m,
+            Sold = 100
+        };
+        <partial name="_ItemContainer" model="@card" />
+    }
+
+    @* @for (int i = 0; i < 10; i++)
+        {
+            var card = new StoreCard
+            {
+                Link = "/",
+                Image = "",
+                Name = "store",
+                Rating = 4.9m,
+                ItemCount = i
+            };
+            <partial name="_StoreContainer" model="@card" />
+        } *@
+</div>
+
+<partial name="_NoResults" model="null" />
+
+<div class="pagination-container">
+    <ul class="pagination">
+        <li class="PagedList-skipToFirst disabled"><a>
+                <div class="paging-symbol first"></div>
+            </a></li>
+        <li class="PagedList-skipToPrevious"><a rel="prev">
+                <div class="paging-symbol prev"></div>
+            </a></li>
+        <li class="active"><span>1</span></li>
+        <li class=""><span>201</span></li>
+        <li class=""><span>2</span></li>
+        <li class=""><span>2</span></li>
+        <li class=""><span>2</span></li>
+        <li class="PagedList-skipToNext disabled"><a rel="next">
+                <div class="paging-symbol next"></div>
+            </a></li>
+        <li class="PagedList-skipToLast disabled"><a>
+                <div class="paging-symbol last"></div>
+            </a></li>
+    </ul>
+</div>

@@ -461,17 +461,17 @@ header .search-container button {
 	height: 100%;
 	border-radius: 0;
 }
-header .search-container button[type="reset"] {
+header .search-container button[type="button"] {
 	padding: 0 0.3rem;
 	display: none;
 }
-header .search-container button[type="reset"] img {
+header .search-container button[type="button"] img {
 	height: 1.25rem;
 }
-header:has(.search-container:focus-within) .search-container button[type="reset"] {
+header:has(.search-container:focus-within) .search-container button[type="button"] {
 	display: inline-flex;
 }
-header .search-container button[type="reset"]:hover {
+header .search-container button[type="button"]:hover {
 	filter: brightness(3);
 }
 header .search-container button[type="submit"] {
@@ -868,23 +868,29 @@ main:has(.container-center) {
 	display: flex;
 	opacity: 1;
 }
+body:has(.overlay.show) {
+	overflow: hidden;
+}
 .overlay .content {
 	background-color: var(--bg-pure);
 	border-radius: 0.25rem;
-	padding: 2rem;
+	padding: 1.5rem;
 	width: clamp(12.5rem, 70vw, 35rem);
+	display: flex;
+	flex-direction: column;
+    gap: 1.2rem;
+	max-height: 90%;
 }
 .overlay-header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
-	margin-bottom: 2rem;
 	min-width: 12.5rem;
 }
-.overlay > title {
+.overlay .title {
 	font-family: var(--font-display);
-	font-size: 1.25rem;
-	font-weight: var(--font-weight-semibold);
+	font-size: 1.2rem;
+	font-weight: var(--font-weight-medium);
 	margin-bottom: 0;
 }
 .overlay-close {
@@ -900,9 +906,34 @@ main:has(.container-center) {
 .overlay-close:hover {
 	filter: brightness(4);
 }
+@keyframes detect-overlay-scroll {
+	from, to {
+        --can-scroll: ;
+    }
+}
 .overlay-body {
 	overflow-y: auto;
-	max-height: calc(60vh + 20rem);
+	animation: detect-overlay-scroll linear;
+	animation-timeline: scroll(self);
+    --overlay-padding-right: var(--can-scroll) 0.75rem;
+	padding-right: var(--overlay-padding-right, 0);
+    flex: 1;
+}
+
+/* Sidebar Overlay */
+.sidebar-overlay {
+	justify-content: end;
+}
+.sidebar-overlay .content {
+	height: 100%;
+    max-height: none;
+	border-radius: 0;
+}
+@media (max-width: 500px) {
+    .sidebar-overlay .content {
+        width: 100%;
+        max-width: none;
+    }
 }
 
 /* Confirmation Popup */
@@ -1104,29 +1135,29 @@ main:has(.container-center) {
 	background-color: var(--bg-custom-tick-selected);
 	color: var(--text-inverse);
 }
-.custom-tick-container .custom-tick-image {
+.custom-tick-container .image {
 	width: 2.5rem;
 	height: 2.5rem;
 	background-size: 100%;
 	background-repeat: no-repeat;
 	background-position: center;
 }
-.custom-tick-container .custom-tick-text {
+.custom-tick-container .text {
 	font-size: 1rem;
 }
-.custom-tick-container.small-text .custom-tick-text {
-	font-size: 0.85rem;
+.custom-tick-container.small-text .text {
+	font-size: 0.9rem;
 }
-.custom-tick-container.big-text .custom-tick-text {
+.custom-tick-container.big-text .text {
 	font-size: 1.2rem;
 	text-transform: uppercase;
 	font-weight: bold;
 }
-.custom-tick-description {
-	font-size: 0.75rem;
+.custom-tick-container .description {
+	font-size: 0.85rem;
 }
-.custom-tick-container.small-text .custom-tick-description {
-	font-size: 0.6rem;
+.custom-tick-container.small-text .description {
+	font-size: 0.75rem;
 }
 .custom-tick-container.center-text label {
 	justify-content: center;
@@ -1428,6 +1459,7 @@ main:has([data-result-container]):not(:has([data-result-container] *)) .paginati
 #no-results .text {
 	font-size: 1.5rem;
 }
+main:not(:has([data-result-container])) #no-results,
 main:has([data-result-container]):has([data-result-container] *) #no-results {
 	display: none;
 }
@@ -1587,7 +1619,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	background-position: center;
 	background-repeat: no-repeat;
 	transition: all 0.3s ease;
-    position: relative;
+	position: relative;
 }
 .store-container .delete:hover,
 .item-container .delete:hover {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
+using X.PagedList;
 
 namespace Superchef.Models;
 
@@ -123,4 +124,25 @@ public class ChangePasswordVM
     [DataType(DataType.Password)]
     [DisplayName("Confirm New Password")]
     public string ConfirmPassword { get; set; }
+}
+
+public class SearchVM
+{
+    public string? Query { get; set; }
+    public string? Type { get; set; }
+    public List<int> Venues { get; set; } = [];
+    public string? Price { get; set; }
+    public string? Rating { get; set; }
+    public string? Sort { get; set; }
+    public List<int> Categories { get; set; } = [];
+    public int Page { get; set; } = 1;
+    public IPagedList<object> Results { get; set; }
+
+    // Available Options
+    public List<string> AvailableTypes { get; set; } = [];
+    public List<Venue> AvailableVenues { get; set; } = [];
+    public Dictionary<string, string> AvailablePrices { get; set; } = [];
+    public Dictionary<string, string> AvailableRatings { get; set; } = [];
+    public Dictionary<string, string> AvailableSortBy { get; set; } = [];
+    public List<Category> AvailableCategories { get; set; } = [];
 }

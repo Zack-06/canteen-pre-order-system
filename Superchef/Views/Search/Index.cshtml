@@ -1,3 +1,5 @@
+@model SearchVM
+
 @section head {
     <style>
         .result-text {
@@ -11,91 +13,153 @@
             height: 1.2rem;
             flex-shrink: 0;
         }
+
+        main form:has(input[name="Type"][value="Stores"]:checked) [data-form-group-store] {
+            display: none !important;
+        }
     </style>
 }
 
-<div class="container" data-no="color padding" data-flex="between gap">
-    <div class="custom-tick-container">
-        <label>
-            <input type="radio" name="Types" value="items" checked>
-            <div>
-                <div class="custom-tick-text">Items</div>
-            </div>
-        </label>
+<form asp-action="Index" method="get" data-ajax="true" data-ajax-update="#ajax-result-container"
+    data-ajax-complete="closeOverlay('filter-overlay')" class="container" data-no="color padding"
+    data-flex="between gap">
+    <input type="hidden" name="Query" asp-for="Query" data-clear-form-ignore>
 
-        <label>
-            <input type="radio" name="Types" value="stores">
-            <div>
-                <div class="custom-tick-text">Stores</div>
+    <div id="filter-overlay" class="overlay sidebar-overlay">
+        <div class="content">
+            <div class="overlay-header">
+                <div class="title">Filter By</div>
+                <div class="overlay-close"></div>
             </div>
-        </label>
+            <div class="overlay-body">
+
+                <div class="form-group">
+                    <label>Venue</label>
+                    <div class="custom-tick-container center-text small-text rounded-border">
+                        <label>
+                            <input type="checkbox" name="Venues" value="items">
+                            <div>
+                                <div class="text">Items</div>
+                            </div>
+                        </label>
+
+                        <label>
+                            <input type="checkbox" name="Venues" value="items">
+                            <div>
+                                <div class="text">Items</div>
+                            </div>
+                        </label>
+
+                        <label>
+                            <input type="checkbox" name="Venues" value="items">
+                            <div>
+                                <div class="text">Items</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" data-form-group-store>
+                    <label>Price</label>
+                    <div class="custom-tick-container center-text small-text rounded-border">
+                        <label>
+                            <input type="radio" name="Price" value="items">
+                            <div>
+                                <div class="text">Items</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="custom-tick-container center-text small-text rounded-border">
+                        <label>
+                            <input type="radio" name="Rating" value="items">
+                            <div>
+                                <div class="text">Items</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Sort By</label>
+                    <div class="custom-tick-container center-text small-text rounded-border">
+                        <label>
+                            <input type="radio" name="Sort" value="items">
+                            <div>
+                                <div class="text">Items</div>
+                            </div>
+                        </label>
+
+                        <label>
+                            <input type="radio" name="Sort" value="items">
+                            <div>
+                                <div class="text">Items</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group" data-form-group-store>
+                    <label>Category</label>
+                    <div class="custom-tick-container center-text small-text rounded-border">
+                        <label>
+                            <input type="checkbox" name="Categories" value="items">
+                            <div>
+                                <div class="text">Items</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group"></div>
+            </div>
+
+            <div class="button-group-inline">
+                <button type="button" data-button="accent" data-clear-form>Reset</button>
+                <button type="submit" data-button="success">Apply</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="custom-tick-container">
+        @foreach (var type in Model.AvailableTypes)
+        {
+            <label>
+                <input type="radio" name="Type" value="@type" data-clear-form-ignore data-auto-submit="clear" @(Model.Type
+                                                                                                                              == type ? "checked" : "")>
+                <div>
+                    <div class="text">@type</div>
+                </div>
+            </label>
+        }
     </div>
 
     <button type="button" id="filter-button">
         Filter
         <img src="/img/filter.png">
     </button>
-</div>
-
-<div class="container" data-no="color padding">
-    <div class="result-text title normal">
-        <img src="/img/info.png">
-        Search result for &nbsp;&quot;<strong>lol</strong>&quot;
-    </div>
-</div>
+</form>
 
 <div id="ajax-result-container">
-    <div class="listing-container container" data-no="color padding" data-result-container>
-        @for (int i = 0; i < 10; i++)
-        {
-            var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem      soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
-            var card = new ItemCard
-            {
-                Link = "/",
-                Image = "",
-                Name = i == 0 ? superlongName : "item",
-                Price = 100.00m,
-                Rating = 4.9m,
-                Sold = 100
-            };
-            <partial name="_ItemContainer" model="@card" />
-        }
-
-        @* @for (int i = 0; i < 10; i++)
-        {
-            var card = new StoreCard
-            {
-                Link = "/",
-                Image = "",
-                Name = "store",
-                Rating = 4.9m,
-                ItemCount = i
-            };
-            <partial name="_StoreContainer" model="@card" />
-        } *@
-    </div>
-
-    <partial name="_NoResults" />
-
-    <div class="pagination-container">
-        <ul class="pagination">
-            <li class="PagedList-skipToFirst disabled"><a>
-                    <div class="paging-symbol first"></div>
-                </a></li>
-            <li class="PagedList-skipToPrevious"><a rel="prev">
-                    <div class="paging-symbol prev"></div>
-                </a></li>
-            <li class="active"><span>1</span></li>
-            <li class=""><span>201</span></li>
-            <li class=""><span>2</span></li>
-            <li class=""><span>2</span></li>
-            <li class=""><span>2</span></li>
-            <li class="PagedList-skipToNext disabled"><a rel="next">
-                    <div class="paging-symbol next"></div>
-                </a></li>
-            <li class="PagedList-skipToLast disabled"><a>
-                    <div class="paging-symbol last"></div>
-                </a></li>
-        </ul>
-    </div>
+    <partial name="_SearchResults" model="Model" />
 </div>
+
+@section foot {
+    <script>
+        $("header form.search-container").on("submit", function (e) {
+            e.preventDefault()
+
+            const $form = $("main form")
+            $form.find(`input[name="Query"]`).val($(this).find("input").val())
+
+            $form.submit()
+        })
+
+        $(document).on("click", "#filter-button", function () {
+            openOverlay("filter-overlay")
+        })
+    </script>
+}

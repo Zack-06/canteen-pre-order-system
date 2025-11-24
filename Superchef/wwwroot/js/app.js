@@ -12,7 +12,7 @@ function responsiveSetup() {
 	const $responsiveContainer = $("[data-responsive-container]")
 	if ($responsiveContainer.length !== 1) return
 
-    $("main").removeClass("mobile")
+	$("main").removeClass("mobile")
 
 	if ($responsiveContainer[0].scrollWidth > $responsiveContainer[0].clientWidth) {
 		$("main").addClass("mobile")
@@ -151,7 +151,10 @@ function updateButtonCountdown($button, expiryTimestamp, timer, changeText = tru
 
 // ==========Clear Form==========
 $("[data-clear-form]").on("click", function () {
-	const $form = $(this).closest("form")
+	betterClearForm(this)
+})
+function betterClearForm(element) {
+	const $form = $(element).closest("form")
 	if (!$form.length) return
 
 	$form
@@ -173,10 +176,14 @@ $("[data-clear-form]").on("click", function () {
 					this.value = ""
 			}
 		})
-})
+}
 
 // ==========Auto Submit Form==========
 $("[data-auto-submit]").on("change", function () {
+	if ($(this).data("auto-submit") == "clear") {
+		betterClearForm(this)
+	}
+    
 	$(this).closest("form").submit()
 })
 
@@ -327,8 +334,6 @@ function openOverlay(id, callback = () => {}) {
 		$overlay.removeClass("show")
 		callback()
 	})
-
-	overlayPadder($overlay)
 }
 
 function closeOverlay(id) {
@@ -337,23 +342,6 @@ function closeOverlay(id) {
 
 	$overlay.removeClass("show")
 }
-
-function overlayPadder(overlayEle) {
-	const $body = overlayEle.find(".overlay-body")
-	if (!$body[0]) return
-
-	if ($body[0].scrollHeight > $body[0].clientHeight) {
-		$body.css("padding-right", "0.75rem")
-	} else {
-		$body.css("padding-right", null)
-	}
-}
-
-window.addEventListener("resize", () => {
-	$(".overlay").each(function () {
-		overlayPadder($(this))
-	})
-})
 
 // ==========Upload Overlay==========
 class UploadOverlay {

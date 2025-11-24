@@ -1,4 +1,4 @@
-<header>
+<header class="@(ViewBag.SearchQuery != null ? "search-active" : "")">
     <div class="wrapper">
         <a href="/" class="header-nav-link app-logo">
             <img src="/img/logo/normal.png" alt="SUPERCHEF">
@@ -10,8 +10,8 @@
     </div>
 
     <form class="search-container" method="get" action="@Url.Action("Index", "Search")">
-        <input type="text" name="query" placeholder="Search">
-        <button type="reset">
+        <input type="text" name="Query" placeholder="Search" value="@ViewBag.SearchQuery">
+        <button type="button" onclick="this.parentElement.querySelector('input').value = ''; this.parentElement.querySelector('input').focus()">
             <img src="/img/cross.png" alt="Clear">
         </button>
         <button type="submit">
