@@ -1,0 +1,14 @@
+@model StoreCard
+
+<a href="@Model.Link" class="store-container">
+    <img src="@Model.Image" alt="Store Image">
+
+    <div class="info">
+        <div class="name">@Model.Name</div>
+        <div class="rating">
+            <img src="/img/star.png" alt="Star">
+            @FormatService.ToRatingFormat(Model.Rating)
+        </div>
+        <div class="item" data-count="@Model.ItemCount">@Model.ItemCount</div>
+    </div>
+</a>

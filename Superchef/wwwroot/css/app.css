@@ -143,7 +143,8 @@
 
 	/* Widths */
 	--width-item: 10rem;
-	--width-category: 7rem;
+    --width-store: 10rem;
+	--width-category: 9rem;
 }
 
 * {
@@ -1410,6 +1411,23 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 .pagination .paging-symbol.last {
 	background-image: url("/img/double_right.png");
 }
+main:has([data-result-container]):not(:has([data-result-container] *)) .pagination-container {
+    display: none;
+}
+
+/* No Result */
+#no-result {
+    font-family: var(--font-display);
+}
+#no-result .icon {
+    font-size: clamp(4rem, 10vw, 10rem);
+}
+#no-result .text {
+    font-size: 1.5rem;
+}
+main:has([data-result-container]):has([data-result-container] *) #no-result {
+    display: none;
+}
 
 /* Listing Container */
 .listing-container {
@@ -1417,12 +1435,22 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 
 	display: grid;
 	grid-template-columns: repeat(auto-fill, minmax(min(var(--_grid-min-col-size), 100%), 1fr));
-	gap: 1.25rem;
+	gap: 1.1rem;
+}
+.listing-container:has(.item-container) {
+    --grid-min-col-size: var(--width-item);
+}
+.listing-container:has(.store-container) {
+    --grid-min-col-size: var(--width-store);
+}
+.listing-container:has(.category-container) {
+    --grid-min-col-size: var(--width-category);
 }
 
-/* Item Container & Store Container */
+/* Item Container, Store Container & Category Container */
 .item-container,
-.store-container {
+.store-container,
+.category-container {
 	border: 1px solid var(--border-primary);
 	background-color: var(--bg-wrapper);
 	border-radius: 0.25rem;
@@ -1434,13 +1462,15 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	color: var(--text-primary) !important;
 }
 .item-container:hover,
-.store-container:hover {
+.store-container:hover,
+.category-container:hover {
 	box-shadow: var(--shadow-primary);
 	transform: translateY(-2px);
 	border-color: var(--border-active);
 }
 .item-container > img,
-.store-container > img {
+.store-container > img,
+.category-container > img {
 	width: 100%;
 	aspect-ratio: 1 / 1;
 	object-fit: cover;
@@ -1468,8 +1498,12 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 		"rating item";
 	gap: 0.3rem;
 }
+.category-container .info {
+    padding: 0.5rem;
+}
 .item-container .name,
-.store-container .name {
+.store-container .name,
+.category-container .name {
 	grid-area: name;
 	font-size: 1rem;
 	display: -webkit-box;
@@ -1480,6 +1514,9 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	text-overflow: ellipsis;
 	line-height: var(--line-height-sm);
 	height: calc(var(--line-height-sm) * 2em);
+}
+.category-container .name {
+    text-align: center;
 }
 .item-container .price {
 	grid-area: price;

@@ -1,0 +1,20 @@
+@model ItemCard
+
+<a href="@Model.Link" class="item-container">
+    <img src="@Model.Image" alt="Item Image">
+
+    <div class="info">
+        <div class="name">@Model.Name</div>
+        <div class="price">@FormatService.ToRMFormat(Model.Price, false)</div>
+        <div class="rating">
+            <img src="/img/star.png" alt="Star">
+            @FormatService.ToRatingFormat(Model.Rating)
+        </div>
+        <div class="sold">@Model.Sold</div>
+
+        @if (Model.IsFavorite)
+        {
+            <div class="remove"></div>
+        }
+    </div>
+</a>

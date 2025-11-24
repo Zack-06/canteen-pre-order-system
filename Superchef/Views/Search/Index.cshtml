@@ -11,10 +11,6 @@
             height: 1.2rem;
             flex-shrink: 0;
         }
-
-        #result-container {
-            --grid-min-col-size: var(--width-item);
-        }
     </style>
 }
 
@@ -48,87 +44,61 @@
     </div>
 </div>
 
-<div id="result-container" class="listing-container container" data-no="color padding">
-    <a href="/" class="item-container">
-        <img src="" alt="">
+<div id="ajax-result-container">
+    <div class="listing-container container" data-no="color padding" data-result-container>
+        @for (int i = 0; i < 10; i++)
+        {
+            var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem      soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
+                var card = new ItemCard
+                {
+                    Link = "/",
+                    Image = "",
+                    Name = i == 0 ? superlongName : "item",
+                    IsFavorite = false,
+                    Price = 100.00m,
+                    Rating = 4.9m,
+                    Sold = 100
+                };
+            <partial name="_ItemContainer" model="@card" />
+        }
+    </div>
 
-        <div class="info">
-            <div class="name">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Pariatur, soluta.</div>
-            <div class="price">100.00</div>
-            <div class="rating">
-                <img src="/img/star.png" alt="Star">
-                4.9
-            </div>
-            <div class="sold">100</div>
-        </div>
-    </a>
-    @for (int i = 0; i < 10; i++)
-    {
-        <a href="/" class="item-container">
-            <img src="" alt="">
+    <partial name="_NoResult" />
 
-            <div class="info">
-                <div class="name">item</div>
-                <div class="price">100.00</div>
-                <div class="rating">
-                    <img src="/img/star.png" alt="Star">
-                    4.9
-                </div>
-                <div class="sold">100</div>
-            </div>
-        </a>
-    }
-</div>
+    @* <div class="listing-container container" data-no="color padding">
+        @for (int i = 0; i < 10; i++)
+        {
+            var card = new StoreCard
+            {
+                Link = "/",
+                Image = "",
+                Name = "store",
+                Rating = 4.9m,
+                ItemCount = i
+            };
+            <partial name="_StoreContainer" model="@card" />
+        }
+    </div> *@
 
-<div id="result-container" class="listing-container container" data-no="color padding">
-    <a href="/" class="store-container">
-        <img src="" alt="">
-
-        <div class="info">
-            <div class="name">store</div>
-            <div class="rating">
-                <img src="/img/star.png" alt="Star">
-                4.9
-            </div>
-            <div class="item" data-count="1">1</div>
-        </div>
-    </a>
-    @for (int i = 0; i < 10; i++)
-    {
-        <a href="/" class="store-container">
-            <img src="" alt="">
-
-            <div class="info">
-                <div class="name">store</div>
-                <div class="rating">
-                    <img src="/img/star.png" alt="Star">
-                    4.9
-                </div>
-                <div class="item" data-count="100">100</div>
-            </div>
-        </a>
-    }
-</div>
-
-
-<div class="pagination-container">
-    <ul class="pagination">
-        <li class="PagedList-skipToFirst disabled"><a>
-                <div class="paging-symbol first"></div>
-            </a></li>
-        <li class="PagedList-skipToPrevious"><a rel="prev">
-                <div class="paging-symbol prev"></div>
-            </a></li>
-        <li class="active"><span>1</span></li>
-        <li class=""><span>201</span></li>
-        <li class=""><span>2</span></li>
-        <li class=""><span>2</span></li>
-        <li class=""><span>2</span></li>
-        <li class="PagedList-skipToNext disabled"><a rel="next">
-                <div class="paging-symbol next"></div>
-            </a></li>
-        <li class="PagedList-skipToLast disabled"><a>
-                <div class="paging-symbol last"></div>
-            </a></li>
-    </ul>
+    <div class="pagination-container">
+        <ul class="pagination">
+            <li class="PagedList-skipToFirst disabled"><a>
+                    <div class="paging-symbol first"></div>
+                </a></li>
+            <li class="PagedList-skipToPrevious"><a rel="prev">
+                    <div class="paging-symbol prev"></div>
+                </a></li>
+            <li class="active"><span>1</span></li>
+            <li class=""><span>201</span></li>
+            <li class=""><span>2</span></li>
+            <li class=""><span>2</span></li>
+            <li class=""><span>2</span></li>
+            <li class="PagedList-skipToNext disabled"><a rel="next">
+                    <div class="paging-symbol next"></div>
+                </a></li>
+            <li class="PagedList-skipToLast disabled"><a>
+                    <div class="paging-symbol last"></div>
+                </a></li>
+        </ul>
+    </div>
 </div>
