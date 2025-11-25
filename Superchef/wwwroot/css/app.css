@@ -149,6 +149,7 @@
 	--width-store: 10rem;
 	--width-category: 7rem;
 	--width-slot: 5rem;
+    --width-custom-tick: 5rem;
 }
 
 * {
@@ -1183,9 +1184,16 @@ body:has(.overlay.show) {
 .custom-tick-container.flex label {
 	flex: 1;
 }
+.custom-tick-container.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--width-custom-tick), 100%), 1fr));
+}
+.custom-tick-container.grid.specified-width {
+    grid-template-columns: repeat(auto-fit, minmax(min(var(--width-custom-tick), 100%), 5rem));
+}
 .custom-tick-container.specified-width label {
 	flex: unset;
-	width: 5.5rem;
+	width: 5rem;
 }
 .custom-tick-container.specified-width.big-text label {
 	width: 8rem;
