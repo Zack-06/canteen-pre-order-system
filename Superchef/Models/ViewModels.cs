@@ -146,3 +146,22 @@ public class SearchVM
     public Dictionary<string, string> AvailableSortBy { get; set; } = [];
     public List<Category> AvailableCategories { get; set; } = [];
 }
+
+public class ManageCustomerVM
+{
+    public string? Dir { get; set; }
+    public string? Sort { get; set; }
+    public int Page { get; set; } = 1;
+    public string? Search { get; set; }
+    public string? SearchOption { get; set; }
+    public List<string> Statuses { get; set; } = [];
+    [DisplayName("Creation Date From")]
+    [DataType(DataType.Date)]
+    public DateTime? CreationFrom { get; set; }
+    [DisplayName("Creation Date To")]
+    [DataType(DataType.Date)]
+    public DateTime? CreationTo { get; set; }
+    public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
+    public List<string> AvailableStatuses { get; set; } = [];
+    public IPagedList<Account> Results { get; set; }
+}

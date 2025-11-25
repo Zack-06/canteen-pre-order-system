@@ -207,6 +207,11 @@ function detectFormChanges(formSelector, selectElements = "input", changedCallba
 	}
 }
 
+/* ==========Filter Button========== */
+$(document).on("click", "#filter-button", function () {
+	openOverlay("filter-overlay")
+})
+
 // ==========Input Number==========
 $("input[type='number']").on("keypress", function (event) {
 	if (event.code === "KeyE") {
@@ -329,8 +334,8 @@ function openOverlay(id, callback = () => {}) {
 	if (!$overlay.length) return
 
 	$overlay.addClass("show")
-	$overlay.find(".overlay-close").off("click")
-	$overlay.find(".overlay-close").on("click", function () {
+	$overlay.find(".close").off("click")
+	$overlay.find(".close").on("click", function () {
 		$overlay.removeClass("show")
 		callback()
 	})
@@ -569,7 +574,7 @@ class UploadOverlay {
 
 			// Close overlay
 			overlay
-				.find(".overlay-close")
+				.find(".close")
 				.off("click")
 				.on("click", () => {
 					overlay.removeClass("show")

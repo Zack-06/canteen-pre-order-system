@@ -899,7 +899,7 @@ body:has(.overlay.show) {
 	gap: 1.2rem;
 	max-height: 90%;
 }
-.overlay-header {
+.overlay .header {
 	display: flex;
 	justify-content: space-between;
 	align-items: center;
@@ -911,7 +911,7 @@ body:has(.overlay.show) {
 	font-weight: var(--font-weight-medium);
 	margin-bottom: 0;
 }
-.overlay-close {
+.overlay .close {
 	background-image: url("/img/cross.png");
 	background-size: contain;
 	background-position: center;
@@ -921,7 +921,7 @@ body:has(.overlay.show) {
 	height: 1.5rem;
 	cursor: pointer;
 }
-.overlay-close:hover {
+.overlay .close:hover {
 	filter: brightness(4);
 }
 @keyframes detect-overlay-scroll {
@@ -930,7 +930,7 @@ body:has(.overlay.show) {
 		--can-scroll: ;
 	}
 }
-.overlay-body {
+.overlay .body {
 	overflow-y: auto;
 	animation: detect-overlay-scroll linear;
 	animation-timeline: scroll(self);

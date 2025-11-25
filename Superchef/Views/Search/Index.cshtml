@@ -27,11 +27,11 @@
 
     <div id="filter-overlay" class="overlay sidebar-overlay">
         <div class="content">
-            <div class="overlay-header">
+            <div class="header">
                 <div class="title">Filter By</div>
-                <div class="overlay-close"></div>
+                <div class="close"></div>
             </div>
-            <div class="overlay-body">
+            <div class="body">
 
                 <div class="form-group">
                     <label>Venue</label>
@@ -156,10 +156,6 @@
             $form.find(`input[name="Query"]`).val($(this).find("input").val())
 
             $form.submit()
-        })
-
-        $(document).on("click", "#filter-button", function () {
-            openOverlay("filter-overlay")
         })
     </script>
 }
