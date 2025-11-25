@@ -444,6 +444,9 @@ namespace Superchef.Migrations
                     b.Property<DateTime>("EndTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("MaxOrders")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("StartTime")
                         .HasColumnType("datetime2");
 
@@ -474,7 +477,6 @@ namespace Superchef.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Image")
-                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
@@ -485,6 +487,9 @@ namespace Superchef.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
+
+                    b.Property<int>("SlotMaxOrders")
+                        .HasColumnType("int");
 
                     b.Property<string>("Slug")
                         .IsRequired()

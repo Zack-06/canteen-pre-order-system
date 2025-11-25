@@ -1,0 +1,23 @@
+@model StepContainerDM
+
+@{
+    decimal completeBarWidth = ((decimal)(Model.CurrentStep - 1) / 2m) * 100m;
+}
+
+<div class="container" data-no="color">
+    <div class="step-bar">
+        <div style="width: @completeBarWidth%;"></div>
+    </div>
+    <div>
+        @for (int i = 1; i <= 3; i++)
+        {
+            <div class="step-circle @(i == Model.CurrentStep ? "active" : "") @(i < Model.CurrentStep ? "completed" : "")">
+                @(i < Model.CurrentStep ? "✓" : i)</div>
+        }
+    </div>
+</div>
+
+<div class="container" style="text-align: center;" data-limit-container>
+    <div class="title">@Model.Title</div>
+    <div>Please note that orders <strong>cannot</strong> be cancelled within <strong>30 minutes</strong> of pickup</div>
+</div>

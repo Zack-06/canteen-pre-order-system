@@ -1,0 +1,72 @@
+@{
+    var data = new StepContainerDM
+    {
+        CurrentStep = 2,
+        Title = "Select Pickup Time"
+    };
+}
+
+<partial name="_StepContainer" model="data" />
+
+<div class="container custom-tick-container center-items center-text bold-text specified-width" data-limit-container>
+    <label>
+        <input type="radio" name="Date" value="today" checked>
+        <div>
+            <div class="text">MON</div>
+            <div class="description">31 OCT</div>
+        </div>
+    </label>
+
+    <label>
+        <input type="radio" name="Date" value="today" checked>
+        <div>
+            <div class="text">MON</div>
+            <div class="description">31</div>
+        </div>
+    </label>
+
+    <label>
+        <input type="radio" name="Date" value="today">
+        <div>
+            <div class="text">31</div>
+            <div class="description">MONDAY</div>
+        </div>
+    </label>
+
+    <label>
+        <input type="radio" name="Date" value="today">
+        <div>
+            <div class="text">31 OCT</div>
+            <div class="description">MONDAY</div>
+        </div>
+    </label>
+
+    <label>
+        <input type="radio" name="Date" value="today">
+        <div>
+            <div class="text">31 OCT</div>
+            <div class="description">MON</div>
+        </div>
+    </label>
+
+    <label>
+        <input type="radio" name="Date" value="today">
+        <div>
+            <div class="text">31</div>
+            <div class="description">MON</div>
+        </div>
+    </label>
+</div>
+
+<div class="container listing-container custom-tick-container center-text" data-limit-container>
+    @for (int i = 0; i < 10; i++)
+    {
+        var card = new SlotCardDM
+        {
+            Text = "10:00 AM",
+            IsDisabled = i == 0
+        };
+
+        <partial name="_SlotCard" model="@card" />
+    }
+</div>

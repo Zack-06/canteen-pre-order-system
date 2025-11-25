@@ -177,7 +177,8 @@ public class Store
     [MaxLength(500)]
     public string Description { get; set; }
     [MaxLength(50)]
-    public string Image { get; set; }
+    public string? Image { get; set; }
+    public int SlotMaxOrders { get; set; } = 20;
     public bool IsDeleted { get; set; } = false;
     public int VenueId { get; set; }
     public int AccountId { get; set; }
@@ -288,6 +289,7 @@ public class Slot
     public int Id { get; set; }
     public DateTime StartTime { get; set; }
     public DateTime EndTime { get; set; }
+    public int MaxOrders { get; set; }
     public int StoreId { get; set; }
 
     public Store Store { get; set; }

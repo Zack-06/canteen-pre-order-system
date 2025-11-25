@@ -1,0 +1,8 @@
+@model SlotCardDM
+
+<label class="slot-card @(Model.IsDisabled ? "disabled" : "")">
+    <input type="radio" name="Date" value="today">
+    <div>
+        <div class="text">@Model.Text</div>
+    </div>
+</label>
