@@ -8,7 +8,8 @@
 
 <partial name="_StepContainer" model="data" />
 
-<div class="container custom-tick-container grid center-items center-text bold-text specified-width" data-limit-container>
+<div class="container custom-tick-container grid center-items center-text bold-text specified-width"
+    data-limit-container>
     <label>
         <input type="radio" name="Date" value="31-oct" checked>
         <div>
@@ -44,3 +45,16 @@
         <partial name="_SlotCard" model="@card" />
     }
 </div>
+
+@{
+    var summary = new SummaryContainerDM
+    {
+        TotalPrice = 100m,
+        TotalItems = 10,
+        ExitLink = "/Order/Cancel"
+    };
+}
+
+<form method="post" data-expired-timestamp="1764073738459" data-sticky-bottom>
+    <partial name="_SummaryContainer" model="summary" />
+</form>

@@ -54,3 +54,12 @@ public record StepContainerDM
     public int CurrentStep { get; set; }
     public string Title { get; set; }
 }
+
+public record SummaryContainerDM
+{
+    public decimal TotalPrice { get; set; }
+    public int TotalItems { get; set; }
+    public string? SubmitText { get; set; }
+    public string? ExitText { get; set; }
+    public string ExitLink { get; set; }
+}
