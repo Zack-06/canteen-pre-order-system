@@ -111,7 +111,7 @@ public class PaymentService
         }
     }
 
-    public async void TriggerRefund(string paymentIntentId)
+    public void TriggerRefund(string paymentIntentId)
     {
         // 1. List charges for the PaymentIntent
         var chargeService = new ChargeService();

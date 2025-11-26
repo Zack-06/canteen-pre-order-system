@@ -145,8 +145,8 @@
 	--letter-spacing-wider: 0.1em;
 
 	/* Widths */
-	--width-item: 10rem;
-	--width-store: 10rem;
+	--width-item: 9.5rem;
+	--width-store: 9.5rem;
 	--width-category: 7rem;
 	--width-slot: 7rem;
 	--width-custom-tick: 5rem;
@@ -370,7 +370,7 @@ input[readonly] {
 /* Scrollbar */
 ::-webkit-scrollbar {
 	width: 0.5rem;
-    height: 0.5rem;
+	height: 0.5rem;
 }
 ::-webkit-scrollbar-track {
 	background: transparent;
@@ -673,6 +673,8 @@ footer .social-media-icons a:hover {
 	margin-right: 0;
 	width: 100%;
 	border: none;
+}
+.container[data-overflow] {
     overflow: auto;
 }
 .container > .title {
@@ -1300,7 +1302,7 @@ body:has(.overlay.show) {
 }
 [data-manage-container="table"] th:last-child,
 [data-manage-container="table"] td:last-child {
-	width: max-content;
+	width: 1%;
 }
 [data-manage-container="table"] button {
 	max-width: max-content;
@@ -1317,20 +1319,17 @@ main.mobile [data-manage-container="table"] table {
 }
 main.mobile [data-manage-container="table"] thead {
 	display: block;
+    min-width: calc(100% + 2px);
 	margin-bottom: 1.5rem;
-}
-main.mobile [data-manage-container="table"] thead tr {
-	display: flex;
-	width: 100%;
 	overflow: auto;
 	scroll-behavior: smooth;
 	anchor-name: --sort-heading;
 }
-main.mobile [data-manage-container="table"] thead tr::-webkit-scrollbar {
+main.mobile [data-manage-container="table"] thead::-webkit-scrollbar {
 	display: none;
 }
-main.mobile [data-manage-container="table"] thead tr::scroll-button(left),
-main.mobile [data-manage-container="table"] thead tr::scroll-button(right) {
+main.mobile [data-manage-container="table"] thead::scroll-button(left),
+main.mobile [data-manage-container="table"] thead::scroll-button(right) {
 	content: "";
 	width: 1.75rem;
 	height: 1.75rem;
@@ -1342,25 +1341,33 @@ main.mobile [data-manage-container="table"] thead tr::scroll-button(right) {
 	background-size: 90%;
 	background-position: center;
 	background-image: url("/img/left_white.png");
-	position: fixed;
+	position: absolute;
 	position-anchor: --sort-heading;
 	position-area: left center;
 	translate: 50%;
 }
-main.mobile [data-manage-container="table"] thead tr::scroll-button(right) {
+main.mobile [data-manage-container="table"] thead::scroll-button(right) {
 	background-image: url("/img/right_white.png");
 	position-area: right center;
 	translate: -50%;
 }
-main.mobile [data-manage-container="table"] thead tr::scroll-button(left):hover,
-main.mobile [data-manage-container="table"] thead tr::scroll-button(right):hover {
+main.mobile [data-manage-container="table"] thead::scroll-button(left):hover,
+main.mobile [data-manage-container="table"] thead::scroll-button(right):hover {
 	background-color: var(--btn-accent-hover);
 }
-main.mobile [data-manage-container="table"] thead tr::scroll-button(left):disabled,
-main.mobile [data-manage-container="table"] thead tr::scroll-button(right):disabled {
+main.mobile [data-manage-container="table"] thead::scroll-button(left):disabled,
+main.mobile [data-manage-container="table"] thead::scroll-button(right):disabled {
 	background-color: var(--bg-muted);
 	opacity: 0;
 	pointer-events: none;
+}
+main.mobile [data-manage-container="table"] thead tr {
+	display: flex;
+	width: 100%;
+}
+main.mobile [data-manage-container="table"] th:last-child,
+main.mobile [data-manage-container="table"] td:last-child {
+	width: max-content;
 }
 main.mobile [data-manage-container="table"] thead tr th {
 	flex: 1;
