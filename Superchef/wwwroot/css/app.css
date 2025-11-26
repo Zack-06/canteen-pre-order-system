@@ -1431,6 +1431,13 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	justify-content: center;
 	user-select: none;
 }
+.pagination {
+    display: flex;
+    row-gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+}
 .pagination a,
 .pagination span {
 	background: var(--bg-pagination) !important;
