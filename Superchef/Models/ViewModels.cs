@@ -167,6 +167,28 @@ public class ManageCustomerVM
     public IPagedList<Account> Results { get; set; }
 }
 
+public class ManageVendorVM
+{
+    public string? Dir { get; set; }
+    public string? Sort { get; set; }
+    public int Page { get; set; } = 1;
+    public string? Search { get; set; }
+    public string? SearchOption { get; set; }
+    [DisplayName("Min Stores Count")]
+    public int? MinStoresCount { get; set; }
+    [DisplayName("Max Stores Count")]
+    public int? MaxStoresCount { get; set; }
+    [DisplayName("Creation Date From")]
+    [DataType(DataType.Date)]
+    public DateTime? CreationFrom { get; set; }
+    [DisplayName("Creation Date To")]
+    [DataType(DataType.Date)]
+    public DateTime? CreationTo { get; set; }
+
+    public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
+    public IPagedList<Account> Results { get; set; }
+}
+
 public class ManageAdminVM
 {
     public string? Dir { get; set; }

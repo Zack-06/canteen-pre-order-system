@@ -675,7 +675,7 @@ footer .social-media-icons a:hover {
 	border: none;
 }
 .container[data-overflow] {
-    overflow: auto;
+	overflow: auto;
 }
 .container > .title {
 	font-family: var(--font-display);
@@ -897,7 +897,7 @@ body:has(.overlay.show) {
 .overlay .content {
 	background-color: var(--bg-pure);
 	border-radius: 0.25rem;
-	padding: 1.5rem;
+	padding: 1.5rem 0;
 	width: clamp(12.5rem, 70vw, 35rem);
 	display: flex;
 	flex-direction: column;
@@ -909,6 +909,7 @@ body:has(.overlay.show) {
 	justify-content: space-between;
 	align-items: center;
 	min-width: 12.5rem;
+	padding: 0 1.5rem;
 }
 .overlay .title {
 	font-family: var(--font-display);
@@ -940,7 +941,8 @@ body:has(.overlay.show) {
 	animation: detect-overlay-scroll linear;
 	animation-timeline: scroll(self);
 	--overlay-padding-right: var(--can-scroll) 0.75rem;
-	padding-right: var(--overlay-padding-right, 0);
+	padding-left: 1.5rem;
+	padding-right: calc(1.5rem + var(--overlay-padding-right, 0rem));
 	flex: 1;
 }
 
@@ -1319,7 +1321,7 @@ main.mobile [data-manage-container="table"] table {
 }
 main.mobile [data-manage-container="table"] thead {
 	display: block;
-    min-width: calc(100% + 2px);
+	min-width: calc(100% + 2px);
 	margin-bottom: 1.5rem;
 	overflow: auto;
 	scroll-behavior: smooth;
