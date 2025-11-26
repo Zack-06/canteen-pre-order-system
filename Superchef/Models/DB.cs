@@ -317,7 +317,7 @@ public class Order
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public Store Store { get; set; }
     [DeleteBehavior(DeleteBehavior.Restrict)]
-    public Payment? Payment { get; set; }
+    public Payment Payment { get; set; }
     public List<OrderItem> OrderItems { get; set; } = [];
 }
 
