@@ -31,6 +31,7 @@ namespace Superchef.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int>("AccountTypeId")
+                        .HasPrecision(15, 2)
                         .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
@@ -74,10 +75,6 @@ namespace Superchef.Migrations
                         .IsRequired()
                         .HasMaxLength(12)
                         .HasColumnType("nvarchar(12)");
-
-                    b.Property<decimal>("WalletBalance")
-                        .HasPrecision(15, 2)
-                        .HasColumnType("decimal(15,2)");
 
                     b.HasKey("Id");
 
@@ -351,9 +348,11 @@ namespace Superchef.Migrations
 
             modelBuilder.Entity("Superchef.Models.Payment", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("Amount")
                         .HasPrecision(10, 2)
@@ -366,24 +365,34 @@ namespace Superchef.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
-                    b.Property<DateTime?>("ExpiresAt")
-                        .HasColumnType("datetime2");
+                    b.Property<bool>("IsRefunded")
+                        .HasColumnType("bit");
 
                     b.Property<string>("OrderId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(50)");
 
-                    b.Property<DateTime?>("PaidAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("PaymentType")
+                    b.Property<string>("PaymentMethod")
+                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("StripePaymentIntentId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransferId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("TransferStatus")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("OrderId")
-                        .IsUnique()
-                        .HasFilter("[OrderId] IS NOT NULL");
+                        .IsUnique();
 
                     b.ToTable("Payments");
                 });
@@ -495,6 +504,9 @@ namespace Superchef.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("StripeAccountId")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int>("VenueId")
                         .HasColumnType("int");
@@ -610,40 +622,6 @@ namespace Superchef.Migrations
                     b.HasIndex("DeviceId");
 
                     b.ToTable("Verifications");
-                });
-
-            modelBuilder.Entity("Superchef.Models.WalletTransaction", b =>
-                {
-                    b.Property<string>("Id")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<int>("AccountId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Amount")
-                        .HasPrecision(10, 2)
-                        .HasColumnType("decimal(10,2)");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Description")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("PaymentId")
-                        .HasColumnType("nvarchar(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("AccountId");
-
-                    b.HasIndex("PaymentId")
-                        .IsUnique()
-                        .HasFilter("[PaymentId] IS NOT NULL");
-
-                    b.ToTable("WalletTransactions");
                 });
 
             modelBuilder.Entity("Superchef.Models.Account", b =>
@@ -786,7 +764,9 @@ namespace Superchef.Migrations
                 {
                     b.HasOne("Superchef.Models.Order", "Order")
                         .WithOne("Payment")
-                        .HasForeignKey("Superchef.Models.Payment", "OrderId");
+                        .HasForeignKey("Superchef.Models.Payment", "OrderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Order");
                 });
@@ -877,24 +857,6 @@ namespace Superchef.Migrations
                     b.Navigation("Device");
                 });
 
-            modelBuilder.Entity("Superchef.Models.WalletTransaction", b =>
-                {
-                    b.HasOne("Superchef.Models.Account", "Account")
-                        .WithMany("WalletTransactions")
-                        .HasForeignKey("AccountId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Superchef.Models.Payment", "Payment")
-                        .WithOne("WalletTransaction")
-                        .HasForeignKey("Superchef.Models.WalletTransaction", "PaymentId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("Account");
-
-                    b.Navigation("Payment");
-                });
-
             modelBuilder.Entity("Superchef.Models.Account", b =>
                 {
                     b.Navigation("Carts");
@@ -910,8 +872,6 @@ namespace Superchef.Migrations
                     b.Navigation("Stores");
 
                     b.Navigation("Verifications");
-
-                    b.Navigation("WalletTransactions");
                 });
 
             modelBuilder.Entity("Superchef.Models.AccountType", b =>
@@ -947,11 +907,6 @@ namespace Superchef.Migrations
                     b.Navigation("OrderItems");
 
                     b.Navigation("Payment");
-                });
-
-            modelBuilder.Entity("Superchef.Models.Payment", b =>
-                {
-                    b.Navigation("WalletTransaction");
                 });
 
             modelBuilder.Entity("Superchef.Models.Slot", b =>

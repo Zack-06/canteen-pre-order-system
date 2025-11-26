@@ -4,8 +4,8 @@ global using Superchef.Services;
 global using X.PagedList.Extensions;
 // using Superchef.BackgroundWorkers;
 // using Superchef.Middlewares;
-// using Stripe;
 using Microsoft.AspNetCore.Mvc;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllersWithViews();
@@ -25,6 +25,8 @@ builder.Services.AddScoped<EmailService>();
 builder.Services.AddScoped<DeviceService>();
 builder.Services.AddScoped<SecurityService>();
 builder.Services.AddScoped<VerificationService>();
+
+StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 var app = builder.Build();
 app.UseHttpsRedirection();

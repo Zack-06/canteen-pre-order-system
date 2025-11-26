@@ -9,3 +9,4 @@ place
 qr code scanner
 store
 search
+swap

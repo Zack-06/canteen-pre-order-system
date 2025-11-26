@@ -31,7 +31,6 @@ public class DB : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<Payment> Payments { get; set; }
-    public DbSet<WalletTransaction> WalletTransactions { get; set; }
 }
 
 #nullable disable warnings
@@ -87,7 +86,6 @@ public class Account
     public bool IsBanned { get; set; }
     public bool IsDeleted { get; set; } = false;
     [Precision(15, 2)]
-    public decimal WalletBalance { get; set; }
     public int AccountTypeId { get; set; }
     [NotMapped]
     public string Status
@@ -115,7 +113,6 @@ public class Account
     public List<Review> Reviews { get; set; } = [];
     public List<Favourite> Favourites { get; set; } = [];
     public List<Order> Orders { get; set; } = [];
-    public List<WalletTransaction> WalletTransactions { get; set; } = [];
 }
 
 public class Device
@@ -178,6 +175,7 @@ public class Store
     public string Description { get; set; }
     [MaxLength(50)]
     public string? Image { get; set; }
+    public string? StripeAccountId { get; set; }
     public int SlotMaxOrders { get; set; } = 20;
     public bool IsDeleted { get; set; } = false;
     public int VenueId { get; set; }
@@ -340,39 +338,19 @@ public class OrderItem
 
 public class Payment
 {
-    [Key]
-    [MaxLength(50)]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public int Id { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
     [Precision(10, 2)]
     public decimal Amount { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime? ExpiresAt { get; set; }
-    public DateTime? PaidAt { get; set; }
+    public string StripePaymentIntentId { get; set; }
+    public string TransferStatus { get; set; }
+    public string TransferId { get; set; }
+    public bool IsRefunded { get; set; } = false;
     [MaxLength(20)]
-    public string? PaymentType { get; set; }
+    public string PaymentMethod { get; set; }
     [MaxLength(100)]
     public string? Details { get; set; }
-    public string? OrderId { get; set; }
+    public string OrderId { get; set; }
 
-    public Order? Order { get; set; }
-    public WalletTransaction? WalletTransaction { get; set; }
-}
-
-public class WalletTransaction
-{
-    [Key]
-    [MaxLength(50)]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
-    [Precision(10, 2)]
-    public decimal Amount { get; set; }
-    [MaxLength(100)]
-    public string? Description { get; set; }
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public int AccountId { get; set; }
-    public string? PaymentId { get; set; }
-
-    [DeleteBehavior(DeleteBehavior.Restrict)]
-    public Account Account { get; set; }
-    [DeleteBehavior(DeleteBehavior.Restrict)]
-    public Payment? Payment { get; set; }
+    public Order Order { get; set; }
 }
