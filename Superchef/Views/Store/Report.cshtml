@@ -1,5 +1,9 @@
 @section head {
     <style>
+        .sales-container {
+            position: relative;
+        }
+
         .sales-container .title {
             text-align: center;
             margin-bottom: 1rem;
@@ -11,7 +15,6 @@
             border-spacing: 0;
             background-color: var(--bg-manage-table);
             border: 1px solid var(--border-primary);
-            margin-top: 1.25rem;
             overflow-x: auto;
         }
 
@@ -54,14 +57,39 @@
         .sales-container:has(input[type="radio"][value="quarterly"]:checked) .annually-table {
             display: none;
         }
+
+        .sales-container button {
+            position: absolute;
+            right: 1.5rem;
+            top: 1.5rem;
+            padding: 0;
+            background-color: transparent;
+            width: 1.5rem;
+            height: 1.5rem;
+            background-image: url("/img/download.png");
+            background-size: 100%;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .sales-container button:hover {
+            filter: brightness(3);
+        }
     </style>
 }
 
-<div class="container sales-container">
+<div class="container sales-container" data-flex="column center">
     <div class="title">Daily Sales Summary</div>
+
+    <div class="form-group" data-limit-group>
+        <div class="form-input">
+            <input type="date">
+        </div>
+    </div>
 
     <div class="container" data-no="padding color margin" data-overflow>
         <table class="annually-table">
+            <caption><button></button></caption>
             <tbody>
                 <tr>
                     <th>Total Orders</th>
@@ -84,21 +112,33 @@
     </div>
 </div>
 
-<div class="container sales-container" data-flex="column">
+<div class="container sales-container" data-flex="column center">
     <div class="title">Sales Report</div>
-    <div class="custom-tick-container center-items">
-        <label>
-            <input type="radio" name="sales_report" value="annually" checked>
-            <div class="text">Anually</div>
-        </label>
-        <label>
-            <input type="radio" name="sales_report" value="quarterly">
-            <div class="text">Quarterly</div>
-        </label>
+
+    <div class="form-group">
+        <div class="custom-tick-container center-items">
+            <label>
+                <input type="radio" name="sales_report" value="annually" checked>
+                <div class="text">Anually</div>
+            </label>
+            <label>
+                <input type="radio" name="sales_report" value="quarterly">
+                <div class="text">Quarterly</div>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="form-input">
+            <input type="date">
+            <span>to</span>
+            <input type="date">
+        </div>
     </div>
 
     <div class="container" data-no="color padding" data-overflow>
         <table class="annually-table">
+            <caption><button></button></caption>
             <thead>
                 <tr>
                     <th></th>
@@ -141,6 +181,7 @@
         </table>
 
         <table class="quarterly-table">
+            <caption><button></button></caption>
             <thead>
                 <tr>
                     <th></th>
@@ -184,21 +225,33 @@
     </div>
 </div>
 
-<div class="container sales-container">
+<div class="container sales-container" data-flex="column center">
     <div class="title">Sales By Items</div>
-    <div class="custom-tick-container center-items">
-        <label>
-            <input type="radio" name="sales_items" value="annually" checked>
-            <div class="text">Anually</div>
-        </label>
-        <label>
-            <input type="radio" name="sales_items" value="quarterly">
-            <div class="text">Quarterly</div>
-        </label>
+
+    <div class="form-group">
+        <div class="custom-tick-container center-items">
+            <label>
+                <input type="radio" name="sales_items" value="annually" checked>
+                <div class="text">Anually</div>
+            </label>
+            <label>
+                <input type="radio" name="sales_items" value="quarterly">
+                <div class="text">Quarterly</div>
+            </label>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <div class="form-input">
+            <input type="date">
+            <span>to</span>
+            <input type="date">
+        </div>
     </div>
 
     <div class="container" data-no="padding color" data-overflow>
         <table class="annually-table">
+            <caption><button></button></caption>
             <thead>
                 <tr>
                     <th></th>
@@ -241,6 +294,7 @@
         </table>
 
         <table class="quarterly-table">
+            <caption><button></button></caption>
             <thead>
                 <tr>
                     <th></th>
@@ -283,3 +337,58 @@
         </table>
     </div>
 </div>
+
+@section foot {
+    <script>
+        $(document).on("click", ".sales-container button", tableToCSV)
+
+        function tableToCSV() {
+            const $table = $(this).closest("table")
+
+            let csv_data = [];
+            let rows = $table.find("tr");
+
+            rows.each(function (i, row) {
+                const cols = $(row).find("td,th");
+                const csvrow = [];
+
+                cols.each(function (j, col) {
+                    let text = col.innerText;
+                    text = text.replace(/"/g, '""');
+                    csvrow.push(`"${text}"`);
+                })
+
+                csv_data.push(csvrow.join(","));
+            })
+
+            downloadCSVFile(csv_data.join("\n"))
+        }
+
+        function downloadCSVFile(csv_data) {
+
+            // Create CSV file object and feed
+            // our csv_data into it
+            CSVFile = new Blob([csv_data], {
+                type: "text/csv"
+            });
+
+            // Create to temporary link to initiate
+            // download process
+            let temp_link = document.createElement('a');
+
+            // Download csv file
+            temp_link.download = "GfG.csv";
+            let url = window.URL.createObjectURL(CSVFile);
+            temp_link.href = url;
+
+            // This link should not be displayed
+            temp_link.style.display = "none";
+            document.body.appendChild(temp_link);
+
+            // Automatically click the link to
+            // trigger download
+            temp_link.click();
+            document.body.removeChild(temp_link);
+        }
+    </script>
+}

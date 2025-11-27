@@ -734,6 +734,9 @@ main:has(.container-center) {
 	color: var(--text-label);
 	margin-bottom: 1.5rem;
 }
+.form-group[data-limit-group] {
+    max-width: 20rem;
+}
 .form-group.space-between {
 	display: flex;
 	flex-direction: row;
