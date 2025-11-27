@@ -48,7 +48,18 @@ public class CategoryController : Controller
 
     public IActionResult Edit()
     {
-        return View();
+        var vm = new EditCategoryVM
+        {
+            Id = 1,
+            Name = "abc",
+            ImageX = 1,
+            ImageY = 1,
+            ImageScale = 1,
+        };
+
+        ViewBag.ImageUrl = "abc";
+
+        return View(vm);
     }
 
     // ==========REMOTE==========

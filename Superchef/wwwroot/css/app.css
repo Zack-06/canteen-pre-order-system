@@ -1724,10 +1724,12 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 [data-column-container~="3"] .form-group {
 	margin-bottom: 0;
-    margin-left: 1rem;
 }
 [data-column-container~="3"] > .form-group {
 	margin-bottom: 1rem;
+}
+[data-column-container~="3"] .form-group .form-input {
+	margin-left: 0.1rem;
 }
 [data-column-container~="3"] > .form-group .form-group:has(.field-validation-error) {
 	margin-bottom: 0.75rem;

@@ -278,9 +278,8 @@ public class ManageCategoryVM
     public IPagedList<Account> Results { get; set; }
 }
 
-public class AddExperienceVM
+public class AddCategoryVM
 {
-    public int Id { get; set; }
     [MaxLength(50)]
     public string Name { get; set; }
     public double ImageScale { get; set; }
@@ -289,7 +288,7 @@ public class AddExperienceVM
     public IFormFile? Image { get; set; }
 }
 
-public class EditExperienceVM
+public class EditCategoryVM
 {
     public int Id { get; set; }
     [MaxLength(50)]

@@ -48,7 +48,13 @@ public class VenueController : Controller
 
     public IActionResult Edit()
     {
-        return View();
+        var vm = new EditVenueVM
+        {
+            Id = 1,
+            Name = "abc",
+        };
+
+        return View(vm);
     }
 
     // ==========REMOTE==========
