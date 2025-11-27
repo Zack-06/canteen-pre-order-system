@@ -1,0 +1,24 @@
+<div class="container" data-no="padding color">
+    <div class="title">My Favourites</div>
+
+    <partial name="_NoResults" model="@("Your favourite is empty")" />
+
+    <div class="container listing-container" data-no="padding color" data-result-container>
+        @for (int i = 0; i < 10; i++)
+        {
+            var card = new ItemCardDM
+            {
+                Link = "/",
+                Image = "",
+                Name = "item",
+                Rating = 4.9m,
+                Price = 100.00m,
+                Sold = 100,
+                DeleteLink = "/",
+                DeleteMsg = "Are you sure you want to delete this item from your favourites?"
+
+            };
+            <partial name="_ItemCard" model="@card" />
+        }
+    </div>
+</div>

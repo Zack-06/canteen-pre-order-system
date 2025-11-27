@@ -1,1 +1,89 @@
-home
+@{
+    ViewBag.Title = "Home | Superchef";
+}
+
+@section head {
+    <style>
+
+    </style>
+}
+<div class="container">
+    <div class="title">Trending</div>
+    <div class="listing-container container" data-no="color padding" data-result-container>
+        @for (int i = 0; i < 10; i++)
+        {
+            var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem    soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
+            var card = new ItemCardDM
+            {
+                Link = "/",
+                Image = "",
+                Name = i == 0 ? superlongName : "item",
+                Price = 100.00m,
+                Rating = 4.9m,
+                Sold = 100
+            };
+            <partial name="_ItemCard" model="@card" />
+        }
+
+    </div>
+</div>
+
+
+<div class="container">
+    <div class="title">Categoty</div>
+    <div class="listing-container container" data-no="color padding" data-result-container>
+        @for (int i = 0; i < 9; i++)
+        {
+            var card = new CategoryCardDM
+            {
+                Link = "/",
+                Image = "",
+                Name = "category",
+            };
+            <partial name="_CategoryCard" model="@card" />
+        }
+
+    </div>
+</div>
+
+<div class="container">
+    <div class="title">Order Again</div>
+    <div class="listing-container container" data-no="color padding" data-result-container>
+        @for (int i = 0; i < 7; i++)
+        {
+            var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem       soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
+            var card = new ItemCardDM
+            {
+                Link = "/",
+                Image = "",
+                Name = i == 0 ? superlongName : "item",
+                Price = 100.00m,
+                Rating = 4.9m,
+                Sold = 100
+            };
+            <partial name="_ItemCard" model="@card" />
+        }
+
+    </div>
+</div>
+
+<div class="container">
+    <div class="title">Daliy Discover</div>
+    <div class="listing-container container" data-no="color padding" data-result-container>
+        @for (int i = 0; i < 14; i++)
+        {
+            var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem    soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
+            var card = new ItemCardDM
+            {
+                Link = "/",
+                Image = "",
+                Name = i == 0 ? superlongName : "item",
+                Price = 100.00m,
+                Rating = 4.9m,
+                Sold = 100
+            };
+            <partial name="_ItemCard" model="@card" />
+        }
+
+    </div>
+</div>

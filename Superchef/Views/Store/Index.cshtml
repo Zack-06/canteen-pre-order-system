@@ -1,0 +1,161 @@
+@model SearchVM
+
+@{
+    ViewBag.Title = "Store Details | Superchef";
+}
+
+@section head {
+    <style>
+        .container.store-details {
+            display: grid;
+            grid-template-columns: 135px 1fr;
+            grid-template-areas:
+                "img info";
+            gap: 1rem;
+            padding: 0;
+        }
+
+        .container.store-details img {
+            grid-area: img;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            object-fit: cover;
+        }
+
+
+        .container.store-details .info {
+            grid-area: info;
+        }
+
+        .container.store-details>.info>.name {
+            font-size: 1.5rem;
+            font-weight: var(--font-weight-bold);
+            margin-bottom: 0.5rem;
+        }
+
+        .container.store-details>.info>.rating {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .container.store-details>.info>.rating>img {
+            height: 1rem;
+            margin-top: -2px;
+            width: 1rem;
+        }
+
+        .container.store-details>.info>.review-count {
+            margin-bottom: 0.5rem;
+            font-size: 1rem;
+        }
+
+        .container.store-details>.info>.review-count::before {
+            content: "Reviews: ";
+        }
+
+        .container.store-details>.info>.joined {
+            margin-bottom: 0.5rem;
+        }
+
+        .container.store-details>.info>.joined::before {
+            content: "Joined: ";
+            font-size: 1rem;
+
+        }
+
+        .container.store-details>.info>.joined::after {
+            content: "Months ago";
+            font-size: 0.8rem;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .container.store-details>.info>.items {
+            margin-bottom: 0.5rem;
+        }
+
+        .container.store-details>.info>.items::before {
+            content: "Items: ";
+        }
+
+        .container.store-details>.info>.sold {
+            margin-bottom: 0.5rem;
+        }
+
+        .container.store-details>.info>.sold::before {
+            content: "Sold: ";
+        }
+
+        .container.store-details>.info>.cancellation-rate {
+            margin-bottom: 0.5rem;
+        }
+
+        .container.store-details>.info>.cancellation-rate::before {
+            content: "Cancellation Rate: ";
+        }
+
+        .container.store-details>.info>.cancellation-rate::after {
+            content: "%";
+            font-size: 0.8rem;
+            font-weight: var(--font-weight-bold);
+        }
+
+        .container.store-details>.info>.Venue::before {
+            content: "Venue: ";
+        }
+    </style>
+}
+
+<div class="container">
+    <div class="container store-details">
+        <img src="" alt=>
+        <div class="info">
+            <div class="name"> abc </div>
+            <div class="rating">
+                <img src="/img/star.png">
+                <div class="rating-count">4.9</div>
+            </div>
+            <div class="review-count">123</div>
+            <div class="joined"> 100 </div>
+            <div class="items">100 </div>
+            <div class="sold">123 </div>
+            <div class="cancellation-rate">10 </div>
+            <div class="Venue">Yum Yum</div>
+        </div>
+    </div>
+</div>
+
+<div class="container">
+    <div class="title">
+        description
+    </div>
+    <div class="description">
+        kevrhbvieybevriuebviubsivdbiwusbviubeirccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
+    </div>
+</div>
+
+<div class="container">
+    <div class="title">Items</div>
+
+    <partial name="_NoResults" model="@("This Store is empty")" />
+
+    <div class="container listing-container" data-no="padding color" data-result-container>
+        @for (int i = 0; i < 10; i++)
+        {
+            var card = new ItemCardDM
+            {
+                Link = "/",
+                Image = "",
+                Name = "item",
+                Rating = 4.9m,
+                Price = 100.00m,
+                Sold = 100,
+            };
+            <partial name="_ItemCard" model="@card" />
+        }
+    </div>
+
+
+</div>
