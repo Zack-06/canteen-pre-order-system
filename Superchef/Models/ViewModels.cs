@@ -244,7 +244,7 @@ public class ManageVenueVM
     public int? MaxStoresCount { get; set; }
 
     public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
-    public IPagedList<Account> Results { get; set; }
+    public IPagedList<Venue> Results { get; set; }
 }
 
 public class AddVenueVM
@@ -275,7 +275,7 @@ public class ManageCategoryVM
     public int? MaxItemsCount { get; set; }
 
     public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
-    public IPagedList<Account> Results { get; set; }
+    public IPagedList<Category> Results { get; set; }
 }
 
 public class AddCategoryVM
@@ -297,4 +297,22 @@ public class EditCategoryVM
     public double ImageX { get; set; }
     public double ImageY { get; set; }
     public IFormFile? Image { get; set; }
+}
+
+public class ManageStoreVM
+{
+    public string? Dir { get; set; }
+    public string? Sort { get; set; }
+    public int Page { get; set; } = 1;
+    public string? Search { get; set; }
+    public string? SearchOption { get; set; }
+    public List<int> Venues { get; set; } = [];
+    [DisplayName("Min Items Count")]
+    public int? MinItemsCount { get; set; }
+    [DisplayName("Max Items Count")]
+    public int? MaxItemsCount { get; set; }
+
+    public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
+    public List<Venue> AvailableVenues { get; set; } = [];
+    public IPagedList<Store> Results { get; set; }
 }

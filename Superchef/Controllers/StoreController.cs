@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 
@@ -5,10 +6,12 @@ namespace Superchef.Controllers;
 
 public class StoreController : Controller
 {
+    private readonly DB db;
     private readonly IConfiguration cf;
 
-    public StoreController(IConfiguration configuration)
+    public StoreController(DB db, IConfiguration configuration)
     {
+        this.db = db;
         cf = configuration;
     }
 
@@ -18,9 +21,39 @@ public class StoreController : Controller
         return View();
     }
 
-    public IActionResult Manage()
+    public IActionResult Manage(ManageStoreVM vm)
     {
-        return View();
+        Dictionary<string, Expression<Func<Store, object>>> sortOptions = new()
+        {
+            { "Id", a => a.Id },
+            { "Name", a => a.Name },
+            { "Slug", a => a.Slug },
+            { "Items Count", a => a.Items.Count }
+        };
+        ViewBag.Fields = sortOptions.Keys.ToList();
+
+
+        if (vm.Sort == null || !sortOptions.ContainsKey(vm.Sort) || (vm.Dir != "asc" && vm.Dir != "desc"))
+        {
+            vm.Sort = sortOptions.Keys.First();
+            vm.Dir = "asc";
+        }
+
+        vm.AvailableSearchOptions = [
+            new() { Value = "name", Text = "Search By Name" },
+            new() { Value = "slug", Text = "Search By Slug" },
+            new() { Value = "id", Text = "Search By Id" }
+        ];
+        vm.AvailableVenues = db.Venues.ToList();
+
+        if (vm.SearchOption == null || !vm.AvailableSearchOptions.Any(o => o.Value == vm.SearchOption))
+        {
+            vm.SearchOption = vm.AvailableSearchOptions.First().Value;
+        }
+
+        ViewBag.VendorName = "abc";
+
+        return View(vm);
     }
 
     public IActionResult Add()
