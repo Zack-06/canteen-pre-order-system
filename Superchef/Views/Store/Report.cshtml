@@ -361,10 +361,12 @@
                 csv_data.push(csvrow.join(","));
             })
 
-            downloadCSVFile(csv_data.join("\n"))
+            const title = $(this).closest(".sales-container").find(".title").text()
+
+            downloadCSVFile(csv_data.join("\n"), `${title}_${Date.now()}`)
         }
 
-        function downloadCSVFile(csv_data) {
+        function downloadCSVFile(csv_data, name = "Unknown") {
 
             // Create CSV file object and feed
             // our csv_data into it
@@ -377,7 +379,7 @@
             let temp_link = document.createElement('a');
 
             // Download csv file
-            temp_link.download = "GfG.csv";
+            temp_link.download = `${name}.csv`;
             let url = window.URL.createObjectURL(CSVFile);
             temp_link.href = url;
 
