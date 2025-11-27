@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
@@ -143,10 +144,41 @@ public class OrderController : Controller
         return View();
     }
 
-    public IActionResult Manage(int storeId)
+    public IActionResult Manage(ManageOrderVM vm)
     {
-        // show all orders in a store (vendor)
-        return View();
+        Dictionary<string, Expression<Func<Order, object>>> sortOptions = new()
+        {
+            { "Id", a => a.Id },
+            { "Customer Name", a => a.Name },
+            { "Customer Id", a => a.AccountId },
+            { "Status", a => a.Status },
+            { "Pickup At", a => a.Slot.StartTime },
+            { "Created At", a => a.CreatedAt }
+        };
+        ViewBag.Fields = sortOptions.Keys.ToList();
+
+
+        if (vm.Sort == null || !sortOptions.ContainsKey(vm.Sort) || (vm.Dir != "asc" && vm.Dir != "desc"))
+        {
+            vm.Sort = sortOptions.Keys.First();
+            vm.Dir = "asc";
+        }
+
+        vm.AvailableSearchOptions = [
+            new() { Value = "id", Text = "Search By Id" },
+            new() { Value = "customer_name", Text = "Search By Customer Name" },
+            new() { Value = "customer_id", Text = "Search By Customer Id" },
+        ];
+        vm.AvailableStatuses = ["Confirmed", "Preparing", "Completed", "Cancelled"];
+
+        if (vm.SearchOption == null || !vm.AvailableSearchOptions.Any(o => o.Value == vm.SearchOption))
+        {
+            vm.SearchOption = vm.AvailableSearchOptions.First().Value;
+        }
+
+        ViewBag.StoreName = "abc";
+
+        return View(vm);
     }
 
     public IActionResult Edit(int id)

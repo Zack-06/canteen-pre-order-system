@@ -453,10 +453,10 @@ public class ManageOrderVM
     public string? Search { get; set; }
     public string? SearchOption { get; set; }
     public List<string> Statuses { get; set; } = [];
-    [DisplayName("Min Items Count")]
-    public int? MinItemsCount { get; set; }
-    [DisplayName("Max Items Count")]
-    public int? MaxItemsCount { get; set; }
+    [DisplayName("Pickup At From")]
+    public DateTime? PickupFrom { get; set; }
+    [DisplayName("Pickup At To")]
+    public DateTime? PickupTo { get; set; }
     [DisplayName("Created At From")]
     public DateTime? CreationFrom { get; set; }
     [DisplayName("Created At To")]

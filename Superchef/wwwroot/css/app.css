@@ -1437,6 +1437,14 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	--status-text-container-bg: var(--status-disabled-bg);
 	--status-text-container-color: var(--status-disabled-text);
 }
+.status-text-container.preparing {
+	--status-text-container-bg: var(--status-warning-bg);
+	--status-text-container-color: var(--status-warning-text);
+}
+.status-text-container.confirmed {
+    --status-text-container-bg: var(--status-info-bg);
+    --status-text-container-color: var(--status-info-text);
+}
 
 /* Pagination Container */
 .pagination-container {
