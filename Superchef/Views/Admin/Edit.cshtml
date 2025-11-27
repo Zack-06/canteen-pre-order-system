@@ -1,0 +1,47 @@
+@model Account
+
+@{
+    ViewBag.Title = "Edit Admin | Supershow";
+}
+
+<div class="container" data-limit-container>
+    <div class="title">Admin Details</div>
+    <div data-column-container="3">
+        <div>Id</div>
+        <div>:</div>
+        <div>@Model.Id</div>
+        <div>Name</div>
+        <div>:</div>
+        <div>@Model.Name</div>
+        <div>Email</div>
+        <div>:</div>
+        <div>@Model.Email</div>
+        <div>Status</div>
+        <div>:</div>
+        <div>@Model.Status</div>
+    </div>
+</div>
+
+<div class="container" data-limit-container>
+    <div class="title">Action</div>
+    <div class="button-group" data-flex="inline column">
+        @if (Model.Email != "superchef.system@gmail.com")
+        {
+            <a data-button="danger" data-ajax="true" data-ajax-url="@Url.Action("Delete", new { id = Model.Id })"
+                data-ajax-method="POST" data-ajax-failure="defaultOnFailure"
+                data-ajax-success="redirectToPage('@Url.Action("Manage")')"
+                data-ajax-confirm="Are you sure you want to delete this admin account?">Delete Admin</a>
+        }
+
+        @if (Model.LockoutEnd != null)
+        {
+            <a data-button="accent" data-ajax="true" data-ajax-url="@Url.Action("RemoveTimeout", new { id = Model.Id })"
+                data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+                data-ajax-confirm="Are you sure you want to remove timeout for this admin?">Remove Timeout</a>
+        }
+
+        <a data-button="danger" data-ajax="true" data-ajax-url="@Url.Action("LogoutAllDevices", new { id = Model.Id })"
+            data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+            data-ajax-confirm="Are you sure you want to log out all devices of this admin?">Log Out from All Devices</a>
+    </div>
+</div>

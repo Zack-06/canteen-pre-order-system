@@ -41,6 +41,19 @@ public class CustomerController : Controller
 
     public IActionResult Edit()
     {
-        return View();
+        var vm = new Account
+        {
+            Id = 1,
+            Name = "abc",
+            Email = "abc@gmail.com",
+            AccountTypeId = 1,
+            CreatedAt = DateTime.Now,
+            IsBanned = false,
+            DeletionAt = null,
+            LockoutEnd = null,
+            IsDeleted = false,
+        };
+
+        return View(vm);
     }
 }

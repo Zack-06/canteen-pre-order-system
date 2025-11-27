@@ -18,6 +18,11 @@ public class StoreController : Controller
         return View();
     }
 
+    public IActionResult Manage()
+    {
+        return View();
+    }
+
     public IActionResult Add()
     {
         // add new store

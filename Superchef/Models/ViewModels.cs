@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Superchef.Controllers;
+using Superchef.Helpers;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using X.PagedList;
@@ -11,27 +13,27 @@ namespace Superchef.Models;
 
 public class LoginVM
 {
-    [StringLength(100)]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailLogin", "Auth", ErrorMessage = "{0} is not registered.")]
     public string Email { get; set; }
 
-    [StringLength(100)]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [DataType(DataType.Password)]
     public string Password { get; set; }
 }
 
 public class RegisterVM
 {
-    [StringLength(50, ErrorMessage = "Name must not exceed {0} characters.")]
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
 
-    [StringLength(100, ErrorMessage = "Email must not exceed {0} characters.")]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
     public string Email { get; set; }
 
-    [StringLength(100, ErrorMessage = "Password must not exceed {0} characters.")]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [RegularExpression(
         @"(?=.{6,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).+",
         ErrorMessage = "Password must have at least 6 characters, one number, one uppercase letter, one lowercase letter and one special character."
@@ -39,7 +41,7 @@ public class RegisterVM
     [DataType(DataType.Password)]
     public string Password { get; set; }
 
-    [StringLength(100, ErrorMessage = "Password must not exceed {0} characters.")]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [Compare("Password", ErrorMessage = "Passwords do not match.")]
     [DataType(DataType.Password)]
     [DisplayName("Confirm Password")]
@@ -48,7 +50,7 @@ public class RegisterVM
 
 public class ForgotPasswordVM
 {
-    [StringLength(100)]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailLogin", "Auth", ErrorMessage = "{0} is not registered.")]
     public string Email { get; set; }
@@ -56,7 +58,7 @@ public class ForgotPasswordVM
 
 public class ResetPasswordVM
 {
-    [StringLength(100, ErrorMessage = "Password must not exceed {0} characters.")]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [RegularExpression(
         @"(?=.{6,})(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9]).+",
         ErrorMessage = "Password must have at least 6 characters, one number, one uppercase letter, one lowercase letter and one special character."
@@ -64,7 +66,7 @@ public class ResetPasswordVM
     [DataType(DataType.Password)]
     public string Password { get; set; }
 
-    [StringLength(100, ErrorMessage = "Password must not exceed {0} characters.")]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [Compare("Password", ErrorMessage = "Passwords do not match.")]
     [DataType(DataType.Password)]
     [DisplayName("Confirm Password")]
@@ -73,12 +75,12 @@ public class ResetPasswordVM
 
 public class ChangeEmailVM
 {
-    [StringLength(100)]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
     public string Email { get; set; }
 
-    [StringLength(100)]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Compare("Email", ErrorMessage = "Emails do not match.")]
     [DisplayName("Confirm Email")]
@@ -87,7 +89,7 @@ public class ChangeEmailVM
 
 public class AccountProfileVM
 {
-    [StringLength(50, ErrorMessage = "Name must not exceed {0} characters.")]
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
     [RegularExpression(@"^01\d-\d{7,8}$", ErrorMessage = "{0} must be in the format 01X-XXXXXXX")]
     [DisplayName("Phone Number")]
@@ -105,7 +107,7 @@ public class AccountProfileVM
 
 public class ChangePasswordVM
 {
-    [StringLength(100)]
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [DataType(DataType.Password)]
     [DisplayName("Current Password")]
     public string CurrentPassword { get; set; }
@@ -189,6 +191,17 @@ public class ManageVendorVM
     public IPagedList<Account> Results { get; set; }
 }
 
+public class AddVendorVM
+{
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [EmailAddress(ErrorMessage = "Invalid email address.")]
+    [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
+    public string Email { get; set; }
+}
+
 public class ManageAdminVM
 {
     public string? Dir { get; set; }
@@ -207,6 +220,17 @@ public class ManageAdminVM
     public IPagedList<Account> Results { get; set; }
 }
 
+public class AddAdminVM
+{
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+
+    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [EmailAddress(ErrorMessage = "Invalid email address.")]
+    [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
+    public string Email { get; set; }
+}
+
 public class ManageVenueVM
 {
     public string? Dir { get; set; }
@@ -223,6 +247,21 @@ public class ManageVenueVM
     public IPagedList<Account> Results { get; set; }
 }
 
+public class AddVenueVM
+{
+    [Remote("CheckNameExists", "Venue", ErrorMessage = "{0} already exists")]
+    [MaxLength(50)]
+    public string Name { get; set; }
+}
+
+public class EditVenueVM
+{
+    public int Id { get; set; }
+    [Remote("CheckNameExists", "Venue", AdditionalFields = "Id", ErrorMessage = "{0} already exists")]
+    [MaxLength(50)]
+    public string Name { get; set; }
+}
+
 public class ManageCategoryVM
 {
     public string? Dir { get; set; }
@@ -237,4 +276,26 @@ public class ManageCategoryVM
 
     public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
     public IPagedList<Account> Results { get; set; }
+}
+
+public class AddExperienceVM
+{
+    public int Id { get; set; }
+    [MaxLength(50)]
+    public string Name { get; set; }
+    public double ImageScale { get; set; }
+    public double ImageX { get; set; }
+    public double ImageY { get; set; }
+    public IFormFile? Image { get; set; }
+}
+
+public class EditExperienceVM
+{
+    public int Id { get; set; }
+    [MaxLength(50)]
+    public string Name { get; set; }
+    public double ImageScale { get; set; }
+    public double ImageX { get; set; }
+    public double ImageY { get; set; }
+    public IFormFile? Image { get; set; }
 }

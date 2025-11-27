@@ -453,8 +453,8 @@ class UploadOverlay {
 									imgX = startImgX + (deltaX / previewContainer.width()) * 100
 									imgY = startImgY + (deltaY / previewContainer.height()) * 100
 
-									const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50
-									const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50
+									const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewImage.width()) * 50
+									const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewImage.height()) * 50
 
 									imgX = Math.min(maxX, Math.max(-maxX, imgX))
 									imgY = Math.min(maxY, Math.max(-maxY, imgY))
@@ -474,56 +474,7 @@ class UploadOverlay {
 
 							previewImage.off("mousedown touchstart").on("mousedown touchstart", startDrag)
 
-							// ===== Pinch to Zoom (Mobile) + Slider Zoom (Desktop) =====
-							let initialDistance = null
-							let initialScale = scale
-
-							previewContainer[0].addEventListener(
-								"touchstart",
-								(e) => {
-									if (e.touches.length === 2) {
-										e.preventDefault()
-										const dx = e.touches[0].clientX - e.touches[1].clientX
-										const dy = e.touches[0].clientY - e.touches[1].clientY
-										initialDistance = Math.sqrt(dx * dx + dy * dy)
-										initialScale = scale
-									}
-								},
-								{ passive: false }
-							)
-
-							previewContainer[0].addEventListener(
-								"touchmove",
-								(e) => {
-									if (e.touches.length === 2 && initialDistance) {
-										e.preventDefault()
-										const dx = e.touches[0].clientX - e.touches[1].clientX
-										const dy = e.touches[0].clientY - e.touches[1].clientY
-										const distance = Math.sqrt(dx * dx + dy * dy)
-										const newScale = initialScale * (distance / initialDistance)
-
-										const scaleRatio = newScale / scale
-										scale = newScale
-										imgX *= scaleRatio
-										imgY *= scaleRatio
-
-										const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50
-										const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50
-
-										imgX = Math.min(maxX, Math.max(-maxX, imgX))
-										imgY = Math.min(maxY, Math.max(-maxY, imgY))
-
-										previewImage.css("transform", `translate(calc(-50% + ${imgX}%), calc(-50% + ${imgY}%)) scale(${scale})`)
-									}
-								},
-								{ passive: false }
-							)
-
-							previewContainer[0].addEventListener("touchend", (e) => {
-								if (e.touches.length < 2) initialDistance = null
-							})
-
-							// Desktop zoom slider
+							// Zoom slider
 							$(".zoom-slider").val(1)
 							$(".zoom-slider")
 								.off("input")
@@ -535,8 +486,8 @@ class UploadOverlay {
 									imgX *= scaleRatio
 									imgY *= scaleRatio
 
-									const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewContainer.width()) * 50
-									const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewContainer.height()) * 50
+									const maxX = ((previewImage.width() * scale - previewContainer.width()) / previewImage.width()) * 50
+									const maxY = ((previewImage.height() * scale - previewContainer.height()) / previewImage.height()) * 50
 
 									imgX = Math.min(maxX, Math.max(-maxX, imgX))
 									imgY = Math.min(maxY, Math.max(-maxY, imgY))

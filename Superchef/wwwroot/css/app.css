@@ -297,16 +297,17 @@ button:active {
 	margin-bottom: 0.75rem;
 }
 .button-group {
-	margin-top: 1.5rem;
-}
-.button-group :last-child {
-	margin-bottom: 0 !important;
-}
-.button-group-inline {
 	display: flex;
-	gap: 8px;
+	gap: 0.5rem;
 }
-.button-group-inline button {
+.button-group[data-flex~="inline"] {
+	display: inline-flex;
+}
+.button-group[data-flex~="column"] {
+	flex-direction: column;
+	gap: 0.75rem;
+}
+.button-group [data-button] {
 	flex: 1;
 }
 
@@ -705,6 +706,9 @@ main > .container.container-center {
 	margin-top: 0 !important;
 	margin-bottom: 0 !important;
 }
+main > h1 {
+    margin-top: 0;
+}
 main:has(.container-center) {
 	display: flex;
 	align-items: center;
@@ -944,6 +948,9 @@ body:has(.overlay.show) {
 	padding-left: 1.5rem;
 	padding-right: calc(1.5rem + var(--overlay-padding-right, 0rem));
 	flex: 1;
+}
+.overlay .content > .button-group {
+    padding: 0 1.5rem;
 }
 
 /* Sidebar Overlay */
@@ -1392,10 +1399,13 @@ main.mobile [data-manage-container="table"] tbody tr {
 main.mobile [data-manage-container="table"] tr td {
 	border: none;
 	padding: 0;
+    word-break: break-all;
+    word-wrap: break-word;
 }
 main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	justify-self: end;
 	align-self: end;
+    word-break: normal;
 }
 
 /* Status Text Container */
@@ -1432,11 +1442,11 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	user-select: none;
 }
 .pagination {
-    display: flex;
-    row-gap: 0.5rem;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
+	display: flex;
+	row-gap: 0.5rem;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
 }
 .pagination a,
 .pagination span {
@@ -1714,6 +1724,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 [data-column-container~="3"] .form-group {
 	margin-bottom: 0;
+    margin-left: 1rem;
 }
 [data-column-container~="3"] > .form-group {
 	margin-bottom: 1rem;
@@ -1728,12 +1739,12 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 [data-column-container~="3"] > .form-group:has(input[type="file"]):not(:has(img[src])) {
 	align-self: unset;
 }
-[data-column-container~="3"] .button-group-inline {
+[data-column-container~="3"] .button-group {
 	margin-top: 0;
 	display: inline-flex;
 	gap: 0.75rem;
 }
-[data-column-container~="3"] .button-group-inline > button {
+[data-column-container~="3"] .button-group > button {
 	margin-top: 0;
 }
 [data-column-container~="center"] {

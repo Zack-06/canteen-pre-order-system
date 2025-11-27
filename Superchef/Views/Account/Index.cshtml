@@ -125,17 +125,16 @@
                 </div>
             </div>
 
-            <div class="button-group">
-                <button type="submit" id="account-submit-button" class="button-full" data-button="success" disabled>Save
+            <div class="button-group" data-flex="column">
+                <button type="submit" id="account-submit-button" data-button="success" disabled>Save
                     Changes</button>
-                <a href="/Account/ChangePassword" class="button-full" data-button="info">Change
+                <a href="/Account/ChangePassword" data-button="info">Change
                     Password</a>
 
                 <a data-ajax="true" data-ajax-method="post" data-ajax-url="/Account/RequestDeleteAccount"
                     data-ajax-confirm="Are you sure you want to delete your account?"
                     data-ajax-begin="deleteAccountBegin" data-ajax-complete="deleteAccountComplete"
-                    data-ajax-success="deleteAccountSuccess" id="delete-account-button" class="button-full"
-                    data-button="danger">Delete
+                    data-ajax-success="deleteAccountSuccess" id="delete-account-button" data-button="danger">Delete
                     Account</a>
 
             </div>
@@ -161,7 +160,7 @@
                 <span asp-validation-for="Image"></span>
             </div>
 
-            <div class="button-group-inline">
+            <div class="button-group">
                 <button type="button" id="upload-profile-picture-button" data-button="accent">Upload</button>
                 <button type="button" id="remove-profile-picture-button" data-button="danger">Remove</button>
                 <button type="button" id="reset-profile-picture-button" data-button="info">Reset</button>

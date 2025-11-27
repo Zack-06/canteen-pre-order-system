@@ -1,0 +1,29 @@
+@model AddAdminVM
+
+@{
+    ViewBag.Title = "Add Admin | Supershow";
+}
+
+<form class="container" method="post" data-limit-container>
+    <div class="title">Add Admin</div>
+    <div data-column-container="3">
+        <label asp-for="Name"></label>
+        <div>:</div>
+        <div class="form-group">
+            <div class="form-input">
+                <input asp-for="Name">
+            </div>
+            <span asp-validation-for="Name"></span>
+        </div>
+
+        <label asp-for="Email"></label>
+        <div>:</div>
+        <div class="form-group">
+            <div class="form-input">
+                <input asp-for="Email">
+            </div>
+            <span asp-validation-for="Email"></span>
+        </div>
+    </div>
+    <button data-button="success">Create</button>
+</form>

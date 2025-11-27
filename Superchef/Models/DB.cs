@@ -49,8 +49,6 @@ public class Venue
     public int Id { get; set; }
     [MaxLength(50)]
     public string Name { get; set; }
-    [MaxLength(50)]
-    public string Image { get; set; }
 
     public List<Store> Stores { get; set; } = [];
 }
