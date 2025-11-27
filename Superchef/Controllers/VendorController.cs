@@ -29,6 +29,7 @@ public class VendorController : Controller
             new() { Value = "email", Text = "Search By Email" },
             new() { Value = "id", Text = "Search By Id" }
         ];
+        vm.AvailableStatuses = ["Active", "ToDelete", "Timeout", "Banned"];
 
         if (vm.SearchOption == null || !vm.AvailableSearchOptions.Any(o => o.Value == vm.SearchOption))
         {

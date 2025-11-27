@@ -1,0 +1,261 @@
+@model ManageItemVM
+
+@section head {
+    <style>
+        [data-manage-container="table"] tbody tr td:nth-child(1) {
+            grid-area: id;
+        }
+
+        main.mobile [data-manage-container="table"] tbody tr td:nth-child(1)::before {
+            content: "ID: ";
+        }
+
+        [data-manage-container="table"] tbody tr td:nth-child(2) {
+            grid-area: name;
+        }
+
+        [data-manage-container="table"] tbody tr td:nth-child(3) {
+            grid-area: slug;
+        }
+
+        [data-manage-container="table"] tbody tr td:nth-child(4) {
+            grid-area: status;
+        }
+
+        [data-manage-container="table"] tbody tr td:nth-child(5) {
+            grid-area: variants-count;
+        }
+
+        main.mobile [data-manage-container="table"] tbody tr td:nth-child(5)::before {
+            content: "Variants Count: ";
+        }
+
+        [data-manage-container="table"] tbody tr td:nth-child(6) {
+            grid-area: category;
+        }
+
+        main.mobile [data-manage-container="table"] tbody tr td:nth-child(6)::before {
+            content: "Category: ";
+        }
+
+        [data-manage-container="table"] tbody tr td:nth-child(7) {
+            grid-area: creation-date;
+        }
+
+        [data-manage-container="table"] tbody tr td:last-child {
+            grid-area: action;
+        }
+
+        main.mobile [data-manage-container="table"] tbody tr {
+            grid-template-areas:
+                "name name"
+                "slug slug"
+                "category category"
+                "creation-date creation-date"
+                ". status"
+                "variants-count action"
+                "id action"
+            ;
+            grid-template-columns: 1fr auto;
+        }
+    </style>
+}
+
+<form class="container" data-no="color padding">
+    <div id="filter-overlay" class="overlay sidebar-overlay">
+        <div class="content">
+            <div class="header">
+                <div class="title">Filter By</div>
+                <div class="close"></div>
+            </div>
+
+            <div class="body">
+                <div class="form-group">
+                    <label>Status</label>
+                    <div class="custom-tick-container center-text-container small-text rounded-border">
+                        @foreach (var status in Model.AvailableStatuses)
+                        {
+                            <label>
+                                <input type="checkbox" name="Statuses" value="@status" @(Model.Statuses.Contains(status) ?
+                                                                                                                       "checked" : "")>
+                                <div>
+                                    <div class="text">@status</div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Category</label>
+                    <div class="custom-tick-container center-text small-text rounded-border">
+                        <label>
+                            <input type="checkbox" name="Category" value="items">
+                            <div>
+                                <div class="text">abc</div>
+                            </div>
+                        </label>
+
+                        <label>
+                            <input type="checkbox" name="Category" value="items">
+                            <div>
+                                <div class="text">def</div>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MinVariantsCount"></label>
+                    <div class="form-input">
+                        <input asp-for="MinVariantsCount" />
+                    </div>
+                    <span asp-validation-for="MinVariantsCount"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="MaxVariantsCount"></label>
+                    <div class="form-input">
+                        <input asp-for="MaxVariantsCount" />
+                    </div>
+                    <span asp-validation-for="MaxVariantsCount"></span>
+                </div>
+            </div>
+
+            <div class="button-group">
+                <button type="button" data-button="accent" data-clear-form>Reset</button>
+                <button type="submit" data-button>Apply</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="container" data-manage-container="query">
+        <div class="title">Manage Items - @ViewBag.StoreName</div>
+
+        <div class="form-group">
+            <div class="input-group search-container">
+                <div class="form-input">
+                    <input data-clear-form-ignore />
+                    <button type="submit">
+                        <img src="/img/search.png" alt="Search">
+                    </button>
+                </div>
+                <div class="custom-select">
+                    <select>
+                        <option value="1" selected>Search By Name</option>
+                        <option value="2">Search By Slug</option>
+                        <option value="3">Search By Id</option>
+                    </select>
+                </div>
+                <a href="/Item/Add" data-button="info">Add Item</a>
+                <button type="button" id="filter-button">
+                    Filter
+                    <img src="/img/filter.png">
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ajax-result-container">
+        <div class="container" data-manage-container="table" data-responsive-container>
+            <table>
+                <thead>
+                    <tr>
+                        <th class="asc selected">
+                            <a href="/Customer/Manage?Dir=desc&amp;Sort=Id&amp;Page=1&amp;SearchOption=name"
+                                data-ajax="true" data-ajax-update="#ajax-result-container">Id</a>
+                        </th>
+                        <th class="asc ">
+                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Name&amp;Page=1&amp;SearchOption=name"
+                                data-ajax="true" data-ajax-update="#ajax-result-container">Name</a>
+                        </th>
+                        <th class="asc ">
+                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Email&amp;Page=1&amp;SearchOption=name"
+                                data-ajax="true" data-ajax-update="#ajax-result-container">Slug</a>
+                        </th>
+                        <th class="asc ">
+                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Email&amp;Page=1&amp;SearchOption=name"
+                                data-ajax="true" data-ajax-update="#ajax-result-container">Status</a>
+                        </th>
+                        <th class="asc ">
+                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Email&amp;Page=1&amp;SearchOption=name"
+                                data-ajax="true" data-ajax-update="#ajax-result-container">Variants Count</a>
+                        </th>
+                        <th class="asc ">
+                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Creation%20Date&amp;Page=1&amp;SearchOption=name"
+                                data-ajax="true" data-ajax-update="#ajax-result-container">Category</a>
+                        </th>
+                        <th class="asc ">
+                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Creation%20Date&amp;Page=1&amp;SearchOption=name"
+                                data-ajax="true" data-ajax-update="#ajax-result-container">Creation Date</a>
+                        </th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+
+                <tbody data-result-container>
+                    <tr>
+                        <td>1</td>
+                        <td>abcafewaf</td>
+                        <td>slug-name</td>
+                        <td>
+                            <div class="status-text-container active">Active</div>
+                        </td>
+                        <td>1</td>
+                        <td>Pastry</td>
+                        <td>26 Sep 2025</td>
+                        <td>
+                            <div class="button-group" data-flex="inline">
+                                <a href="/Item/Edit/1" data-button="accent">Edit</a>
+                                <a href="/Item/Edit/1" data-button="danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>1</td>
+                        <td>abcafewaf</td>
+                        <td>slug-name</td>
+                        <td>
+                            <div class="status-text-container active">Active</div>
+                        </td>
+                        <td>1</td>
+                        <td>Dog Food</td>
+                        <td>26 Sep 2025</td>
+                        <td>
+                            <div class="button-group" data-flex="inline">
+                                <a href="/Item/Edit/1" data-button="accent">Edit</a>
+                                <a href="/Item/Edit/1" data-button="danger">Delete</a>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <partial name="_NoResults" model="null" />
+        </div>
+
+
+        <div class="pagination-container">
+            <ul class="pagination">
+                <li class="PagedList-skipToFirst disabled"><a>
+                        <div class="paging-symbol first"></div>
+                    </a></li>
+                <li class="PagedList-skipToPrevious disabled"><a rel="prev">
+                        <div class="paging-symbol prev"></div>
+                    </a></li>
+                <li class="active"><span>1</span></li>
+                <li class=""><span>201</span></li>
+                <li class=""><span>2</span></li>
+                <li class=""><span>2</span></li>
+                <li class=""><span>2</span></li>
+                <li class="PagedList-skipToNext disabled"><a rel="next">
+                        <div class="paging-symbol next"></div>
+                    </a></li>
+                <li class="PagedList-skipToLast disabled"><a>
+                        <div class="paging-symbol last"></div>
+                    </a></li>
+            </ul>
+        </div>
+    </div>
+</form>

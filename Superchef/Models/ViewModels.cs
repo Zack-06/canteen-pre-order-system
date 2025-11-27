@@ -176,6 +176,7 @@ public class ManageVendorVM
     public int Page { get; set; } = 1;
     public string? Search { get; set; }
     public string? SearchOption { get; set; }
+    public List<string> Statuses { get; set; } = [];
     [DisplayName("Min Stores Count")]
     public int? MinStoresCount { get; set; }
     [DisplayName("Max Stores Count")]
@@ -188,6 +189,7 @@ public class ManageVendorVM
     public DateTime? CreationTo { get; set; }
 
     public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
+    public List<string> AvailableStatuses { get; set; } = [];
     public IPagedList<Account> Results { get; set; }
 }
 
@@ -301,6 +303,7 @@ public class EditCategoryVM
 
 public class ManageStoreVM
 {
+    public int VendorId { get; set; }
     public string? Dir { get; set; }
     public string? Sort { get; set; }
     public int Page { get; set; } = 1;
@@ -315,4 +318,151 @@ public class ManageStoreVM
     public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
     public List<Venue> AvailableVenues { get; set; } = [];
     public IPagedList<Store> Results { get; set; }
+}
+
+public class ManageItemVM
+{
+    public int StoreId { get; set; }
+    public string? Dir { get; set; }
+    public string? Sort { get; set; }
+    public int Page { get; set; } = 1;
+    public string? Search { get; set; }
+    public string? SearchOption { get; set; }
+    public List<string> Statuses { get; set; } = [];
+    public List<int> Categories { get; set; } = [];
+    [DisplayName("Min Variants Count")]
+    public int? MinVariantsCount { get; set; }
+    [DisplayName("Max Variants Count")]
+    public int? MaxVariantsCount { get; set; }
+    [DisplayName("Creation Date From")]
+    [DataType(DataType.Date)]
+    public DateTime? CreationFrom { get; set; }
+    [DisplayName("Creation Date To")]
+    [DataType(DataType.Date)]
+    public DateTime? CreationTo { get; set; }
+
+    public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
+    public List<string> AvailableStatuses { get; set; } = [];
+    public List<Category> AvailableCategories { get; set; } = [];
+    public IPagedList<Item> Results { get; set; }
+}
+
+public class AddItemVM
+{
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
+    [Remote("IsSlugUnique", "Item", ErrorMessage = "{0} has been taken.")]
+    public string Slug { get; set; }
+    [StringLength(500, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Description { get; set; }
+    [Remote("CheckCategory", "Item", ErrorMessage = "{0} is not a valid category.")]
+    public int Category { get; set; }
+    public List<string> Keywords { get; set; } = [];
+    public double ImageScale { get; set; }
+    public double ImageX { get; set; }
+    public double ImageY { get; set; }
+    public IFormFile Image { get; set; }
+
+    public List<SelectListItem> AvailableCategories { get; set; } = [];
+}
+
+public class EditItemVM
+{
+    public int Id { get; set; }
+    public DateTime CreatedAt { get; set; }
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
+    [Remote("IsSlugUnique", "Item", AdditionalFields = "Id", ErrorMessage = "{0} has been taken.")]
+    public string Slug { get; set; }
+    [StringLength(500, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Description { get; set; }
+    [Remote("CheckCategory", "Item", ErrorMessage = "{0} is not a valid category.")]
+    public int Category { get; set; }
+    public double ImageScale { get; set; }
+    public double ImageX { get; set; }
+    public double ImageY { get; set; }
+    public IFormFile? Image { get; set; }
+
+    public List<SelectListItem> AvailableCategories { get; set; } = [];
+}
+
+public class ManageVariantVM
+{
+    public int ItemId { get; set; }
+    public string? Dir { get; set; }
+    public string? Sort { get; set; }
+    public int Page { get; set; } = 1;
+    public string? Search { get; set; }
+    public string? SearchOption { get; set; }
+    public List<string> Statuses { get; set; } = [];
+    [DisplayName("Min Price")]
+    public decimal? MinPrice { get; set; }
+    [DisplayName("Max Price")]
+    public decimal? MaxPrice { get; set; }
+
+    public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
+    public List<string> AvailableStatuses { get; set; } = [];
+    public IPagedList<Variant> Results { get; set; }
+}
+
+public class AddVariantVM
+{
+    public int ItemId { get; set; }
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+    [Range(2.00, 200.00, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
+    [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "{0} must be a number with no more than 2 decimal places.")]
+    public decimal Price { get; set; }
+    [DisplayName("Stock Count")]
+    [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
+    public int StockCount { get; set; } = 0;
+    public double ImageScale { get; set; }
+    public double ImageX { get; set; }
+    public double ImageY { get; set; }
+    public IFormFile Image { get; set; }
+}
+
+public class EditVariantVM
+{
+    public int Id { get; set; }
+    public DateTime CreatedAt { get; set; }
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+    [Range(2.00, 200.00, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
+    [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "{0} must be a number with no more than 2 decimal places.")]
+    public decimal Price { get; set; }
+    [DisplayName("Stock Count")]
+    [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
+    public int StockCount { get; set; } = 0;
+    public double ImageScale { get; set; }
+    public double ImageX { get; set; }
+    public double ImageY { get; set; }
+    public IFormFile? Image { get; set; }
+}
+
+public class ManageOrderVM
+{
+    public int StoreId { get; set; }
+    public string? Dir { get; set; }
+    public string? Sort { get; set; }
+    public int Page { get; set; } = 1;
+    public string? Search { get; set; }
+    public string? SearchOption { get; set; }
+    public List<string> Statuses { get; set; } = [];
+    [DisplayName("Min Items Count")]
+    public int? MinItemsCount { get; set; }
+    [DisplayName("Max Items Count")]
+    public int? MaxItemsCount { get; set; }
+    [DisplayName("Created At From")]
+    public DateTime? CreationFrom { get; set; }
+    [DisplayName("Created At To")]
+    public DateTime? CreationTo { get; set; }
+
+    public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
+    public List<string> AvailableStatuses { get; set; } = [];
+    public IPagedList<Order> Results { get; set; }
 }

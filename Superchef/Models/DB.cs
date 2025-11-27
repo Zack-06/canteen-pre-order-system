@@ -204,6 +204,18 @@ public class Item
     public bool IsActive { get; set; } = true;
     public int CategoryId { get; set; }
     public int StoreId { get; set; }
+    [NotMapped]
+    public string Status
+    {
+        get
+        {
+            if (IsDeleted) return "Deleted";
+
+            if (IsActive == false) return "Inactive";
+
+            return "Active";
+        }
+    }
 
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public Category Category { get; set; }
@@ -239,6 +251,18 @@ public class Variant
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public int ItemId { get; set; }
+    [NotMapped]
+    public string Status
+    {
+        get
+        {
+            if (IsDeleted) return "Deleted";
+
+            if (IsActive == false) return "Inactive";
+
+            return "Active";
+        }
+    }
 
     public Item Item { get; set; }
     public List<Cart> Carts { get; set; } = [];

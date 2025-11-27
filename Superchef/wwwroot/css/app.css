@@ -707,7 +707,7 @@ main > .container.container-center {
 	margin-bottom: 0 !important;
 }
 main > h1 {
-    margin-top: 0;
+	margin-top: 0;
 }
 main:has(.container-center) {
 	display: flex;
@@ -733,9 +733,6 @@ main:has(.container-center) {
 .form-group {
 	color: var(--text-label);
 	margin-bottom: 1.5rem;
-}
-.form-group[data-limit-group] {
-    max-width: 20rem;
 }
 .form-group.space-between {
 	display: flex;
@@ -953,7 +950,7 @@ body:has(.overlay.show) {
 	flex: 1;
 }
 .overlay .content > .button-group {
-    padding: 0 1.5rem;
+	padding: 0 1.5rem;
 }
 
 /* Sidebar Overlay */
@@ -1402,13 +1399,16 @@ main.mobile [data-manage-container="table"] tbody tr {
 main.mobile [data-manage-container="table"] tr td {
 	border: none;
 	padding: 0;
-    word-break: break-all;
-    word-wrap: break-word;
+	word-break: break-all;
+	word-wrap: break-word;
+}
+main.mobile [data-manage-container="table"] tbody tr td:has(.status-text-container) {
+    margin-left: auto;
 }
 main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	justify-self: end;
 	align-self: end;
-    word-break: normal;
+	word-break: normal;
 }
 
 /* Status Text Container */
