@@ -31,13 +31,13 @@
         #payment-status-container.success .image {
             background-color: var(--status-success-bg);
             color: var(--status-success-text);
-            box-shadow: 0 0 0 8px var(--bg-pure), 0 0 0 10px var(--status-success-bg);
+            box-shadow: 0 0 0 0.5rem var(--bg-pure), 0 0 0 0.6rem var(--status-success-bg);
         }
 
         #payment-status-container.failed .image {
             background-color: var(--status-error-bg);
             color: var(--status-error-text);
-            box-shadow: 0 0 0 8px var(--bg-pure), 0 0 0 10px var(--status-error-bg);
+            box-shadow: 0 0 0 0.5rem var(--bg-pure), 0 0 0 0.6rem var(--status-error-bg);
         }
 
         #payment-status-container.success .image::after {
@@ -96,6 +96,13 @@
     <div class="description"></div>
 
     <div class="status-actions">
-        <a href="/" data-button="accent">Back to Home</a>
+        @if (Model == "success")
+        {
+            <a href="/Account/History" data-button="info">View Order History</a>
+        }
+        else
+        {
+            <a href="/" data-button="accent">Back to Home</a>
+        }
     </div>
 </div>

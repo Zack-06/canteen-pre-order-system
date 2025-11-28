@@ -31,7 +31,7 @@ public class OrderController : Controller
         {
             Id = id
         };
-        
+
         return View(vm);
     }
 
@@ -46,7 +46,7 @@ public class OrderController : Controller
         // show order confirmation, click "pay"
         // after that only set to "confirmed"
 
-        // pending, confirmed, completed, cancelled
+        // pending, confirmed, preparing, completed, cancelled
         return View();
     }
 
