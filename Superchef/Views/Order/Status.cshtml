@@ -1,0 +1,101 @@
+@model string
+@{
+    ViewBag.Title = "Payment Status | SuperChef";
+    var statusClass = Model?.ToLower() ?? "failed";
+}
+
+@section head {
+    <style>
+        #payment-status-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 3rem 1.5rem;
+        }
+
+        #payment-status-container .image {
+            width: 8rem;
+            height: 8rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            font-weight: var(--font-weight-bold);
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        #payment-status-container.success .image {
+            background-color: var(--status-success-bg);
+            color: var(--status-success-text);
+            box-shadow: 0 0 0 8px var(--bg-pure), 0 0 0 10px var(--status-success-bg);
+        }
+
+        #payment-status-container.failed .image {
+            background-color: var(--status-error-bg);
+            color: var(--status-error-text);
+            box-shadow: 0 0 0 8px var(--bg-pure), 0 0 0 10px var(--status-error-bg);
+        }
+
+        #payment-status-container.success .image::after {
+            content: "✓";
+        }
+
+        #payment-status-container.failed .image::after {
+            content: "✕";
+        }
+
+        #payment-status-container .status-title {
+            font-family: var(--font-display);
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+            color: var(--text-primary);
+        }
+
+        #payment-status-container.success .status-title::after {
+            content: "Payment Successful";
+            color: var(--status-success-text);
+        }
+
+        #payment-status-container.failed .status-title::after {
+            content: "Payment Unsuccessful";
+            color: var(--status-error-text);
+        }
+
+        #payment-status-container .description {
+            font-family: var(--font-primary);
+            color: var(--text-secondary);
+            margin-bottom: 2rem;
+            max-width: 25rem;
+            line-height: var(--line-height-md);
+        }
+
+        #payment-status-container.success .description::after {
+            content: "Your order has been placed successfully! You can view the details in your order history.";
+        }
+
+        #payment-status-container.failed .description::after {
+            content: "Something went wrong with the transaction. Please try again or contact support if the issue remains.";
+        }
+
+        .status-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+    </style>
+}
+
+<div id="payment-status-container" class="container container-center @statusClass" data-limit-container>
+    <div class="image"></div>
+    <div class="status-title"></div>
+    <div class="description"></div>
+
+    <div class="status-actions">
+        <a href="/" data-button="accent">Back to Home</a>
+    </div>
+</div>

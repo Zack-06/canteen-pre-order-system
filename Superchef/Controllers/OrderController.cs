@@ -24,11 +24,15 @@ public class OrderController : Controller
         return true;
     }
 
-    public IActionResult Customer()
+    [HttpGet]
+    public IActionResult Customer(string id)
     {
-        // fill up name and phone number
-
-        return View();
+        var vm = new OrderCustomerVM
+        {
+            Id = id
+        };
+        
+        return View(vm);
     }
 
     public IActionResult Slot()

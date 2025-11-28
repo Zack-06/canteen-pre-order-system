@@ -4,6 +4,13 @@
         CurrentStep = 2,
         Title = "Select Pickup Time"
     };
+
+    var summary = new SummaryContainerDM
+    {
+        TotalPrice = 100m,
+        TotalItems = 10,
+        ExitLink = "/Order/Cancel"
+    };
 }
 
 <partial name="_StepContainer" model="data" />
@@ -45,15 +52,6 @@
         <partial name="_SlotCard" model="@card" />
     }
 </div>
-
-@{
-    var summary = new SummaryContainerDM
-    {
-        TotalPrice = 100m,
-        TotalItems = 10,
-        ExitLink = "/Order/Cancel"
-    };
-}
 
 <form method="post" data-expired-timestamp="1764073738459" data-sticky-bottom>
     <partial name="_SummaryContainer" model="summary" />

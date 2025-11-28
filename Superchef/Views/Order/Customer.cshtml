@@ -1,0 +1,47 @@
+@model OrderCustomerVM
+
+@{
+    var data = new StepContainerDM
+    {
+        CurrentStep = 1,
+        Title = "Fill Up Details"
+    };
+
+    var summary = new SummaryContainerDM
+    {
+        TotalPrice = 100m,
+        TotalItems = 10,
+        ExitLink = "/Order/Cancel",
+        ExitText = "Cancel"
+    };
+}
+
+<partial name="_StepContainer" model="data" />
+
+<form method="post" data-expired-timestamp="1764291789847">
+    <div class="container" data-limit-container>
+        <h1 class="title">Customer Details</h1>
+
+        <input type="hidden" asp-for="Id">
+
+        <div class="form-group">
+            <label asp-for="Name"></label>
+            <div class="form-input">
+                <input asp-for="Name" type="text">
+            </div>
+            <span asp-validation-for="Name"></span>
+        </div>
+
+        <div class="form-group">
+            <label asp-for="ContactNumber"></label>
+            <div class="form-input">
+                <input asp-for="ContactNumber" type="text" data-phone placeholder="01X-XXXXXXX">
+            </div>
+            <span asp-validation-for="ContactNumber"></span>
+        </div>
+    </div>
+
+    <div data-sticky-bottom>
+        <partial name="_SummaryContainer" model="summary" />
+    </div>
+</form>

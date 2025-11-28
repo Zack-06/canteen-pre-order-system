@@ -1,0 +1,185 @@
+@section head {
+    <style>
+        .custom-tick-container {
+            margin-bottom: 1rem !important;
+        }
+
+        .order-history-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-primary);
+            border-radius: 0.25rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: grid;
+            gap: 0.75rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .order-history-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-dropdown);
+            border-color: var(--border-active);
+        }
+
+        .oh-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .oh-header>.title {
+            font-family: var(--font-display);
+            font-weight: var(--font-weight-bold);
+            color: var(--text-primary);
+        }
+
+        .oh-body {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+
+        .info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+            font-size: var(--font-size-sm);
+            color: var(--text-secondary);
+        }
+
+        .info>.title {
+            font-weight: var(--font-weight-semibold);
+            color: var(--text-primary);
+
+        }
+
+        .oh-price {
+            font-family: var(--font-display);
+            font-weight: bold;
+            color: var(--text-price);
+        }
+
+        .oh-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .oh-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            flex: 1;
+        }
+
+        @@media (max-width: 480px) {
+            .oh-footer {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .oh-actions {
+                justify-content: stretch;
+            }
+
+            .oh-actions>* {
+                flex: 1;
+            }
+        }
+    </style>
+
+}
+
+<div class="container container-center" data-limit-container>
+    <h2 class="title">Order History</h2>
+
+    <div class="custom-tick-container center-text bold-text">
+        <label>
+            <input type="radio" name="status" checked>
+            <div>
+                <div class="text">All Orders</div>
+            </div>
+        </label>
+        <label>
+            <input type="radio" name="status">
+            <div>
+                <div class="text">To Pay</div>
+            </div>
+        </label>
+        <label>
+            <input type="radio" name="status">
+            <div>
+                <div class="text">To Pickup</div>
+            </div>
+        </label>
+        <label>
+            <input type="radio" name="status">
+            <div>
+                <div class="text">Completed</div>
+            </div>
+        </label>
+        <label>
+            <input type="radio" name="status">
+            <div>
+                <div class="text">Cancelled</div>
+            </div>
+        </label>
+    </div>
+    <div class="order-history-card">
+        <div class="oh-header">
+            <span class="title"> #ORD-123</span>
+            <div class="status-text-container warning">To Pay</div>
+        </div>
+
+        <div class="oh-body">
+            <div class="info">
+                <div class="title">
+                    Burger King
+                </div>
+                <span>24 Oct 2023, 10:30 AM</span>
+                <span>3 items</span>
+
+            </div>
+            <div class="oh-price">RM 45.50</div>
+        </div>
+
+        <div class="oh-footer">
+            <button data-button="info">Details</button>
+            <div class="oh-actions">
+                <button data-button="danger">Cancel</button>
+                <button data-button="accent">Pay Now</button>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="order-history-card">
+        <div class="oh-header">
+            <span class="title"> #ORD-123</span>
+            <div class="status-text-container completed">Completed</div>
+        </div>
+
+        <div class="oh-body">
+            <div class="info">
+                <div class="title">
+                    Burger King
+                </div>
+                <span>24 Oct 2023, 10:30 AM</span>
+                <span>3 items</span>
+
+            </div>
+            <div class="oh-price">RM 45.50</div>
+        </div>
+
+        <div class="oh-footer">
+            <button data-button="info">Details</button>
+            <div class="oh-actions">
+                <button data-button="primary">Reorder</button>
+                <button data-button="success">Rate</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -466,3 +466,13 @@ public class ManageOrderVM
     public List<string> AvailableStatuses { get; set; } = [];
     public IPagedList<Order> Results { get; set; }
 }
+
+public class OrderCustomerVM
+{
+    public string Id { get; set; }
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+    [DisplayName("Contact Number")]
+    [RegularExpression(@"^01\d-\d{7,8}$", ErrorMessage = "{0} must be in the format 01X-XXXXXXX")]
+    public string ContactNumber { get; set; }
+}
