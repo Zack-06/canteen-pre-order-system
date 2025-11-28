@@ -1,6 +1,5 @@
 @section head {
-    <style>
-        .custom-tick-container {
+    @* .custom-tick-container {
             margin-bottom: 1rem !important;
         }
 
@@ -88,25 +87,179 @@
             .oh-actions>* {
                 flex: 1;
             }
+        } *@
+
+
+    <style>
+        .order-history-card {
+            width: 100%;
+            padding: 1rem;
+            background-color: var(--bg-card);
+            border-radius: 0.25rem;
+            transition: all 0.3s ease;
+            overflow: hidden;
+            user-select: none;
+            position: relative;
+            text-decoration: none !important;
+            font-family: var(--font-display);
+            color: var(--text-primary) !important;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            grid-template-rows: auto 0.75rem auto auto auto auto 1rem;
+            column-gap: 0.5rem;
+            grid-template-areas:
+                "id id status"
+                ". . ."
+                "store store price"
+                "created-at created-at price"
+                "pickup-at pickup-at price"
+                "total-items total-items price"
+                ". . ."
+                "start-button middle-button end-button"
+            ;
+        }
+
+        @@media (max-width: 480px) {
+            .order-history-card {
+                grid-template-rows: auto 0.75rem auto auto auto auto 1rem auto 0.5rem;
+                grid-template-areas:
+                    "id id status"
+                    ". . ."
+                    "store store price"
+                    "created-at created-at price"
+                    "pickup-at pickup-at price"
+                    "total-items total-items price"
+                    ". . ."
+                    ". . middle-button"
+                    ". . ."
+                    "start-button . end-button"
+                ;
+            }
+        }
+
+        .order-history-card * {
+            height: max-content;
+        }
+
+        .order-history-card .id {
+            grid-area: id;
+            font-family: var(--font-display);
+            font-weight: var(--font-weight-bold);
+            margin-right: 1rem;
+            overflow-wrap: break-word;
+        }
+
+        .order-history-card .status-text-container {
+            grid-area: status;
+            justify-self: end;
+            width: max-content;
+        }
+
+        .order-history-card .store {
+            grid-area: store;
+            font-weight: var(--font-weight-semibold);
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-right: 1rem;
+            overflow-wrap: break-word;
+        }
+
+        .order-history-card .price {
+            grid-area: price;
+            color: var(--text-price);
+            text-shadow: var(--shadow-price);
+            font-size: 1.1rem;
+            font-weight: var(--font-weight-medium);
+            justify-self: end;
+            width: max-content;
+        }
+
+        .order-history-card .price::before {
+            content: "RM";
+            color: var(--text-price);
+            font-family: var(--font-primary);
+            font-size: 0.8rem;
+            font-weight: var(--font-weight-bold);
+            margin-right: 0.25rem;
+        }
+
+        .order-history-card .created-at,
+        .order-history-card .pickup-at,
+        .order-history-card .total-items {
+            grid-area: created-at;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-right: 1rem;
+            overflow-wrap: break-word;
+        }
+
+        .order-history-card .pickup-at {
+            grid-area: pickup-at;
+        }
+
+        .order-history-card .total-items {
+            grid-area: total-items;
+        }
+
+        .order-history-card .created-at::before {
+            content: "Created At: ";
+        }
+
+        .order-history-card .pickup-at::before {
+            content: "Pickup At: ";
+        }
+
+        .order-history-card .total-items::before {
+            content: "Total Items: ";
+        }
+
+        .order-history-card .start-button {
+            grid-area: start-button;
+            width: max-content;
+        }
+
+        .order-history-card .middle-button {
+            grid-area: middle-button;
+            justify-self: end;
+            width: max-content;
+        }
+
+        .order-history-card .end-button {
+            grid-area: end-button;
+            justify-self: end;
+            width: 100%;
         }
     </style>
 
 }
 
-<div class="container container-center" data-limit-container>
-    <h2 class="title">Order History</h2>
+<div class="container" data-limit-container>
+    <div class="title">Order History</div>
 
-    <div class="custom-tick-container center-text bold-text">
+    <div class="container custom-tick-container center-items center-text" data-specified-width="big"
+        data-no="padding color">
         <label>
             <input type="radio" name="status" checked>
             <div>
-                <div class="text">All Orders</div>
+                <div class="text">All</div>
             </div>
         </label>
         <label>
             <input type="radio" name="status">
             <div>
-                <div class="text">To Pay</div>
+                <div class="text">Pending</div>
+            </div>
+        </label>
+        <label>
+            <input type="radio" name="status">
+            <div>
+                <div class="text">Confirmed</div>
+            </div>
+        </label>
+        <label>
+            <input type="radio" name="status">
+            <div>
+                <div class="text">Preparing</div>
             </div>
         </label>
         <label>
@@ -128,58 +281,24 @@
             </div>
         </label>
     </div>
-    <div class="order-history-card">
-        <div class="oh-header">
-            <span class="title"> #ORD-123</span>
-            <div class="status-text-container warning">To Pay</div>
-        </div>
 
-        <div class="oh-body">
-            <div class="info">
-                <div class="title">
-                    Burger King
-                </div>
-                <span>24 Oct 2023, 10:30 AM</span>
-                <span>3 items</span>
+    <div class="container" data-no="padding color" data-flex="gap column center" data-result-container>
+        @for (int i = 0; i < 0; i++)
+        {
+            var card = new OrderHistoryCardDM
+            {
+                Id = "ajkfjwaelkfjlkwajflkwajflkjwalkfejwalkjfelkwajfelk",
+                Store = "Burger King",
+                CreatedAt = DateTime.Now,
+                PickupAt = DateTime.Now,
+                TotalItems = 100,
+                TotalPrice = 100.00m,
+                Status = "Confirmed",
+            };
 
-            </div>
-            <div class="oh-price">RM 45.50</div>
-        </div>
-
-        <div class="oh-footer">
-            <button data-button="info">Details</button>
-            <div class="oh-actions">
-                <button data-button="danger">Cancel</button>
-                <button data-button="accent">Pay Now</button>
-            </div>
-        </div>
+            <partial name="_HistoryCard" model="@card" />
+        }
     </div>
 
-
-    <div class="order-history-card">
-        <div class="oh-header">
-            <span class="title"> #ORD-123</span>
-            <div class="status-text-container completed">Completed</div>
-        </div>
-
-        <div class="oh-body">
-            <div class="info">
-                <div class="title">
-                    Burger King
-                </div>
-                <span>24 Oct 2023, 10:30 AM</span>
-                <span>3 items</span>
-
-            </div>
-            <div class="oh-price">RM 45.50</div>
-        </div>
-
-        <div class="oh-footer">
-            <button data-button="info">Details</button>
-            <div class="oh-actions">
-                <button data-button="primary">Reorder</button>
-                <button data-button="success">Rate</button>
-            </div>
-        </div>
-    </div>
+    <partial name="_NoResults" model="@("No history found")" />
 </div>

@@ -99,4 +99,9 @@ public class FormatService
             return $"{hours} hr";
         return $"{minutes} min";
     }
+
+    public static string ToStatusClassFormat(string status)
+    {
+        return status.ToLower().Replace(" ", "-");
+    }
 }

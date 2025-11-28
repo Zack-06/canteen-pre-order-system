@@ -1209,15 +1209,16 @@ body:has(.overlay.show) {
 	display: grid;
 	grid-template-columns: repeat(auto-fit, minmax(min(var(--width-custom-tick), 100%), 1fr));
 }
-.custom-tick-container.grid.specified-width {
+.custom-tick-container.grid[data-specified-width] {
 	grid-template-columns: repeat(auto-fit, minmax(min(var(--width-custom-tick), 100%), 5rem));
 }
-.custom-tick-container.specified-width label {
+.custom-tick-container[data-specified-width] label {
 	flex: unset;
 	width: 5rem;
 }
-.custom-tick-container.specified-width.big-text label {
-	width: 8rem;
+.custom-tick-container[data-specified-width="big"] label,
+.custom-tick-container[data-specified-width].big-text label {
+    width: 8rem;
 }
 
 /* Manage Container Query */
@@ -1433,15 +1434,17 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	--status-text-container-bg: var(--status-error-bg);
 	--status-text-container-color: var(--status-error-text);
 }
-.status-text-container.banned {
+.status-text-container.banned,
+.status-text-container.pending {
 	--status-text-container-bg: var(--status-disabled-bg);
 	--status-text-container-color: var(--status-disabled-text);
 }
-.status-text-container.preparing {
+.status-text-container.to-pickup {
 	--status-text-container-bg: var(--status-warning-bg);
 	--status-text-container-color: var(--status-warning-text);
 }
-.status-text-container.confirmed {
+.status-text-container.confirmed,
+.status-text-container.preparing {
     --status-text-container-bg: var(--status-info-bg);
     --status-text-container-color: var(--status-info-text);
 }

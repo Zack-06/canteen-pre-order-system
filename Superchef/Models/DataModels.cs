@@ -63,3 +63,14 @@ public record SummaryContainerDM
     public string? ExitText { get; set; }
     public string ExitLink { get; set; }
 }
+
+public record OrderHistoryCardDM
+{
+    public string Id { get; set; }
+    public string Status { get; set; }
+    public string Store { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime? PickupAt { get; set; }
+    public int TotalItems { get; set; }
+    public decimal TotalPrice { get; set; }
+}

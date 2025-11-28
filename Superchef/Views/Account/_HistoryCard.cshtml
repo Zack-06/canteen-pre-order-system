@@ -1,0 +1,34 @@
+@model OrderHistoryCardDM
+
+<div class="order-history-card">
+    <div class="id">@Model.Id</div>
+    <div class="status-text-container @FormatService.ToStatusClassFormat(Model.Status)">@Model.Status</div>
+    <div class="store">@Model.Store</div>
+    <div class="created-at">@FormatService.ToDateTimeFormat(Model.CreatedAt)</div>
+
+    @if (Model.PickupAt != null)
+    {
+        <div class="pickup-at">@FormatService.ToDateTimeFormat(Model.PickupAt.Value)</div>
+    }
+    <div class="total-items">@Model.TotalItems</div>
+    <div class="price">@FormatService.ToRMFormat(Model.TotalPrice, false)</div>
+
+    @if (Model.Status != "Pending")
+    {
+        <a href="/Order/Info/@Model.Id" data-button="info" class="start-button">Details</a>
+    }
+
+    @if (Model.Status == "Pending" || Model.Status == "Confirmed")
+    {
+        <a href="/Order/Cancel/@Model.Id" data-button="danger" class="middle-button">Cancel</a>
+    }
+
+    @if (Model.Status == "Pending")
+    {
+        <a href="/Order/Customer/@Model.Id" data-button="accent" class="end-button">Continue</a>
+    }
+    else
+    {
+        <a href="/Order/Reorder/@Model.Id" data-button class="end-button">Reorder</a>
+    }
+</div>
