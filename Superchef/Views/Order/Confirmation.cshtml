@@ -10,7 +10,7 @@
         TotalPrice = 25.50m,
         TotalItems = 3,
         ExitLink = "/Order/Slot",
-        ExitText = "Back",
+        SubmitText = "Pay",
     };
 }
 
@@ -66,8 +66,7 @@
                 Name = "Nasi Lemak",
                 Variant = "Spicy",
                 Quantity = 1,
-                Subtotal =
-            12.00m,
+                Subtotal = 12.00m,
                 Link = null
             };
             var mockItem2 = new OrderItemCardDM
@@ -76,8 +75,7 @@
                 Name = "Teh Tarik",
                 Variant = "Less Sweet",
                 Quantity = 2,
-                Subtotal
-            = 6.50m,
+                Subtotal = 6.50m,
                 Link = null
             };
         }
@@ -86,6 +84,6 @@
     </div>
 </div>
 
-<form method="post" data-expired-timestamp="1764073738459" data-sticky-bottom>
+<form method="post" data-expired-timestamp="1764298333874" data-sticky-bottom>
     <partial name="_SummaryContainer" model="summary" />
 </form>
