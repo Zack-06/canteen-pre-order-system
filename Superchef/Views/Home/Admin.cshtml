@@ -1,0 +1,303 @@
+@{
+    ViewBag.Title = "Home | Superchef";
+}
+
+@section head {
+    <style>
+        main>.container {
+            display: grid;
+            grid-template-rows: repeat(3, max-content);
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            grid-template-areas:
+                "sales orders customers"
+                "performance performance devices"
+                "activity activity activity"
+            ;
+        }
+
+        main>.container>.container {
+            height: 100%;
+            border: 1px solid var(--border-primary);
+        }
+
+        .sales-container {
+            grid-area: sales;
+        }
+
+        .orders-container {
+            grid-area: orders;
+        }
+
+        .customers-container {
+            grid-area: customers;
+        }
+
+        .performance-container {
+            grid-area: performance;
+        }
+
+        .devices-container {
+            grid-area: devices;
+        }
+
+        .activity-container {
+            grid-area: activity;
+        }
+
+        .stat-container {
+            display: grid;
+            grid-template-rows: auto auto 1fr auto;
+            grid-template-areas:
+                "title"
+                "value"
+                "."
+                "trend";
+        }
+
+        .stat-container .title {
+            grid-area: title;
+        }
+
+        .stat-container .value {
+            grid-area: value;
+            font-size: 2rem;
+            font-family: var(--font-display);
+            font-weight: bold;
+            color: var(--color-primary);
+        }
+
+        .stat-container .trend {
+            grid-area: trend;
+            color: var(--status-success-text);
+            margin-top: 1rem;
+        }
+
+        .stat-container .trend::before {
+            content: "▲ ";
+        }
+
+        .stat-container .trend.down {
+            color: var(--status-error-text);
+        }
+
+        .stat-container .trend.down::before {
+            content: "▼ ";
+        }
+
+        canvas {
+            width: 100% !important;
+            height: unset !important;
+            max-height: unset !important;
+        }
+
+        .log-item {
+            display: grid;
+            grid-template-columns: max-content 1fr max-content;
+            grid-template-areas:
+                "icon name time"
+                "icon details time";
+            column-gap: 1rem;
+            padding: 1rem;
+            background-color: var(--bg-card);
+            align-items: center;
+            width: 100%;
+        }
+
+        .log-item h4 {
+            grid-area: name;
+            margin: 0;
+            font-family: var(--font-primary);
+            font-size: 1rem;
+        }
+
+        .log-item p {
+            grid-area: details;
+            margin: 0.2rem 0;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .log-item span {
+            grid-area: time;
+            margin: 0.2rem 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .log-item .icon {
+            grid-area: icon;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            background-color: var(--bg-pure);
+            display: grid;
+            place-items: center;
+            font-size: 1.2rem;
+        }
+
+        @@media (max-width: 900px) {
+            main>.container {
+                grid-template-rows: repeat(5, max-content);
+                grid-template-columns: repeat(2, 1fr);
+                grid-template-areas:
+                    "sales devices"
+                    "orders devices"
+                    "customers devices"
+                    "performance performance"
+                    "activity activity"
+                ;
+            }
+
+        }
+
+        @@media (max-width: 600px) {
+            main>.container {
+                grid-template-rows: repeat(6, max-content);
+                grid-template-columns: 1fr;
+                grid-template-areas:
+                    "sales"
+                    "orders"
+                    "customers"
+                    "devices"
+                    "performance"
+                    "activity"
+                ;
+            }
+
+            canvas {
+                max-height: 40vh !important;
+            }
+        }
+    </style>
+}
+
+<div class="container" data-no="padding color">
+    <div class="container stat-container sales-container" data-no="margin">
+        <div class="title normal" data-no="margin">Total Sales</div>
+        <div class="value">RM 12,540</div>
+        <div class="trend">12.8% this month</div>
+    </div>
+
+    <div class="container stat-container orders-container" data-no="margin">
+        <div class="title normal" data-no="margin">Completed Orders</div>
+        <div class="value">309</div>
+        <div class="trend">21.5% this month</div>
+    </div>
+
+    <div class="container stat-container customers-container" data-no="margin">
+        <div class="title normal" data-no="margin">New Customers</div>
+        <div class="value">48</div>
+        <div class="trend down">5.2% this month</div>
+    </div>
+
+    <div class="container performance-container" data-no="margin">
+        <div class="title">Sales Performance (30 Days)</div>
+        <canvas id="order-frequency" data-months="1,2,3,4,5" data-orders="12,19,3,5,2"></canvas>
+    </div>
+
+    <div class="container devices-container" data-no="margin">
+        <div class="title">Login Devices</div>
+        <canvas id="login-devices" data-devices="Phone,Computer,Tablet" data-devices-count="65,40,15"></canvas>
+    </div>
+
+    <div class="container activity-container" data-no="margin">
+        <div class="title">Activity Log</div>
+
+        <div class="container" data-no="padding color" data-flex="gap column center" data-result-container>
+            @for (int i = 0; i < 3; i++)
+            {
+                var card = new ActivityLogCardDM
+                {
+                    Icon = "💀",
+                    Name = "Admin name",
+                    Details = "Created vendor with ID 2",
+                    CreatedAt = DateTime.Now,
+                };
+
+                <partial name="_ActivityLogCard" model="@card" />
+            }
+        </div>
+
+        <partial name="_NoResults" model="@("No activity log found")" />
+    </div>
+</div>
+
+@section foot {
+    <script src="/js/chart.min.js"></script>
+    <script>
+        // Line Graph
+        const orderCtx = $("#order-frequency")[0].getContext("2d");
+        const orderCanvas = $("#order-frequency");
+
+        new Chart(orderCtx, {
+            type: "line",
+            data: {
+                labels: orderCanvas.data("months").toString().split(","),
+                datasets: [
+                    {
+                        label: " Orders",
+                        data: orderCanvas.data("orders").toString().split(","),
+                        borderColor: "#a38576",
+                        borderWidth: 3,
+                        tension: 0.35,
+                        fill: false,
+                        pointBackgroundColor: "#fff",
+                        pointBorderColor: "#a38576",
+                        pointRadius: 4
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                scales: {
+                    y: {
+                        type: "linear",
+                        beginAtZero: true,
+                        title: { display: true, text: "Orders", color: "black" },
+                        ticks: { color: "black" },
+                        grid: { color: "#cccccc" }
+                    },
+                    x: {
+                        ticks: { color: "black" },
+                        grid: { color: "#cccccc" }
+                    }
+                },
+                plugins: { legend: { display: false } }
+            }
+        });
+
+        // Pie Chart
+        const deviceCtx = $("#login-devices")[0].getContext("2d");
+        const deviceCanvas = $("#login-devices");
+
+        new Chart(deviceCtx, {
+            type: "doughnut",
+            data: {
+                labels: deviceCanvas.data("devices").toString().split(","),
+                datasets: [
+                    {
+                        label: " Login Count",
+                        data: deviceCanvas.data("devices-count").toString().split(","),
+                        backgroundColor: ["#613c25", "#a38576", "#d6c9ba"],
+                        borderWidth: 0
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: true,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            color: "black",
+                            font: { family: '"Bahnschrift", sans-serif' }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+}

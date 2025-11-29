@@ -31,6 +31,7 @@ public class DB : DbContext
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<Payment> Payments { get; set; }
+    public DbSet<AuditLog> AuditLogs { get; set; }
 }
 
 #nullable disable warnings
@@ -111,6 +112,7 @@ public class Account
     public List<Review> Reviews { get; set; } = [];
     public List<Favourite> Favourites { get; set; } = [];
     public List<Order> Orders { get; set; } = [];
+    public List<AuditLog> AuditLogs { get; set; } = [];
 }
 
 public class Device
@@ -374,4 +376,64 @@ public class Payment
     public string OrderId { get; set; }
 
     public Order Order { get; set; }
+}
+
+public class AuditLog
+{
+    public int Id { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public string Action { get; set; }
+    public string Entity { get; set; }
+    public int EntityId { get; set; }
+    public int AccountId { get; set; }
+    [NotMapped]
+    public string Details
+    {
+        get
+        {
+            // customer / vendor
+            if (Action == "ban") return $"Banned {Entity} with ID {EntityId}";
+
+            // customer / vendor
+            if (Action == "unban") return $"Unbanned {Entity} with ID {EntityId}";
+
+            // customer / vendor
+            if (Action == "revoke") return $"Restored {Entity} with ID {EntityId}";
+
+            // customer / vendor / admin
+            if (Action == "timeout") return $"Removed timeout for {Entity} with ID {EntityId}";
+
+            // customer / vendor / admin
+            if (Action == "logout") return $"Logged out {Entity} with ID {EntityId} from all devices";
+
+            // vendor / admin / category / venue
+            if (Action == "create") return $"Created {Entity} with ID {EntityId}";
+
+            // vendor / admin / category / venue
+            if (Action == "delete") return $"Deleted {Entity} with ID {EntityId}";
+
+            // category / venue
+            if (Action == "update") return $"Updated {Entity} with ID {EntityId}";
+
+            return "Unknown action";
+        }
+    }
+    [NotMapped]
+    public string Icon
+    {
+        get
+        {
+            if (Action == "ban") return "🚫";
+            if (Action == "unban") return "🔓";
+            if (Action == "revoke") return "♻️";
+            if (Action == "timeout") return "⏳";
+            if (Action == "logout") return "🚪";
+            if (Action == "create") return "➕";
+            if (Action == "delete") return "🗑️";
+            if (Action == "update") return "✏️";
+            return "💀";
+        }
+    }
+
+    public Account Account { get; set; }
 }

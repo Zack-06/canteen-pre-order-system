@@ -21,6 +21,53 @@ function responsiveSetup() {
 responsiveSetup()
 window.addEventListener("resize", responsiveSetup)
 
+// ==========Pagination Responsive Setup==========
+function paginationResponsiveSetup() {
+	const containers = $(".pagination-container")
+	containers.each((index, container) => {
+		const pages = $(container).find("li:not(:has(.paging-symbol))")
+		const active = $(container).find("li.active")
+		const activeIndex = pages.index(active)
+		const totalPages = pages.length
+
+		// show all pages
+		pages.each((index, page) => {
+			$(page).css("display", "inline-block")
+		})
+
+		// Only apply when overflow
+		if (container.scrollWidth > container.clientWidth) {
+			if (totalPages <= 3) return // do nothing
+
+			if (totalPages === 4) { // remove 1 page enough to get 3 pages
+				if (activeIndex <= 1) {
+					// if 1 or 2 active, remove last
+					pages.eq(3).css("display", "none")
+				} else {
+					// if 3 or 4 active, remove first
+					pages.eq(0).css("display", "none")
+				}
+			} else if (totalPages === 5) { // remove 2 pages to get 3 pages
+				if (activeIndex <= 1) {
+					// if 1 or 2 active, remove last 2
+					pages.eq(3).css("display", "none")
+					pages.eq(4).css("display", "none")
+				} else if (activeIndex === 2) {
+					// if 3 active, remove first & last
+					pages.eq(0).css("display", "none")
+					pages.eq(4).css("display", "none")
+				} else {
+					// if 4 or 5 active, remove first 2
+					pages.eq(0).css("display", "none")
+					pages.eq(1).css("display", "none")
+				}
+			}
+		}
+	})
+}
+paginationResponsiveSetup()
+window.addEventListener("resize", paginationResponsiveSetup)
+
 // ==========Toast Message==========
 const toast_message = $(".toast-container").data("toast-message")
 if (toast_message) {
@@ -286,13 +333,13 @@ function formatCents(cents) {
 
 // ==========Input Clean==========
 $("input[data-clean]").on("input", function () {
-    let value = $(this).val().toLowerCase().replace(/\s+/g, "-")
-    const originalValue = value
-    
+	let value = $(this).val().toLowerCase().replace(/\s+/g, "-")
+	const originalValue = value
+
 	value = value.replace(/[^a-z0-9-]/g, "") // remove other characters
 	$(this).val(value)
 
-    if (value !== originalValue) showToast("Only lowercase letters, numbers and hyphens are allowed")
+	if (value !== originalValue) showToast("Only lowercase letters, numbers and hyphens are allowed")
 })
 
 // ==========Input Keyword==========

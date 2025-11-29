@@ -1,0 +1,8 @@
+@model ActivityLogCardDM
+
+<div class="log-item">
+    <div class="icon">@Model.Icon</div>
+    <h4>@Model.Name</h4>
+    <p>@Model.Details</p>
+    <span>@FormatService.GetRelativeTime(Model.CreatedAt)</span>
+</div>

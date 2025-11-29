@@ -74,3 +74,11 @@ public record OrderHistoryCardDM
     public int TotalItems { get; set; }
     public decimal TotalPrice { get; set; }
 }
+
+public record ActivityLogCardDM
+{
+    public string Icon { get; set; }
+    public string Name { get; set; }
+    public string Details { get; set; }
+    public DateTime CreatedAt { get; set; }
+}

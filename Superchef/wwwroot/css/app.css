@@ -685,7 +685,7 @@ footer .social-media-icons a:hover {
 	margin-bottom: 2rem;
 }
 .container > .title[data-no~="margin"] {
-	margin-bottom: 0;
+	margin-bottom: 0 !important;
 }
 .container > .title.normal {
 	font-family: var(--font-primary);
@@ -1500,7 +1500,6 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 .pagination {
 	display: flex;
 	row-gap: 0.5rem;
-	flex-wrap: wrap;
 	justify-content: center;
 	align-items: center;
 }

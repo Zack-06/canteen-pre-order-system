@@ -116,6 +116,38 @@ namespace Superchef.Migrations
                     b.ToTable("AccountTypes");
                 });
 
+            modelBuilder.Entity("Superchef.Models.AuditLog", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccountId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Entity")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EntityId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccountId");
+
+                    b.ToTable("AuditLogs");
+                });
+
             modelBuilder.Entity("Superchef.Models.Cart", b =>
                 {
                     b.Property<int>("VariantId")
@@ -655,6 +687,17 @@ namespace Superchef.Migrations
                     b.Navigation("AccountType");
                 });
 
+            modelBuilder.Entity("Superchef.Models.AuditLog", b =>
+                {
+                    b.HasOne("Superchef.Models.Account", "Account")
+                        .WithMany("AuditLogs")
+                        .HasForeignKey("AccountId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Account");
+                });
+
             modelBuilder.Entity("Superchef.Models.Cart", b =>
                 {
                     b.HasOne("Superchef.Models.Account", "Account")
@@ -868,6 +911,8 @@ namespace Superchef.Migrations
 
             modelBuilder.Entity("Superchef.Models.Account", b =>
                 {
+                    b.Navigation("AuditLogs");
+
                     b.Navigation("Carts");
 
                     b.Navigation("Devices");
