@@ -80,6 +80,11 @@ public class StoreController : Controller
         return View();
     }
 
+    public IActionResult Scan(int id)
+    {
+        return View(id);
+    }
+
     public IActionResult ConnectStripe()
     {
         string clientId = cf["Stripe:ClientId"] ?? "";
@@ -113,5 +118,21 @@ public class StoreController : Controller
         return stripeAccountId;
 
         // return RedirectToAction("StripeLinkedSuccess");
+    }
+
+
+    // ==========Remote==========
+    public IActionResult ScanChallenge(int? id, string? orderId)
+    {
+        if (id == null || orderId == null)
+        {
+            return BadRequest();
+        }
+
+        return Ok(new
+        {
+            status = "error",
+            errorMessage = "Invalid order ID"
+        });
     }
 }

@@ -1,0 +1,127 @@
+@model int
+
+@section head {
+    <style>
+        main>.container {
+            width: max-content;
+        }
+
+        #loading-message,
+        #output-message {
+            background-color: var(--bg-card);
+        }
+
+        canvas {
+            margin: auto;
+            max-height: 70vh;
+            margin-bottom: 1rem;
+        }
+    </style>
+}
+
+<div class="container" data-flex="center column">
+    <div class="title">Scan QR Code</div>
+
+    <div class="container" id="loading-message">
+        🎥 Unable to access video stream (please make sure you have a webcam enabled)
+    </div>
+
+    <canvas hidden></canvas>
+
+    <div class="container" id="output-message" hidden>
+        No QR code detected
+    </div>
+</div>
+
+@section foot {
+    <script src="/js/jsQr.min.js"></script>
+    <script>
+        var video = document.createElement("video");
+        var canvasElement = $("canvas")[0];
+        var canvas = canvasElement.getContext("2d");
+        var loadingMessage = $("#loading-message")[0];
+        var outputMessage = $("#output-message")[0];
+        var triedId = {};
+
+        function drawLine(begin, end, color) {
+            canvas.beginPath();
+            canvas.moveTo(begin.x, begin.y);
+            canvas.lineTo(end.x, end.y);
+            canvas.lineWidth = 4;
+            canvas.strokeStyle = color;
+            canvas.stroke();
+        }
+
+        // Use facingMode: environment to attemt to get the front camera on phones
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } }).then(function (stream) {
+            video.srcObject = stream;
+            video.setAttribute("playsinline", true); // required to tell iOS safari we don't want fullscreen
+            video.play();
+            requestAnimationFrame(tick);
+        });
+
+        async function tick() {
+            loadingMessage.innerText = "⌛ Loading video..."
+            if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                loadingMessage.hidden = true;
+                canvasElement.hidden = false;
+                outputMessage.hidden = false;
+
+                canvasElement.height = video.videoHeight;
+                canvasElement.width = video.videoWidth;
+                canvas.drawImage(video, 0, 0, canvasElement.width, canvasElement.height);
+                var imageData = canvas.getImageData(0, 0, canvasElement.width, canvasElement.height);
+                var code = jsQR(imageData.data, imageData.width, imageData.height, {
+                    inversionAttempts: "dontInvert",
+                });
+
+
+
+                if (code) {
+                    drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
+                    drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
+                    drawLine(code.location.bottomRightCorner, code.location.bottomLeftCorner, "#FF3B58");
+                    drawLine(code.location.bottomLeftCorner, code.location.topLeftCorner, "#FF3B58");
+
+                    if (triedId[code.data] == null) {
+                        triedId[code.data] = {
+                            error: null,
+                            startTime: null
+                        }
+                    }
+
+                    if (triedId[code.data].error) {
+                        outputMessage.innerText = triedId[code.data].error
+                    } else {
+                        if (triedId[code.data].startTime == null) {
+                            triedId[code.data].startTime = Date.now()
+                        } else if (Date.now() - triedId[code.data].startTime > 1000) { // 1 second
+                            outputMessage.innerText = "Verifing..."
+
+                            try {
+                                const request = await fetch(`/Store/ScanChallenge?id=@Model&orderId=${code.data}`)
+                                const data = await request.json()
+
+                                if (data.status === "success") {
+                                    outputMessage.innerText = "Success"
+                                    redirectToPage(`/Order/Edit/${code.data}`)
+                                } else if (data.status === "error") {
+                                    triedId[code.data].error = `Error: ${data.errorMessage}`
+                                    outputMessage.innerText = triedId[code.data].error
+                                }
+                            } catch (e) {
+                                console.error(e)
+                            }
+                        }
+                    }
+                } else {
+                    for (const key in triedId) {
+                        triedId[key].startTime = null
+                    }
+                    outputMessage.innerText = "No QR code detected"
+                }
+            }
+            requestAnimationFrame(tick);
+        }
+    </script>
+}
