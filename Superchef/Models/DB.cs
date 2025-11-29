@@ -169,7 +169,7 @@ public class Store
     public string Name { get; set; }
     [MaxLength(100)]
     public string Slug { get; set; }
-    [MaxLength(500)]
+    [MaxLength(1000)]
     public string Description { get; set; }
     [MaxLength(50)]
     public string? Image { get; set; }
@@ -195,7 +195,7 @@ public class Item
     public string Name { get; set; }
     [MaxLength(100)]
     public string Slug { get; set; }
-    [MaxLength(500)]
+    [MaxLength(1000)]
     public string Description { get; set; }
     [MaxLength(50)]
     public string Image { get; set; }
@@ -230,11 +230,10 @@ public class Item
 public class Keyword
 {
     public int Id { get; set; }
-    [MaxLength(50)]
+    [MaxLength(30)]
     public string Word { get; set; }
-    public int ItemId { get; set; }
 
-    public Item Item { get; set; }
+    public List<Item> Items { get; set; } = [];
 }
 
 public class Variant

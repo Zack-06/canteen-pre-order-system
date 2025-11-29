@@ -97,9 +97,9 @@ public class AccountProfileVM
     public string? Email { get; set; }
     public bool RemoveImage { get; set; }
     [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
-    public double ImageScale { get; set; }
-    public double ImageX { get; set; }
-    public double ImageY { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
     public double PreviewWidth { get; set; }
     public double PreviewHeight { get; set; }
     public IFormFile? Image { get; set; }
@@ -284,9 +284,9 @@ public class AddCategoryVM
 {
     [MaxLength(50)]
     public string Name { get; set; }
-    public double ImageScale { get; set; }
-    public double ImageX { get; set; }
-    public double ImageY { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
     public IFormFile? Image { get; set; }
 }
 
@@ -295,9 +295,9 @@ public class EditCategoryVM
     public int Id { get; set; }
     [MaxLength(50)]
     public string Name { get; set; }
-    public double ImageScale { get; set; }
-    public double ImageX { get; set; }
-    public double ImageY { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
     public IFormFile? Image { get; set; }
 }
 
@@ -349,20 +349,21 @@ public class ManageItemVM
 
 public class AddItemVM
 {
+    public int StoreId { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
     [Remote("IsSlugUnique", "Item", ErrorMessage = "{0} has been taken.")]
     public string Slug { get; set; }
-    [StringLength(500, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(1000, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Description { get; set; }
+    public List<string> Keywords { get; set; } = [];
     [Remote("CheckCategory", "Item", ErrorMessage = "{0} is not a valid category.")]
     public int Category { get; set; }
-    public List<string> Keywords { get; set; } = [];
-    public double ImageScale { get; set; }
-    public double ImageX { get; set; }
-    public double ImageY { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
     public IFormFile Image { get; set; }
 
     public List<SelectListItem> AvailableCategories { get; set; } = [];
@@ -378,13 +379,14 @@ public class EditItemVM
     [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
     [Remote("IsSlugUnique", "Item", AdditionalFields = "Id", ErrorMessage = "{0} has been taken.")]
     public string Slug { get; set; }
-    [StringLength(500, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(1000, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Description { get; set; }
+    public List<string> Keywords { get; set; } = [];
     [Remote("CheckCategory", "Item", ErrorMessage = "{0} is not a valid category.")]
     public int Category { get; set; }
-    public double ImageScale { get; set; }
-    public double ImageX { get; set; }
-    public double ImageY { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
     public IFormFile? Image { get; set; }
 
     public List<SelectListItem> AvailableCategories { get; set; } = [];
@@ -420,9 +422,9 @@ public class AddVariantVM
     [DisplayName("Stock Count")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
     public int StockCount { get; set; } = 0;
-    public double ImageScale { get; set; }
-    public double ImageX { get; set; }
-    public double ImageY { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
     public IFormFile Image { get; set; }
 }
 
@@ -438,9 +440,9 @@ public class EditVariantVM
     [DisplayName("Stock Count")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
     public int StockCount { get; set; } = 0;
-    public double ImageScale { get; set; }
-    public double ImageX { get; set; }
-    public double ImageY { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
     public IFormFile? Image { get; set; }
 }
 

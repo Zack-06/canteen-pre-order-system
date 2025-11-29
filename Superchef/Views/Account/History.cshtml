@@ -1,95 +1,4 @@
 @section head {
-    @* .custom-tick-container {
-            margin-bottom: 1rem !important;
-        }
-
-        .order-history-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-primary);
-            border-radius: 0.25rem;
-            padding: 1rem;
-            margin-bottom: 1rem;
-            display: grid;
-            gap: 0.75rem;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .order-history-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-dropdown);
-            border-color: var(--border-active);
-        }
-
-        .oh-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .oh-header>.title {
-            font-family: var(--font-display);
-            font-weight: var(--font-weight-bold);
-            color: var(--text-primary);
-        }
-
-        .oh-body {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-        }
-
-
-        .info {
-            display: flex;
-            flex-direction: column;
-            gap: 0.25rem;
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-        }
-
-        .info>.title {
-            font-weight: var(--font-weight-semibold);
-            color: var(--text-primary);
-
-        }
-
-        .oh-price {
-            font-family: var(--font-display);
-            font-weight: bold;
-            color: var(--text-price);
-        }
-
-        .oh-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .oh-actions {
-            display: flex;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-            justify-content: flex-end;
-            flex: 1;
-        }
-
-        @@media (max-width: 480px) {
-            .oh-footer {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .oh-actions {
-                justify-content: stretch;
-            }
-
-            .oh-actions>* {
-                flex: 1;
-            }
-        } *@
-
-
     <style>
         .order-history-card {
             width: 100%;
@@ -283,7 +192,7 @@
     </div>
 
     <div class="container" data-no="padding color" data-flex="gap column center" data-result-container>
-        @for (int i = 0; i < 0; i++)
+        @for (int i = 0; i < 5; i++)
         {
             var card = new OrderHistoryCardDM
             {

@@ -284,6 +284,75 @@ function formatCents(cents) {
 	}
 }
 
+// ==========Input Clean==========
+$("input[data-clean]").on("input", function () {
+    let value = $(this).val().toLowerCase().replace(/\s+/g, "-")
+    const originalValue = value
+    
+	value = value.replace(/[^a-z0-9-]/g, "") // remove other characters
+	$(this).val(value)
+
+    if (value !== originalValue) showToast("Only lowercase letters, numbers and hyphens are allowed")
+})
+
+// ==========Input Keyword==========
+$("input[data-keyword]").on("keypress", function (e) {
+	if (e.key === "Enter") {
+		e.preventDefault()
+		addKeyword()
+	}
+})
+
+$(".keyword-add-button").on("click", addKeyword)
+
+function addKeyword() {
+	const $input = $("input[data-keyword]")
+	const $keywordContainer = $(".keywords-container")
+	const word = $input.val().toLowerCase()
+
+	if (word.length < 3) {
+		showToast("Keyword must be at least 3 characters")
+		return
+	}
+
+	if (word.length > 30) {
+		showToast("Keyword must be at most 30 characters")
+		return
+	}
+
+	if (!/^[a-z0-9-]+$/.test(word)) {
+		showToast("Keyword can only contain lowercase letters, numbers and hyphens")
+		return
+	}
+
+	const existingKeywords = $input
+		.closest("form")
+		.find("input[name='Keywords']")
+		.map(function () {
+			return $(this).val().toLowerCase()
+		})
+		.get()
+
+	if (existingKeywords.includes(word.toLowerCase())) {
+		showToast("Duplicate keyword is not allowed")
+		return
+	}
+
+	$keywordContainer.append(`
+        <div class="keyword">
+            <span>${word}</span>
+            <input type="hidden" name="Keywords" value="${word}" />
+        </div>
+    `)
+	$input.val("")
+	$input.focus()
+}
+
+$(document).on("click", ".keyword", removeKeyword)
+function removeKeyword() {
+	$(this).remove()
+}
+
 // ==========Formatting==========
 function toRMFormat(value) {
 	return value.toFixed(2)

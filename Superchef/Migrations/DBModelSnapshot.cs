@@ -22,6 +22,21 @@ namespace Superchef.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("ItemKeyword", b =>
+                {
+                    b.Property<int>("ItemsId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("KeywordsId")
+                        .HasColumnType("int");
+
+                    b.HasKey("ItemsId", "KeywordsId");
+
+                    b.HasIndex("KeywordsId");
+
+                    b.ToTable("ItemKeyword");
+                });
+
             modelBuilder.Entity("Superchef.Models.Account", b =>
                 {
                     b.Property<int>("Id")
@@ -217,8 +232,8 @@ namespace Superchef.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Image")
                         .IsRequired()
@@ -261,17 +276,12 @@ namespace Superchef.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Word")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("ItemId");
 
                     b.ToTable("Keywords");
                 });
@@ -482,8 +492,8 @@ namespace Superchef.Migrations
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Image")
                         .HasMaxLength(50)
@@ -572,11 +582,6 @@ namespace Superchef.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Image")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -622,6 +627,21 @@ namespace Superchef.Migrations
                     b.HasIndex("DeviceId");
 
                     b.ToTable("Verifications");
+                });
+
+            modelBuilder.Entity("ItemKeyword", b =>
+                {
+                    b.HasOne("Superchef.Models.Item", null)
+                        .WithMany()
+                        .HasForeignKey("ItemsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Superchef.Models.Keyword", null)
+                        .WithMany()
+                        .HasForeignKey("KeywordsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Superchef.Models.Account", b =>
@@ -701,17 +721,6 @@ namespace Superchef.Migrations
                     b.Navigation("Category");
 
                     b.Navigation("Store");
-                });
-
-            modelBuilder.Entity("Superchef.Models.Keyword", b =>
-                {
-                    b.HasOne("Superchef.Models.Item", "Item")
-                        .WithMany("Keywords")
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("Superchef.Models.Order", b =>
@@ -895,8 +904,6 @@ namespace Superchef.Migrations
                 {
                     b.Navigation("Favourites");
 
-                    b.Navigation("Keywords");
-
                     b.Navigation("Reviews");
 
                     b.Navigation("Variants");
@@ -906,7 +913,8 @@ namespace Superchef.Migrations
                 {
                     b.Navigation("OrderItems");
 
-                    b.Navigation("Payment");
+                    b.Navigation("Payment")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Superchef.Models.Slot", b =>

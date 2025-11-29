@@ -46,12 +46,13 @@ public class VenueController : Controller
         return View();
     }
 
-    public IActionResult Edit()
+    [HttpGet]
+    public IActionResult Edit(string id)
     {
         var vm = new EditVenueVM
         {
-            Id = 1,
-            Name = "abc",
+            Id = int.Parse(id),
+            Name = "abc"
         };
 
         return View(vm);

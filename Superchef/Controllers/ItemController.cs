@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace Superchef.Controllers;
 
@@ -58,13 +59,56 @@ public class ItemController : Controller
 
     public IActionResult Add(int storeId)
     {
-        // add new item
-        return View();
+        var vm = new AddItemVM
+        {
+            StoreId = storeId,
+
+            AvailableCategories = db.Categories.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
+        };
+
+        ViewBag.StoreName = "abc";
+
+        return View(vm);
     }
 
+    [HttpGet]
     public IActionResult Edit(int id)
     {
-        // edit item details
-        return View();
+        var vm = new EditItemVM
+        {
+            Id = id,
+            CreatedAt = DateTime.Now,
+            Name = "abc",
+            Slug = "abc",
+            Description = "abc",
+            Category = 1,
+            Keywords = ["abcde"],
+            Image = null,
+
+            AvailableCategories = db.Categories.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
+        };
+
+        ViewBag.StoreName = "abc";
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult Edit(EditItemVM vm)
+    {
+        Console.WriteLine("KEYWORDS");
+        Console.WriteLine(string.Join(",", vm.Keywords));
+
+        return View(vm);
+    }
+
+    // ==========REMOTE==========
+    public bool CheckCategory(int category, int? id)
+    {
+        return true;
+    }
+
+    public bool IsSlugUnique(string slug, int? id)
+    {
+        return true;
     }
 }

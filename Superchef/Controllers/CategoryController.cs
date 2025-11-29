@@ -51,10 +51,7 @@ public class CategoryController : Controller
         var vm = new EditCategoryVM
         {
             Id = 1,
-            Name = "abc",
-            ImageX = 1,
-            ImageY = 1,
-            ImageScale = 1,
+            Name = "abc"
         };
 
         ViewBag.ImageUrl = "abc";
