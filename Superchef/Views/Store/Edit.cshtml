@@ -95,6 +95,7 @@
             <input id="image-x" asp-for="ImageX" hidden>
             <input id="image-y" asp-for="ImageY" hidden>
             <input id="image-scale" asp-for="ImageScale" hidden>
+            <input id="change-image-checkbox" name="change-image-checkbox" type="checkbox" hidden>
 
             <div id="image-preview-container">
                 <img id="image-preview" src="/uploads/item/@ViewBag.ImageUrl" class="vertical-fit" />
@@ -111,7 +112,7 @@
         </div>
     </div>
 
-    <button data-button="success">Save Changes</button>
+    <button data-enable-on-change data-button="success" disabled>Save Changes</button>
 </form>
 
 <div class="container" data-limit-container>
@@ -167,6 +168,7 @@
                 $("#image-scale").val(uploadResult.scale)
                 updateImagePreview("#image-preview", $("#image-x").val(), $("#image-y").val(), $("#image-scale").val())
 
+                $("#change-image-checkbox").prop("checked", true).trigger("change")
                 $("#reset-image-button").prop("disabled", false)
             }
         })
@@ -184,6 +186,7 @@
             $("#image-preview").removeClass("horizontal-fit")
 
             $("#reset-image-button").prop("disabled", true)
+            $("#change-image-checkbox").prop("checked", false).trigger("change")
         })
     </script>
 }

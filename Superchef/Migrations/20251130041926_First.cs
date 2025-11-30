@@ -151,7 +151,7 @@ namespace Superchef.Migrations
                     Name = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     Slug = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
-                    Image = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: true),
+                    Image = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     StripeAccountId = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SlotMaxOrders = table.Column<int>(type: "int", nullable: false),
                     IsDeleted = table.Column<bool>(type: "bit", nullable: false),

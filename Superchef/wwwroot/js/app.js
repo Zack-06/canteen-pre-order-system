@@ -39,7 +39,8 @@ function paginationResponsiveSetup() {
 		if (container.scrollWidth > container.clientWidth) {
 			if (totalPages <= 3) return // do nothing
 
-			if (totalPages === 4) { // remove 1 page enough to get 3 pages
+			if (totalPages === 4) {
+				// remove 1 page enough to get 3 pages
 				if (activeIndex <= 1) {
 					// if 1 or 2 active, remove last
 					pages.eq(3).css("display", "none")
@@ -47,7 +48,8 @@ function paginationResponsiveSetup() {
 					// if 3 or 4 active, remove first
 					pages.eq(0).css("display", "none")
 				}
-			} else if (totalPages === 5) { // remove 2 pages to get 3 pages
+			} else if (totalPages === 5) {
+				// remove 2 pages to get 3 pages
 				if (activeIndex <= 1) {
 					// if 1 or 2 active, remove last 2
 					pages.eq(3).css("display", "none")
@@ -253,6 +255,24 @@ function detectFormChanges(formSelector, selectElements = "input", changedCallba
 		unchangedCallback()
 	}
 }
+
+/* ==========Enable On Change========== */
+$("button[data-enable-on-change]").each(function () {
+    const button = $(this)
+    button.prop("disabled", true)
+
+    const formSelector = button.data("enable-on-change") || "main form"
+	detectFormChanges(
+		formSelector,
+		"input, select, textarea",
+		function () {
+			button.prop("disabled", false)
+		},
+		function () {
+			button.prop("disabled", true)
+		}
+	)
+})
 
 /* ==========Filter Button========== */
 $(document).on("click", "#filter-button", function () {

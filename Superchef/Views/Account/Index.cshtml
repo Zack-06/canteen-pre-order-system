@@ -126,8 +126,7 @@
             </div>
 
             <div class="button-group" data-flex="column">
-                <button type="submit" id="account-submit-button" data-button="success" disabled>Save
-                    Changes</button>
+                <button data-enable-on-change type="submit" data-button="success" disabled>Save Changes</button>
                 <a href="/Account/ChangePassword" data-button="info">Change
                     Password</a>
 
@@ -223,18 +222,6 @@
         function deleteAccountSuccess(data) {
             window.location.href = `/Auth/Verify?Token=${data}`
         }
-
-        $("#account-submit-button").prop("disabled", true)
-        const formChanges = detectFormChanges(
-            "main form",
-            "input",
-            function () {
-                $("#account-submit-button").prop("disabled", false)
-            },
-            function () {
-                $("#account-submit-button").prop("disabled", true)
-            }
-        )
 
         const originalSrc = $("#profile-preview").attr("src")
         const noPfp = originalSrc === "/img/pfp.png"

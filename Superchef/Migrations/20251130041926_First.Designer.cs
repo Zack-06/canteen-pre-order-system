@@ -12,7 +12,7 @@ using Superchef.Models;
 namespace Superchef.Migrations
 {
     [DbContext(typeof(DB))]
-    [Migration("20251129174251_First")]
+    [Migration("20251130041926_First")]
     partial class First
     {
         /// <inheritdoc />
@@ -531,6 +531,7 @@ namespace Superchef.Migrations
                         .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Image")
+                        .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)");
 
