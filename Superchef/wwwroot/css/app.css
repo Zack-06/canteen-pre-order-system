@@ -693,6 +693,9 @@ footer .social-media-icons a:hover {
 .container[data-no~="padding"] {
 	padding: 0;
 }
+.container[data-no~="overflow"] {
+    overflow: hidden;
+}
 .container[data-flex] {
 	display: flex;
 }
