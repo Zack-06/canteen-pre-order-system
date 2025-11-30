@@ -367,6 +367,25 @@ public class EditStoreVM
     public List<SelectListItem> AvailableVenues { get; set; } = [];
 }
 
+public class ManageSlotVM
+{
+    public int StoreId { get; set; }
+    public string? Type { get; set; }
+    public DateOnly? Date { get; set; }
+    public int? Day { get; set; }
+    public List<TimeOnly> Slots { get; set; } = [];
+    public TimeOnly? AddSlot { get; set; }
+    public TimeOnly? RemoveSlot { get; set; }
+    public bool IsEnabledAll { get; set; }
+    public bool IsDisabledAll { get; set; }
+    public bool IsUseRecurring { get; set; }
+
+    public List<string> AvailableTypes { get; set; } = [];
+    public List<DateOnly> AvailableDates { get; set; } = [];
+    public Dictionary<int, string> AvailableDays { get; set; } = [];
+    public List<TimeOnly> AvailableSlots { get; set; } = [];
+}
+
 public class ManageItemVM
 {
     public int StoreId { get; set; }
@@ -532,7 +551,10 @@ public class OrderCustomerVM
 
 public class HomePageVM
 {
-    
+    public List<Item> TrendingItems { get; set; } = [];
+    public List<Category> Categories { get; set; } = [];
+    public List<Item> OrderAgainItems { get; set; } = [];
+    public List<Item> DailyDiscoverItems { get; set; } = [];
 }
 
 public class AdminHomePageVM

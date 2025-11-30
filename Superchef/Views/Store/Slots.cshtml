@@ -1,0 +1,109 @@
+@model ManageSlotVM
+
+@{
+    ViewBag.Title = ((ViewBag.InitSlot == null || ViewBag.InitSlot == false) ? "Manage Slots" : "Setup Slots") + " | Supershow";
+}
+
+<form data-ajax="true" data-ajax-update="#ajax-result-container" data-ajax-failure="defaultOnFailure" method="get">
+    <div class="container" data-limit-container>
+        <div class="title">@((ViewBag.InitSlot == null || ViewBag.InitSlot == false) ? "Manage Slots" : "Setup Slots") -
+            @ViewBag.StoreName</div>
+
+        @if (ViewBag.InitSlot == null || ViewBag.InitSlot == false)
+        {
+            <div class="custom-tick-container center-text">
+                @foreach (var type in Model.AvailableTypes)
+                {
+                    <label>
+                        <input type="radio" name="Type" value="@type" @(Model.Type == type ? "checked" : "") data-auto-submit>
+                        <div>
+                            <div class="text">@type</div>
+                        </div>
+                    </label>
+                }
+            </div>
+        }
+        else
+        {
+            <p>Publishing will finalize your first slots. After that, future slots update automatically. Slots within the
+                next three days cannot be edited.</p>
+        }
+    </div>
+
+    <div id="ajax-result-container" class="container" data-limit-container>
+        <partial name="_Slots" model="@Model" />
+    </div>
+</form>
+
+<form data-ajax="true" data-ajax-failure="formFailed" method="post">
+    <input id="post-type" asp-for="Type" hidden>
+    <input id="post-date" asp-for="Date" hidden>
+    <input id="post-day" asp-for="Day" hidden>
+    <input id="post-add-slot" asp-for="AddSlot" hidden>
+    <input id="post-remove-slot" asp-for="RemoveSlot" hidden>
+    <input id="post-enable-all" asp-for="IsEnabledAll" hidden>
+    <input id="post-disable-all" asp-for="IsDisabledAll" hidden>
+    <input id="post-use-recurring" asp-for="IsUseRecurring" hidden>
+</form>
+
+@section foot {
+    <script>
+        const getForm = $("main form[method='get']")
+        const postForm = $("main form[method='post']")
+
+        $(document).on("change", "input[name='Slots']", async function () {
+            const $input = $(this)
+            const value = $input.val()
+            const sendAdd = $input.prop("checked")
+
+            clearInputs()
+            addNecessaryInputs()
+            $(sendAdd ? "#post-add-slot" : "#post-remove-slot").val(value)
+            submitForm()
+        })
+
+        $(document).on("click", "#enable-all", function () {
+            clearInputs()
+            addNecessaryInputs()
+            $("#post-enable-all").prop("checked", true)
+            submitForm()
+        })
+
+        $(document).on("click", "#disable-all", function () {
+            clearInputs()
+            addNecessaryInputs()
+            $("#post-disable-all").prop("checked", true)
+            submitForm()
+        })
+
+        $(document).on("click", "#use-recurring", function () {
+            clearInputs()
+            addNecessaryInputs()
+            $("#post-use-recurring").prop("checked", true)
+            submitForm()
+        })
+
+        function clearInputs() {
+            $(postForm).find("input").each(function () {
+                $(this).val("")
+            })
+        }
+
+        function addNecessaryInputs() {
+            $("#post-type").val(getForm.find("input[name='Type']").val())
+            $("#post-date").val(getForm.find("input[name='Date']").val())
+            $("#post-day").val(getForm.find("input[name='Day']").val())
+        }
+
+        function submitForm(method = "post") {
+            if (method == "post") return postForm.trigger("submit")
+
+            getForm.trigger("submit")
+        }
+
+        function formFailed(...args) {
+            defaultOnFailure(...args)
+            submitForm("get")
+        }
+    </script>
+}

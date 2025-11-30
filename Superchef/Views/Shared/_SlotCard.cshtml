@@ -1,7 +1,10 @@
 @model SlotCardDM
 
-<label class="slot-card @(Model.IsDisabled ? "disabled" : "")">
-    <input type="radio" name="Date" value="today">
+<label class="slot-card @(Model.IsDisabled ? "disabled" : "") @(Model.IsManage ? "manage" : "")">
+    <input  type="@(Model.IsManage ? "checkbox" : "radio")" 
+            name="@(Model.IsManage ? "Slots" : "Slot")"
+            value="@Model.Value" 
+            @(Model.IsChecked ? "checked" : "")>
     <div>
         <div class="text">@Model.Text</div>
     </div>

@@ -37,6 +37,21 @@ namespace Superchef.Migrations
                     b.ToTable("ItemKeyword");
                 });
 
+            modelBuilder.Entity("SlotTemplateStore", b =>
+                {
+                    b.Property<int>("SlotTemplatesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StoresId")
+                        .HasColumnType("int");
+
+                    b.HasKey("SlotTemplatesId", "StoresId");
+
+                    b.HasIndex("StoresId");
+
+                    b.ToTable("SlotTemplateStore");
+                });
+
             modelBuilder.Entity("Superchef.Models.Account", b =>
                 {
                     b.Property<int>("Id")
@@ -511,6 +526,25 @@ namespace Superchef.Migrations
                     b.ToTable("Slots");
                 });
 
+            modelBuilder.Entity("Superchef.Models.SlotTemplate", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DayOfWeek")
+                        .HasColumnType("int");
+
+                    b.Property<TimeOnly>("StartTime")
+                        .HasColumnType("time");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SlotTemplates");
+                });
+
             modelBuilder.Entity("Superchef.Models.Store", b =>
                 {
                     b.Property<int>("Id")
@@ -526,6 +560,9 @@ namespace Superchef.Migrations
                         .IsRequired()
                         .HasMaxLength(1000)
                         .HasColumnType("nvarchar(1000)");
+
+                    b.Property<bool>("HasPublishedFirstSlots")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Image")
                         .IsRequired()
@@ -657,7 +694,9 @@ namespace Superchef.Migrations
 
                     b.HasIndex("AccountId");
 
-                    b.HasIndex("DeviceId");
+                    b.HasIndex("DeviceId")
+                        .IsUnique()
+                        .HasFilter("[DeviceId] IS NOT NULL");
 
                     b.ToTable("Verifications");
                 });
@@ -673,6 +712,21 @@ namespace Superchef.Migrations
                     b.HasOne("Superchef.Models.Keyword", null)
                         .WithMany()
                         .HasForeignKey("KeywordsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("SlotTemplateStore", b =>
+                {
+                    b.HasOne("Superchef.Models.SlotTemplate", null)
+                        .WithMany()
+                        .HasForeignKey("SlotTemplatesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Superchef.Models.Store", null)
+                        .WithMany()
+                        .HasForeignKey("StoresId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
                 });
@@ -902,8 +956,8 @@ namespace Superchef.Migrations
                         .HasForeignKey("AccountId");
 
                     b.HasOne("Superchef.Models.Device", "Device")
-                        .WithMany("Verifications")
-                        .HasForeignKey("DeviceId");
+                        .WithOne("Verification")
+                        .HasForeignKey("Superchef.Models.Verification", "DeviceId");
 
                     b.Navigation("Account");
 
@@ -943,7 +997,8 @@ namespace Superchef.Migrations
                 {
                     b.Navigation("Sessions");
 
-                    b.Navigation("Verifications");
+                    b.Navigation("Verification")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Superchef.Models.Item", b =>

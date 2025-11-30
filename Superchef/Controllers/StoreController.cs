@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Stripe;
 
 namespace Superchef.Controllers;
@@ -86,10 +88,85 @@ public class StoreController : Controller
         return View(vm);
     }
 
-    public IActionResult Slots(int id, string? type = "recurring")
+    public IActionResult Slots(ManageSlotVM vm)
     {
-        // manage store slots
-        return View();
+        var store = db.Stores
+            .Include(s => s.SlotTemplates)
+            .FirstOrDefault(s => s.Id == vm.StoreId);
+
+        vm.AvailableTypes = ["Custom", "Recurring"];
+        vm.AvailableDates = [
+            DateOnly.FromDateTime(DateTime.Now),
+            DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+            DateOnly.FromDateTime(DateTime.Now.AddDays(2))
+        ];
+        vm.AvailableDays = new()
+        {
+            [0] = "Sun",
+            [1] = "Mon",
+            [2] = "Tue",
+            [3] = "Wed",
+            [4] = "Thu",
+            [5] = "Fri",
+            [6] = "Sat"
+        };
+        ViewBag.InitSlot = true;
+
+        if (vm.Type == null || !vm.AvailableTypes.Contains(vm.Type))
+        {
+            vm.Type = vm.AvailableTypes.First();
+        }
+
+        if (vm.Date == null || !vm.AvailableDates.Contains(vm.Date.Value))
+        {
+            vm.Date = vm.AvailableDates.First();
+        }
+
+        if (vm.Day == null || !vm.AvailableDays.ContainsKey(vm.Day.Value))
+        {
+            vm.Day = vm.AvailableDays.First().Key;
+        }
+
+        if (vm.Type == "Custom")
+        {
+            vm.AvailableSlots = [];
+            foreach (var avSlot in db.SlotTemplates.Where(s => s.DayOfWeek == (int)vm.Date.Value.DayOfWeek))
+            {
+                var slot = new DateTime(vm.Date.Value.Year, vm.Date.Value.Month, vm.Date.Value.Day, avSlot.StartTime.Hour, avSlot.StartTime.Minute, 0);
+                if (slot > DateTime.Now)
+                {
+                    vm.AvailableSlots.Add(TimeOnly.FromDateTime(slot));
+                }
+            }
+        }
+        else
+        {
+            // select
+            if (store != null)
+            {
+                vm.Slots = store.SlotTemplates.Where(s => s.DayOfWeek == vm.Day).Select(s => s.StartTime).ToList();
+            }
+            else
+            {
+                vm.Slots = [];
+            }
+            vm.AvailableSlots = db.SlotTemplates.Where(s => s.DayOfWeek == vm.Day).Select(s => s.StartTime).ToList();
+        }
+
+
+
+        if (vm.Type == "Custom" || (ViewBag.InitSlot != null && ViewBag.InitSlot == true))
+        {
+            vm.Slots = db.Slots.Where(s => s.StoreId == vm.StoreId && DateOnly.FromDateTime(s.StartTime) == vm.Date).Select(s => TimeOnly.FromDateTime(s.StartTime)).ToList();
+        }
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_Slots", vm);
+        }
+
+        ViewBag.StoreName = "abc";
+        return View(vm);
     }
 
     public IActionResult Report(int id)
@@ -101,6 +178,25 @@ public class StoreController : Controller
     public IActionResult Scan(int id)
     {
         return View(id);
+    }
+
+    public IActionResult ScanChallenge(int? id, string? orderId)
+    {
+        if (id == null || orderId == null)
+        {
+            return BadRequest();
+        }
+
+        // return Ok(new
+        // {
+        //     status = "error",
+        //     errorMessage = "Invalid order ID"
+        // });
+
+        return Ok(new
+        {
+            status = "success",
+        });
     }
 
     public IActionResult ConnectStripe()
@@ -127,8 +223,8 @@ public class StoreController : Controller
             Code = code
         };
 
-        var service = new OAuthTokenService();
-        var response = await service.CreateAsync(options);
+        var authService = new OAuthTokenService();
+        var response = await authService.CreateAsync(options);
 
         // Stripe account ID of the vendor
         string stripeAccountId = response.StripeUserId;
@@ -138,27 +234,30 @@ public class StoreController : Controller
         // return RedirectToAction("StripeLinkedSuccess");
     }
 
-
-    // ==========Remote==========
-    public IActionResult ScanChallenge(int? id, string? orderId)
+    public IActionResult GetStripeAccountEmail(int id)
     {
-        if (id == null || orderId == null)
+        var store = db.Stores.FirstOrDefault(s => s.Id == id);
+        if (store == null)
         {
-            return BadRequest();
+            return NotFound();
         }
 
-        return Ok(new
+        string? stripeAccountId = store.StripeAccountId;
+        if (string.IsNullOrEmpty(stripeAccountId))
         {
-            status = "error",
-            errorMessage = "Invalid order ID"
-        });
+            // return NotFound();
 
-        return Ok(new
-        {
-            status = "success",
-        });
+            // test
+            stripeAccountId = "acct_1SXR4c0YIOryk7Uo";
+        }
+
+        var accountService = new AccountService();
+        var account = accountService.Get(stripeAccountId);
+
+        return Ok(account.Email);
     }
 
+    // ==========Remote==========
     public bool IsSlugUnique(string slug, int? id)
     {
         return true;

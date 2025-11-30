@@ -28,6 +28,7 @@ public class DB : DbContext
     public DbSet<Favourite> Favourites { get; set; }
     public DbSet<Review> Reviews { get; set; }
     public DbSet<Slot> Slots { get; set; }
+    public DbSet<SlotTemplate> SlotTemplates { get; set; }
     public DbSet<Order> Orders { get; set; }
     public DbSet<OrderItem> OrderItems { get; set; }
     public DbSet<Payment> Payments { get; set; }
@@ -131,7 +132,7 @@ public class Device
     public int AccountId { get; set; }
 
     public Account Account { get; set; }
-    public List<Verification> Verifications { get; set; } = [];
+    public Verification Verification { get; set; }
     public List<Session> Sessions { get; set; } = [];
 }
 
@@ -175,8 +176,9 @@ public class Store
     public string Description { get; set; }
     [MaxLength(50)]
     public string Image { get; set; }
+    public int SlotMaxOrders { get; set; }
     public string? StripeAccountId { get; set; }
-    public int SlotMaxOrders { get; set; } = 20;
+    public bool HasPublishedFirstSlots { get; set; } = false;
     public bool IsDeleted { get; set; } = false;
     public int VenueId { get; set; }
     public int AccountId { get; set; }
@@ -186,6 +188,7 @@ public class Store
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public Account Account { get; set; }
     public List<Slot> Slots { get; set; } = [];
+    public List<SlotTemplate> SlotTemplates { get; set; } = [];
     public List<Item> Items { get; set; } = [];
     public List<Order> Orders { get; set; } = [];
 }
@@ -315,6 +318,15 @@ public class Slot
 
     public Store Store { get; set; }
     public List<Order> Orders { get; set; } = [];
+}
+
+public class SlotTemplate
+{
+    public int Id { get; set; }
+    public TimeOnly StartTime { get; set; }
+    public int DayOfWeek { get; set; }
+
+    public List<Store> Stores { get; set; } = [];
 }
 
 public class Order

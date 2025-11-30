@@ -134,6 +134,16 @@ $("a[data-preserve-search-params]").each(function () {
 $("form").prop("noValidate", true)
 $("form").prop("autocomplete", "off")
 
+// ==========Form Confirmation==========
+$("form[data-confirm]").on("submit", async function (e) {
+	e.preventDefault()
+
+	const message = $(this).data("confirm")
+	if (await confirmation(message)) {
+		$(this).submit()
+	}
+})
+
 // ==========Form Countdown==========
 $("form[data-expired-timestamp]").each(function () {
 	const $form = $(this)
@@ -228,7 +238,7 @@ function betterClearForm(element) {
 }
 
 // ==========Auto Submit Form==========
-$("[data-auto-submit]").on("change", function () {
+$(document).on("change", "[data-auto-submit]", function () {
 	if ($(this).data("auto-submit") == "clear") {
 		betterClearForm(this)
 	}
@@ -258,20 +268,28 @@ function detectFormChanges(formSelector, selectElements = "input", changedCallba
 
 /* ==========Enable On Change========== */
 $("button[data-enable-on-change]").each(function () {
-    const button = $(this)
-    button.prop("disabled", true)
+	const button = $(this)
+	button.prop("disabled", true)
 
-    const formSelector = button.data("enable-on-change") || "main form"
+	const formSelector = button.data("enable-on-change") || "main form"
 	detectFormChanges(
 		formSelector,
-		"input, select, textarea",
+		"input:not([readonly]), select, textarea",
 		function () {
 			button.prop("disabled", false)
+			window.onbeforeunload = function () {
+				return "Changes you made may not be saved."
+			}
 		},
 		function () {
 			button.prop("disabled", true)
+			window.onbeforeunload = null
 		}
 	)
+
+	button.on("click", function () {
+		window.onbeforeunload = null
+	})
 })
 
 /* ==========Filter Button========== */

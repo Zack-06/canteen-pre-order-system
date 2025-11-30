@@ -46,7 +46,10 @@ public record OrderItemCardDM
 public record SlotCardDM
 {
     public string Text { get; set; }
+    public TimeOnly Value { get; set; }
+    public bool IsChecked { get; set; }
     public bool IsDisabled { get; set; }
+    public bool IsManage { get; set; }
 }
 
 public record StepContainerDM

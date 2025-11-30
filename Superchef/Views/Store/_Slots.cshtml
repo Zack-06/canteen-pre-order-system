@@ -1,0 +1,79 @@
+@model ManageSlotVM
+
+@if ((ViewBag.InitSlot != null && ViewBag.InitSlot == true) || Model.Type == "Custom")
+{
+    <div class="container custom-tick-container grid center-items center-text bold-text" data-specified-width
+        data-no="padding color">
+        @foreach (var date in Model.AvailableDates)
+        {
+            var dateTime = new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
+
+            <label>
+                <input type="radio" name="Date" value="@date.ToString("yyyy-MM-dd")" @(Model.Date?.ToString("yyyy-MM-dd") ==
+                                                                                                 date.ToString("yyyy-MM-dd") ? "checked" : "") data-auto-submit>
+                <div>
+                    <div class="text">@FormatService.ToDateTimeFormat(dateTime, "ddd")</div>
+                    <div class="description">@FormatService.ToDateTimeFormat(dateTime, "MMM dd")</div>
+                </div>
+            </label>
+        }
+    </div>
+}
+else
+{
+    <div class="container custom-tick-container center-items center-text" data-no="padding color">
+        @foreach (var day in Model.AvailableDays)
+        {
+            <label>
+                <input type="radio" name="Day" value="@day.Key" @(Model.Day == day.Key ? "checked" : "") data-auto-submit>
+                <div>
+                    <div class="text">@day.Value</div>
+                </div>
+            </label>
+        }
+    </div>
+}
+
+<div class="container divider" data-orientation="horizontal" data-no="padding"></div>
+
+<div class="container" data-no="padding color">
+    <div class="listing-container custom-tick-container center-text" data-result-container>
+        @foreach (var slot in Model.AvailableSlots)
+        {
+            var card = new SlotCardDM
+            {
+                Text = @FormatService.ToDateTimeFormat(DateTime.Today.Add(slot.ToTimeSpan()), "hh:mm tt"),
+                Value = slot,
+                IsChecked = Model.Slots.Contains(slot),
+                IsManage = true
+            };
+
+            <partial name="_SlotCard" model="@card" />
+        }
+    </div>
+
+    <partial name="_NoResults" model="@("No slots found")" />
+</div>
+
+<div class="container divider" data-orientation="horizontal" data-no="padding"></div>
+
+<div class="container" data-no="padding color">
+    <div class="button-group" data-flex="wrap">
+        <button id="enable-all" type="button" data-button="info">Enable All</button>
+        <button id="disable-all" type="button" data-button="danger">Disable All</button>
+
+        @if (!(ViewBag.InitSlot != null && ViewBag.InitSlot == true) && Model.Type == "Custom")
+        {
+            <button id="use-recurring" data-button="accent">Use Recurring</button>
+        }
+
+        @if (ViewBag.InitSlot != null && ViewBag.InitSlot == true)
+        {
+            <a data-button="success" data-ajax="true"
+                data-ajax-url="@Url.Action("LogoutAllDevices", new { id = Model.StoreId })" data-ajax-method="POST"
+                data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+                data-ajax-confirm="Are you sure you want to publish these slots? Once published, they cannot be edited.">Publish
+                First Slots</a>
+        }
+    </div>
+</div>

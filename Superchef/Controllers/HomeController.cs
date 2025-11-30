@@ -6,7 +6,12 @@ public class HomeController : Controller
 {
     public IActionResult Index()
     {
-        return View();
+        var vm = new HomePageVM
+        {
+            
+        };
+        
+        return View(vm);
     }
 
     public IActionResult Vendor()

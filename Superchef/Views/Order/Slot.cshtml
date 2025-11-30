@@ -46,7 +46,8 @@
         var card = new SlotCardDM
         {
             Text = "10:00 AM",
-            IsDisabled = i == 0
+            IsDisabled = i == 0,
+            Value = TimeOnly.FromDateTime(DateTime.Now)
         };
 
         <partial name="_SlotCard" model="@card" />
