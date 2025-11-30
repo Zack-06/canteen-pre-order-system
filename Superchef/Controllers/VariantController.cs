@@ -44,8 +44,14 @@ public class VariantController : Controller
 
     public IActionResult Add(int itemId)
     {
-        // add new variant
-        return View();
+        var vm = new AddVariantVM
+        {
+            ItemId = itemId
+        };
+
+        ViewBag.ItemName = "abc";
+
+        return View(vm);
     }
 
     public IActionResult Edit(int id)

@@ -35,6 +35,8 @@
 }
 
 <form class="container" data-limit-container enctype="multipart/form-data" method="post">
+    <input asp-for="StoreId" hidden />
+
     <div class="title">Add Item - @ViewBag.StoreName</div>
     <div data-column-container="3">
         <label asp-for="Name"></label>
@@ -105,6 +107,16 @@
             <div class="button-group">
                 <button type="button" id="upload-image-button" data-button="accent">Upload</button>
             </div>
+        </div>
+
+        <label asp-for="Active"></label>
+        <div>:</div>
+        <div class="form-group">
+            <label class="switch">
+                <input asp-for="Active">
+                <div class="slider"></div>
+            </label>
+            <span asp-validation-for="Active"></span>
         </div>
     </div>
     <button data-button="success">Create</button>
