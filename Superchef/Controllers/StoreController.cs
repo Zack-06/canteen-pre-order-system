@@ -74,6 +74,7 @@ public class StoreController : Controller
         var vm = new EditStoreVM
         {
             Id = id,
+            StripeAccountId = "abc",
             Name = "abc",
             Slug = "abc",
             Description = "abc",
@@ -199,17 +200,18 @@ public class StoreController : Controller
         });
     }
 
-    public IActionResult ConnectStripe()
+    public IActionResult ConnectStripe(int id)
     {
         string clientId = cf["Stripe:ClientId"] ?? "";
         string redirectUri = "http://localhost:5245/store/callback";
+        string state = id.ToString();
 
-        string url = $"https://connect.stripe.com/oauth/authorize?response_type=code&client_id={clientId}&scope=read_write&redirect_uri={redirectUri}";
+        string url = $"https://connect.stripe.com/oauth/authorize?response_type=code&client_id={clientId}&scope=read_write&redirect_uri={redirectUri}&state={state}";
 
         return Redirect(url);
     }
 
-    public async Task<string> Callback(string code, string error)
+    public async Task<string> Callback(string code, string state, string error)
     {
         if (!string.IsNullOrEmpty(error))
         {
@@ -229,7 +231,9 @@ public class StoreController : Controller
         // Stripe account ID of the vendor
         string stripeAccountId = response.StripeUserId;
 
-        return stripeAccountId;
+        string storeId = state;
+
+        return stripeAccountId + "," + storeId;
 
         // return RedirectToAction("StripeLinkedSuccess");
     }
@@ -239,17 +243,17 @@ public class StoreController : Controller
         var store = db.Stores.FirstOrDefault(s => s.Id == id);
         if (store == null)
         {
-            return NotFound();
+            // return NotFound("Store not found");
         }
 
-        string? stripeAccountId = store.StripeAccountId;
-        if (string.IsNullOrEmpty(stripeAccountId))
-        {
-            // return NotFound();
+        // string? stripeAccountId = store.StripeAccountId;
+        // if (string.IsNullOrEmpty(stripeAccountId))
+        // {
+        //     return NotFound("Stripe account not found");
+        // }
 
-            // test
-            stripeAccountId = "acct_1SXR4c0YIOryk7Uo";
-        }
+        // test
+        string? stripeAccountId = "acct_1SXR4c0YIOryk7Uo";
 
         var accountService = new AccountService();
         var account = accountService.Get(stripeAccountId);

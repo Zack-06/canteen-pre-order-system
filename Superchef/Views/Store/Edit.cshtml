@@ -31,11 +31,41 @@
             height: 100%;
             object-fit: contain;
         }
+
+        #stripe-show-button {
+            width: 1.25rem !important;
+            height: 1.25rem !important;
+            background-image: url(/img/eye.png);
+            background-size: contain !important;
+            background-position: center !important;
+            background-repeat: no-repeat !important;
+            appearance: none;
+            margin: 0 !important;
+            margin-right: 0.4rem !important;
+            padding: 0 !important;
+            cursor: pointer !important;
+            transition: all 0.3s ease;
+        }
+
+        #stripe-show-button:hover {
+            filter: brightness(2);
+        }
+
+        #stripe-show-button-loader {
+            width: 1.5rem;
+            height: 1.5rem;
+            background-image: url("/img/loading.gif");
+            background-size: 190%;
+            background-position: center;
+            background-repeat: no-repeat;
+            margin-right: 0.4rem;
+        }
     </style>
 }
 
 <form class="container" data-limit-container enctype="multipart/form-data" method="post">
     <input asp-for="Id" hidden />
+    <input asp-for="StripeAccountId" hidden />
 
     <div class="title">Store Details</div>
     <div data-column-container="3">
@@ -110,6 +140,31 @@
                 <button type="button" id="reset-image-button" data-button="info" disabled>Reset</button>
             </div>
         </div>
+
+        <div>Stripe</div>
+        <div>:</div>
+        @if (String.IsNullOrEmpty(Model.StripeAccountId))
+        {
+            <div>You haven't connected your Stripe account yet.</div>
+        }
+        else
+        {
+            <div class="form-group">
+                <div class="input-group">
+                    <div class="form-input">
+                        <input type="password" value="@Model.StripeAccountId" readonly />
+
+                        <a data-ajax="true" data-ajax-loading="#stripe-show-button-loader"
+                            data-ajax-url="/Store/GetStripeAccountEmail/@Model.Id" data-ajax-begin="showStripeBegin"
+                            data-ajax-success="showStripeSuccess" data-ajax-failure="showStripeFailed"
+                            id="stripe-show-button"></a>
+
+                        <div id="stripe-show-button-loader" style="display: none;"></div>
+                    </div>
+                </div>
+            </div>
+        }
+
     </div>
 
     <button data-enable-on-change data-button="success" disabled>Save Changes</button>
@@ -122,7 +177,7 @@
             data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
             data-ajax-confirm="Are you sure you want to delete this item?">Delete Store</a>
         <a data-button="info" href="/Store/Slots/@Model.Id">Manage Slots</a>
-        <a data-button="accent" href="/Store/Slots/@Model.Id">Reconnect </a>
+        <a data-button="accent" href="/Store/ConnectStripe/@Model.Id">@(Model.StripeAccountId == null ? "Connect Stripe" : "Reconnect Stripe")</a>
     </div>
 </div>
 
@@ -149,6 +204,21 @@
 
 @section foot {
     <script>
+        function showStripeBegin() {
+            $(this).hide()
+        }
+
+        function showStripeSuccess(data) {
+            const $input = $(this).prev()
+            $input.val(data)
+            $input.prop("type", "text")
+        }
+
+        function showStripeFailed(...args) {
+            defaultOnFailure(...args)
+            $(this).show()
+        }
+
         const originalSrc = $("#image-preview").attr("src")
         const uploadOverlay = new UploadOverlay("#image-file")
 

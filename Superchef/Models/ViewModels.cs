@@ -346,6 +346,7 @@ public class AddStoreVM
 public class EditStoreVM
 {
     public int Id { get; set; }
+    public string? StripeAccountId { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
     [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
