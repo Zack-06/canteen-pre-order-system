@@ -529,3 +529,24 @@ public class OrderCustomerVM
     [RegularExpression(@"^01\d-\d{7,8}$", ErrorMessage = "{0} must be in the format 01X-XXXXXXX")]
     public string ContactNumber { get; set; }
 }
+
+public class HomePageVM
+{
+    
+}
+
+public class AdminHomePageVM
+{
+    public decimal TotalSales { get; set; }
+    public decimal TotalSalesStat { get; set; }
+    public int TotalOrders { get; set; }
+    public decimal TotalOrdersStat { get; set; }
+    public int TotalCustomers { get; set; }
+    public decimal TotalCustomersStat { get; set; }
+    public List<string> SalesPerformanceMonths { get; set; } = [];
+    public List<int> SalesPerformanceOrders { get; set; } = [];
+    public List<string> LoginDevices { get; set; } = [];
+    public List<int> LoginDevicesCount { get; set; } = [];
+    public int Page { get; set; } = 1;
+    public IPagedList<AuditLog> ActivityLogs { get; set; }
+}

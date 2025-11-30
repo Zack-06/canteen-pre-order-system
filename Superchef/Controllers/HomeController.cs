@@ -14,8 +14,22 @@ public class HomeController : Controller
         return View();
     }
 
-    public IActionResult Admin()
+    public IActionResult Admin(AdminHomePageVM vm)
     {
-        return View();
+        vm.TotalSales = 0;
+        vm.TotalSalesStat = 0;
+        vm.TotalOrders = 0;
+        vm.TotalOrdersStat = 0;
+        vm.TotalCustomers = 0;
+        vm.TotalCustomersStat = 0;
+        vm.SalesPerformanceMonths = new List<string>();
+        vm.SalesPerformanceOrders = new List<int>();
+        vm.LoginDevices = new List<string>();
+        vm.LoginDevicesCount = new List<int>();
+
+        Console.WriteLine("HELLO");
+        Console.WriteLine(vm.Page);
+
+        return View(vm);
     }
 }
