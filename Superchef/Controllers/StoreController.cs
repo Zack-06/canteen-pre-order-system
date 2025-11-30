@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Stripe;
 
 namespace Superchef.Controllers;
@@ -58,14 +59,31 @@ public class StoreController : Controller
 
     public IActionResult Add()
     {
-        // add new store
-        return View();
+        var vm = new AddStoreVM
+        {
+            AvailableVenues = db.Venues.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
+        };
+
+        return View(vm);
     }
 
     public IActionResult Edit(int id)
     {
-        // edit store details
-        return View();
+        var vm = new EditStoreVM
+        {
+            Id = id,
+            Name = "abc",
+            Slug = "abc",
+            Description = "abc",
+            SlotMaxOrders = 1,
+            Venue = 1,
+
+            AvailableVenues = db.Venues.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
+        };
+
+        ViewBag.ImageUrl = "abc";
+
+        return View(vm);
     }
 
     public IActionResult Slots(int id, string? type = "recurring")
@@ -139,5 +157,15 @@ public class StoreController : Controller
         {
             status = "success",
         });
+    }
+
+    public bool IsSlugUnique(string slug, int? id)
+    {
+        return true;
+    }
+
+    public bool CheckVenue(int venue, int? id)
+    {
+        return true;
     }
 }

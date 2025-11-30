@@ -147,11 +147,17 @@
 	--letter-spacing-wider: 0.1em;
 
 	/* Widths */
-	--width-item: 9.5rem;
-	--width-store: 9.5rem;
+	--width-item: 10rem;
+	--width-store: 10rem;
 	--width-category: 7rem;
 	--width-slot: 7rem;
 	--width-custom-tick: 5rem;
+
+	/* Widths (Mobile) */
+	--width-mobile-item: 8.67rem;
+	--width-mobile-store: 8.67rem;
+	--width-mobile-category: 7rem;
+	--width-mobile-slot: 7rem;
 }
 
 * {
@@ -330,18 +336,18 @@ button:active {
 	display: none;
 }
 .switch .slider {
-    position: absolute;
-    width: 1.15rem;
-    height: 1.15rem;
-    top: 50%;
-    left: 0.2rem;
-    transform: translateY(-50%);
-    background-color: var(--bg-pure);
+	position: absolute;
+	width: 1.15rem;
+	height: 1.15rem;
+	top: 50%;
+	left: 0.2rem;
+	transform: translateY(-50%);
+	background-color: var(--bg-pure);
 	transition: 0.3s all ease;
 	border-radius: 50%;
 }
 .switch:has(input:checked) .slider {
-    left: calc(100% - 1.15rem - 0.2rem);
+	left: calc(100% - 1.15rem - 0.2rem);
 }
 
 /* Float */
@@ -1487,7 +1493,7 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	word-break: normal;
 }
 main.mobile [data-manage-container="table"] tbody tr td:last-child > * {
-    flex-direction: column;
+	flex-direction: column;
 }
 
 /* Status Text Container */
@@ -1634,6 +1640,20 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 .listing-container:has(.slot-card) {
 	--grid-min-col-size: var(--width-slot);
+}
+@media (max-width: 400px) {
+	.listing-container:has(.item-card) {
+		--grid-min-col-size: var(--width-mobile-item);
+	}
+	.listing-container:has(.store-card) {
+		--grid-min-col-size: var(--width-mobile-store);
+	}
+	.listing-container:has(.category-card) {
+		--grid-min-col-size: var(--width-mobile-category);
+	}
+	.listing-container:has(.slot-card) {
+		--grid-min-col-size: var(--width-mobile-slot);
+	}
 }
 
 /* Item Card, Store Card & Category Card */
@@ -1799,13 +1819,13 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 [data-column-container~="3"] {
 	display: grid;
-	grid-template-columns: auto 0.75rem max-content 0.25rem 1fr;
+	grid-template-columns: min-content 0.75rem max-content 0.25rem 1fr;
 	row-gap: 0.6rem;
 	align-items: baseline;
 	height: max-content;
 }
 [data-column-container~="3"] > * {
-    min-width: 0;
+	min-width: 0;
 }
 [data-column-container~="3"] > *:nth-child(3n + 1) {
 	grid-column: 1;

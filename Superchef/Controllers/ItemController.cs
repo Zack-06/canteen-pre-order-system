@@ -90,6 +90,8 @@ public class ItemController : Controller
         };
 
         ViewBag.StoreName = "abc";
+        ViewBag.ImageUrl = "abc";
+
         return View(vm);
     }
 

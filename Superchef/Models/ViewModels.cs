@@ -320,6 +320,53 @@ public class ManageStoreVM
     public IPagedList<Store> Results { get; set; }
 }
 
+public class AddStoreVM
+{
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
+    [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
+    [Remote("IsSlugUnique", "Store", ErrorMessage = "{0} has been taken.")]
+    public string Slug { get; set; }
+    [StringLength(1000, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Description { get; set; }
+    [DisplayName("Max Orders Per Slot")]
+    [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
+    public int SlotMaxOrders { get; set; }
+    [Remote("CheckVenue", "Store", ErrorMessage = "{0} is not a valid venue.")]
+    public int Venue { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
+    public IFormFile Image { get; set; }
+
+    public List<SelectListItem> AvailableVenues { get; set; } = [];
+}
+
+public class EditStoreVM
+{
+    public int Id { get; set; }
+    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Name { get; set; }
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
+    [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
+    [Remote("IsSlugUnique", "Store", ErrorMessage = "{0} has been taken.")]
+    public string Slug { get; set; }
+    [StringLength(1000, ErrorMessage = "{1} must not exceed {0} characters.")]
+    public string Description { get; set; }
+    [DisplayName("Max Orders Per Slot")]
+    [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
+    public int SlotMaxOrders { get; set; }
+    [Remote("CheckVenue", "Store", ErrorMessage = "{0} is not a valid venue.")]
+    public int Venue { get; set; }
+    public double ImageScale { get; set; } = 1;
+    public double ImageX { get; set; } = 0;
+    public double ImageY { get; set; } = 0;
+    public IFormFile? Image { get; set; }
+
+    public List<SelectListItem> AvailableVenues { get; set; } = [];
+}
+
 public class ManageItemVM
 {
     public int StoreId { get; set; }
@@ -352,7 +399,7 @@ public class AddItemVM
     public int StoreId { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
-    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
     [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
     [Remote("IsSlugUnique", "Item", ErrorMessage = "{0} has been taken.")]
     public string Slug { get; set; }
@@ -376,7 +423,7 @@ public class EditItemVM
     public DateTime CreatedAt { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
-    [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
     [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
     [Remote("IsSlugUnique", "Item", AdditionalFields = "Id", ErrorMessage = "{0} has been taken.")]
     public string Slug { get; set; }
@@ -423,7 +470,7 @@ public class AddVariantVM
     public decimal Price { get; set; }
     [DisplayName("Stock Count")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
-    public int StockCount { get; set; } = 0;
+    public int StockCount { get; set; }
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
@@ -442,7 +489,7 @@ public class EditVariantVM
     public decimal Price { get; set; }
     [DisplayName("Stock Count")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
-    public int StockCount { get; set; } = 0;
+    public int StockCount { get; set; }
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;

@@ -68,6 +68,7 @@ public class VariantController : Controller
         };
 
         ViewBag.ItemName = "abc";
+        ViewBag.ImageUrl = "abc";
 
         return View(vm);
     }

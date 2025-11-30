@@ -174,7 +174,7 @@ public class Store
     [MaxLength(1000)]
     public string Description { get; set; }
     [MaxLength(50)]
-    public string? Image { get; set; }
+    public string Image { get; set; }
     public string? StripeAccountId { get; set; }
     public int SlotMaxOrders { get; set; } = 20;
     public bool IsDeleted { get; set; } = false;
