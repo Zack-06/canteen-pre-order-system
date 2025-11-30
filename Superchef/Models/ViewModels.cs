@@ -550,6 +550,17 @@ public class OrderCustomerVM
     public string ContactNumber { get; set; }
 }
 
+public class OrderSlotVM
+{
+    public string Id { get; set; }
+    public DateOnly? Date { get; set; }
+    public TimeOnly? Slot { get; set; }
+
+    public List<DateOnly> AvailableDates { get; set; } = [];
+    public List<TimeOnly> EnabledSlots { get; set; } = [];
+    public List<TimeOnly> AvailableSlots { get; set; } = [];
+}
+
 public class HomePageVM
 {
     public List<Item> TrendingItems { get; set; } = [];

@@ -1,3 +1,5 @@
+@model OrderSlotVM
+
 @{
     var data = new StepContainerDM
     {
@@ -15,44 +17,11 @@
 
 <partial name="_StepContainer" model="data" />
 
-<div class="container custom-tick-container grid center-items center-text bold-text" data-specified-width
-    data-limit-container>
-    <label>
-        <input type="radio" name="Date" value="31-oct" checked>
-        <div>
-            <div class="text">MON</div>
-            <div class="description">31 OCT</div>
-        </div>
-    </label>
-    <label>
-        <input type="radio" name="Date" value="1-nov" checked>
-        <div>
-            <div class="text">TUE</div>
-            <div class="description">1 NOV</div>
-        </div>
-    </label>
-    <label>
-        <input type="radio" name="Date" value="2-nov" checked>
-        <div>
-            <div class="text">WED</div>
-            <div class="description">2 NOV</div>
-        </div>
-    </label>
-</div>
-
-<div class="container listing-container custom-tick-container center-text" data-limit-container>
-    @for (int i = 0; i < 10; i++)
-    {
-        var card = new SlotCardDM
-        {
-            Text = "10:00 AM",
-            IsDisabled = i == 0,
-            Value = TimeOnly.FromDateTime(DateTime.Now)
-        };
-
-        <partial name="_SlotCard" model="@card" />
-    }
-</div>
+<form data-ajax="true" data-ajax-update="#ajax-result-container" data-ajax-failure="defaultOnFailure" method="get">
+    <div id="ajax-result-container" class="container" data-limit-container>
+        <partial name="_Slot" model="@Model" />
+    </div>
+</form>
 
 <form method="post" data-expired-timestamp="1764073738459" data-sticky-bottom>
     <partial name="_SummaryContainer" model="summary" />

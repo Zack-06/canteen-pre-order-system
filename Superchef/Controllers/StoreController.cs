@@ -128,6 +128,7 @@ public class StoreController : Controller
             vm.Day = vm.AvailableDays.First().Key;
         }
 
+        // Available Slots
         if (vm.Type == "Custom")
         {
             vm.AvailableSlots = [];
@@ -142,6 +143,15 @@ public class StoreController : Controller
         }
         else
         {
+            vm.AvailableSlots = db.SlotTemplates.Where(s => s.DayOfWeek == vm.Day).Select(s => s.StartTime).ToList();
+        }
+
+        // Enabled Slots
+        if (vm.Type == "Custom" || (ViewBag.InitSlot != null && ViewBag.InitSlot == true))
+        {
+            vm.Slots = db.Slots.Where(s => s.StoreId == vm.StoreId && DateOnly.FromDateTime(s.StartTime) == vm.Date).Select(s => TimeOnly.FromDateTime(s.StartTime)).ToList();
+        } else
+        {
             // select
             if (store != null)
             {
@@ -151,14 +161,6 @@ public class StoreController : Controller
             {
                 vm.Slots = [];
             }
-            vm.AvailableSlots = db.SlotTemplates.Where(s => s.DayOfWeek == vm.Day).Select(s => s.StartTime).ToList();
-        }
-
-
-
-        if (vm.Type == "Custom" || (ViewBag.InitSlot != null && ViewBag.InitSlot == true))
-        {
-            vm.Slots = db.Slots.Where(s => s.StoreId == vm.StoreId && DateOnly.FromDateTime(s.StartTime) == vm.Date).Select(s => TimeOnly.FromDateTime(s.StartTime)).ToList();
         }
 
         if (Request.IsAjax())

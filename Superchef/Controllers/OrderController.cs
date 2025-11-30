@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Stripe;
 using Stripe.Checkout;
 
@@ -35,10 +36,58 @@ public class OrderController : Controller
         return View(vm);
     }
 
-    public IActionResult Slot()
+    public IActionResult Slot(OrderSlotVM vm)
     {
+        var order = db.Orders.Include(s => s.Slot).FirstOrDefault(o => o.Id == vm.Id);
+        if (order == null)
+        {
+            // return NotFound("Order not found");
+        }
+
+        vm.AvailableDates = [
+            DateOnly.FromDateTime(DateTime.Now),
+            DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+            DateOnly.FromDateTime(DateTime.Now.AddDays(2))
+        ];
+
+        if (vm.Date == null || !vm.AvailableDates.Contains(vm.Date.Value))
+        {
+            vm.Date = vm.AvailableDates.First();
+        }
+
+        vm.AvailableSlots = [];
+        foreach (var avSlot in db.SlotTemplates.Where(s => s.DayOfWeek == (int)vm.Date.Value.DayOfWeek))
+        {
+            var slot = new DateTime(vm.Date.Value.Year, vm.Date.Value.Month, vm.Date.Value.Day, avSlot.StartTime.Hour, avSlot.StartTime.Minute, 0);
+            if (slot > DateTime.Now)
+            {
+                vm.AvailableSlots.Add(TimeOnly.FromDateTime(slot));
+            }
+        }
+
+        if (order != null)
+        {
+            vm.EnabledSlots = db.Slots.Where(s => s.StoreId == order.StoreId && DateOnly.FromDateTime(s.StartTime) == vm.Date).Select(s => TimeOnly.FromDateTime(s.StartTime)).ToList();
+            
+            var slot = order.Slot;
+            if (slot != null && DateOnly.FromDateTime(slot.StartTime) == vm.Date)
+            {
+                vm.Slot = TimeOnly.FromDateTime(order.Slot.StartTime);
+            }
+        }
+        else
+        {
+            vm.EnabledSlots = vm.AvailableSlots;
+            vm.Slot = null;
+        }
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_Slot", vm);
+        }
+
         // select pickup time slot
-        return View();
+        return View(vm);
     }
 
     public IActionResult Confirmation()
