@@ -1486,6 +1486,9 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child {
 	align-self: end;
 	word-break: normal;
 }
+main.mobile [data-manage-container="table"] tbody tr td:last-child > * {
+    flex-direction: column;
+}
 
 /* Status Text Container */
 .status-text-container {

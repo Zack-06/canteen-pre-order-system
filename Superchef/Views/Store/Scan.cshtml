@@ -3,7 +3,7 @@
 @section head {
     <style>
         main>.container {
-            width: max-content;
+            width: clamp(18rem, 100%, 100rem);
         }
 
         #loading-message,
@@ -15,6 +15,7 @@
             margin: auto;
             max-height: 70vh;
             max-height: 70dvh;
+            max-width: 100%;
             margin-bottom: 1rem;
         }
     </style>
@@ -37,6 +38,7 @@
 @section foot {
     <script src="/js/jsQr.min.js"></script>
     <script>
+        const tryDuration = 700
         var video = document.createElement("video");
         var canvasElement = $("canvas")[0];
         var canvas = canvasElement.getContext("2d");
@@ -96,7 +98,7 @@
                     } else {
                         if (triedId[code.data].startTime == null) {
                             triedId[code.data].startTime = Date.now()
-                        } else if (Date.now() - triedId[code.data].startTime > 1000) { // 1 second
+                        } else if (Date.now() - triedId[code.data].startTime > tryDuration) {
                             outputMessage.innerText = "Verifing..."
 
                             try {
