@@ -388,6 +388,7 @@ public class EditItemVM
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
     public IFormFile? Image { get; set; }
+    public bool Active { get; set; }
 
     public List<SelectListItem> AvailableCategories { get; set; } = [];
 }
@@ -444,6 +445,7 @@ public class EditVariantVM
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
     public IFormFile? Image { get; set; }
+    public bool Active { get; set; }
 }
 
 public class ManageOrderVM

@@ -134,5 +134,10 @@ public class StoreController : Controller
             status = "error",
             errorMessage = "Invalid order ID"
         });
+
+        return Ok(new
+        {
+            status = "success",
+        });
     }
 }

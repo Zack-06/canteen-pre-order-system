@@ -84,6 +84,7 @@ public class ItemController : Controller
             Category = 1,
             Keywords = ["abcde"],
             Image = null,
+            Active = false,
 
             AvailableCategories = db.Categories.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
         };

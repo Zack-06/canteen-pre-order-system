@@ -50,7 +50,19 @@ public class VariantController : Controller
 
     public IActionResult Edit(int id)
     {
-        // edit variant details
-        return View();
+        var vm = new EditVariantVM
+        {
+            Id = id,
+            CreatedAt = DateTime.Now,
+            Name = "abc",
+            Price = 100,
+            StockCount = 0,
+            Image = null,
+            Active = false,
+        };
+
+        ViewBag.ItemName = "abc";
+
+        return View(vm);
     }
 }

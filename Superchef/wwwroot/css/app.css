@@ -41,6 +41,8 @@
 	--bg-pagination-active: #d4d4d4;
 	--bg-pagination-disabled: #fafafa;
 	--bg-step-circle-active: #a38576;
+	--bg-switch: #cccccc;
+	--bg-switch-active: #4caf50;
 
 	/* ==========Buttons========== */
 	/* Primary button */
@@ -309,6 +311,37 @@ button:active {
 }
 .button-group [data-button] {
 	flex: 1;
+}
+
+/* Toggle Switch */
+.switch {
+	position: relative;
+	display: block;
+	width: 3rem;
+	height: 1.5rem;
+	transition: 0.3s all ease;
+	border-radius: 1.5rem;
+	background-color: var(--bg-switch);
+}
+.switch:has(input:checked) {
+	background-color: var(--bg-switch-active);
+}
+.switch input {
+	display: none;
+}
+.switch .slider {
+    position: absolute;
+    width: 1.15rem;
+    height: 1.15rem;
+    top: 50%;
+    left: 0.2rem;
+    transform: translateY(-50%);
+    background-color: var(--bg-pure);
+	transition: 0.3s all ease;
+	border-radius: 50%;
+}
+.switch:has(input:checked) .slider {
+    left: calc(100% - 1.15rem - 0.2rem);
 }
 
 /* Float */
@@ -1082,7 +1115,7 @@ body:has(.overlay.show) {
 	display: inline-block;
 	position: relative;
 	font-family: var(--font-primary);
-	min-width: 13rem;
+	min-width: min(13rem, 100%);
 	border-radius: 0.25rem;
 	border: 1px solid var(--border-primary);
 	transition: all 0.3s ease;
@@ -1763,10 +1796,13 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 [data-column-container~="3"] {
 	display: grid;
-	grid-template-columns: max-content 0.75rem max-content 0.25rem auto;
+	grid-template-columns: auto 0.75rem max-content 0.25rem 1fr;
 	row-gap: 0.6rem;
 	align-items: baseline;
 	height: max-content;
+}
+[data-column-container~="3"] > * {
+    min-width: 0;
 }
 [data-column-container~="3"] > *:nth-child(3n + 1) {
 	grid-column: 1;
@@ -1790,7 +1826,8 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	margin-bottom: 0.75rem;
 }
 [data-column-container~="3"] > .form-group:has(textarea),
-[data-column-container~="3"] > .form-group:has(input[type="file"]) {
+[data-column-container~="3"] > .form-group:has(input[type="file"]),
+[data-column-container~="3"] > .form-group:has(.switch) {
 	align-self: flex-start;
 }
 [data-column-container~="3"] > .form-group:has(input[type="file"]):not(:has(img[src])) {

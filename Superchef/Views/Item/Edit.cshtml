@@ -114,7 +114,7 @@
             <input id="image-scale" asp-for="ImageScale" hidden>
 
             <div id="image-preview-container">
-                <img id="image-preview" src="/uploads/category/@ViewBag.ImageUrl" class="vertical-fit" />
+                <img id="image-preview" src="/uploads/item/@ViewBag.ImageUrl" class="vertical-fit" />
             </div>
 
             <div class="form-group">
@@ -126,7 +126,17 @@
                 <button type="button" id="reset-image-button" data-button="info" disabled>Reset</button>
             </div>
         </div>
+
+        <label asp-for="Active"></label>
+        <div>:</div>
+        <div class="form-group">
+            <label class="switch">
+                <input asp-for="Active">
+                <div class="slider"></div>
+            </label>
+        </div>
     </div>
+
     <button data-button="success">Save Changes</button>
 </form>
 
