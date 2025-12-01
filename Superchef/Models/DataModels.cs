@@ -64,7 +64,7 @@ public record SummaryContainerDM
     public int TotalItems { get; set; }
     public string? SubmitText { get; set; }
     public string? ExitText { get; set; }
-    public string ExitLink { get; set; }
+    public string? ExitLink { get; set; }
 }
 
 public record OrderHistoryCardDM
@@ -96,4 +96,16 @@ public record StoreDetailsContainerDM
     public string Venue { get; set; }
     public DateTime JoinedAt { get; set; }
     public bool ViewStoreButton { get; set; }
+}
+
+public record CardItemContainerDM
+{
+    public int Id { get; set; }
+    public string Slug { get; set; }
+    public string ItemName { get; set; }
+    public string VariantName { get; set; }
+    public string Image { get; set; }
+    public decimal Price { get; set; }
+    public int Quantity { get; set; }
+    public string? Error { get; set; }
 }

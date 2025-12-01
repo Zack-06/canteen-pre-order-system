@@ -1,0 +1,18 @@
+@model SummaryContainerDM
+
+<div id="summary-container" class="container" data-full data-no="color">
+    <div class="summary-info">
+        <div class="price">@FormatService.ToRMFormat(Model.TotalPrice)</div>
+        <span>-</span>
+        <div class="items" data-count="@Model.TotalItems">@Model.TotalItems</div>
+    </div>
+    <div>
+        @if (Model.ExitLink != null)
+        {
+            <a data-expired-disable data-button="danger" data-ajax="true" data-ajax-url="@Model.ExitLink"
+                data-ajax-method="post" data-ajax-confirm="Are you sure you want to cancel this order?"
+                data-ajax-success="window.location.href='/Account/History'">@(Model.ExitText ?? "Back")</a>
+        }
+        <button id="submit-button" data-button="accent">@(Model.SubmitText ?? "Continue")</button>
+    </div>
+</div>

@@ -117,6 +117,77 @@ $(".password-show-button").on("change", function () {
 		.prop("type", $(this).prop("checked") ? "text" : "password")
 })
 
+// ==========Quantity Button==========
+$("[data-quantity-button]").on("click", function () {
+	var $input = $(this).closest(".form-input").find("input")
+	var action = $(this).data("quantity-button")
+
+	var value = $input.val()
+	var min = parseFloat($input.attr("min"))
+	var max = parseFloat($input.attr("max"))
+	var step = parseFloat($input.attr("step"))
+	var quantity = parseInt(value)
+
+	if (isNaN(quantity)) quantity = 0
+	if (isNaN(min)) min = -Infinity
+	if (isNaN(max)) max = Infinity
+	if (isNaN(step)) step = 1
+
+	if (action == "add") {
+		quantity += step
+		if (quantity > max) quantity = max
+	} else if (action == "minus") {
+		quantity -= step
+		if (quantity < min) quantity = min
+	}
+
+	$input.val(quantity)
+	$input.trigger("change")
+})
+
+const quantityInputs = []
+$("[data-quantity-button]").each(function () {
+	var $input = $(this).closest(".form-input").find("input")
+	if (quantityInputs.includes($input)) return
+
+	quantityInputs.push($input)
+})
+quantityInputs.forEach(function ($input) {
+	$input.on("change", updateButtonState)
+	$input.on("input", updateButtonState)
+    updateButtonState()
+
+	function updateButtonState() {
+		const minusButton = $input.prev()
+		const addButton = $input.next()
+
+		var value = $input.val()
+		var min = parseFloat($input.attr("min"))
+		var max = parseFloat($input.attr("max"))
+		var quantity = parseInt(value)
+
+		if (isNaN(quantity)) quantity = 0
+		if (isNaN(min)) min = -Infinity
+		if (isNaN(max)) max = Infinity
+
+		if (quantity >= max) {
+			addButton.prop("disabled", true)
+            quantity = max
+		} else {
+			addButton.prop("disabled", false)
+		}
+
+		if (quantity <= min) {
+			minusButton.prop("disabled", true)
+            quantity = min
+		} else {
+			minusButton.prop("disabled", false)
+		}
+
+        $input.val(quantity)
+	}
+})
+
 // ==========Preserve Search Params==========
 $("a[data-preserve-search-params]").each(function () {
 	const $link = $(this)
@@ -301,6 +372,21 @@ $(document).on("click", "#filter-button", function () {
 $("input[type='number']").on("keypress", function (event) {
 	if (event.code === "KeyE") {
 		event.preventDefault()
+	} else if (event.code === "Minus" && typeof $(this).attr("data-no-negative") != "undefined") {
+		event.preventDefault()
+	}
+})
+$("input[data-no-negative]").on("input", function (event) {
+	if (parseFloat(this.value) < 0) {
+		this.value = 0
+	}
+
+	if (parseFloat(this.value) > parseFloat($(this).attr("max"))) {
+		this.value = parseFloat($(this).attr("max"))
+	}
+
+	if (parseFloat(this.value) < parseFloat($(this).attr("min"))) {
+		this.value = parseFloat($(this).attr("min"))
 	}
 })
 

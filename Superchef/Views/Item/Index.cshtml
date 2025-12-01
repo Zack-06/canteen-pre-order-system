@@ -1,0 +1,91 @@
+<style>
+    .cart-item {
+        display: flex;
+        justify-content: space-between;
+
+        /* This aligns the "RM 100" text with the "4" text */
+        align-items: baseline;
+    }
+
+    /* Make sure the wrapper stacks vertically */
+    .action-wrapper {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        /* Aligns stepper & error to the right */
+        gap: 8px;
+        /* Space between stepper and error */
+    }
+
+    /* Stepper Styling */
+    .stepper {
+        display: flex;
+        align-items: center;
+        border: 1px solid #c05060;
+        /* Match your image border */
+        border-radius: 4px;
+        padding: 2px;
+    }
+
+    .btn {
+        background: #cba89a;
+        /* Match your image button color */
+        color: white;
+        border: none;
+        width: 24px;
+        height: 24px;
+        border-radius: 2px;
+        cursor: pointer;
+        font-size: 18px;
+        line-height: 1;
+        /* Keeps the +/- centered in the button */
+    }
+
+    .count {
+        padding: 0 12px;
+        font-weight: 600;
+    }
+
+    .price {
+        font-weight: 700;
+        color: #6d4c41;
+    }
+
+    .error-msg {
+        background-color: #fceceb;
+        /* Match your image bg */
+        color: #c05060;
+        /* Match your image text */
+        padding: 6px 10px;
+        border-radius: 4px;
+        font-size: 12px;
+        text-align: left;
+        max-width: 180px;
+        /* Prevents it from getting too wide */
+    }
+</style>
+
+<div class="cart-item">
+
+    <!-- Left Side: Price -->
+    <div class="price">RM 100.00</div>
+
+    <!-- Right Side: Wrapper (Column) -->
+    <div class="action-wrapper">
+
+        <!-- The Stepper -->
+        <div class="stepper">
+            <button class="btn">-</button>
+            <span class="count">4</span>
+            <button class="btn">+</button>
+        </div>
+
+        <!-- The Error (Flows naturally below) -->
+        <div class="error-msg">
+            Not enough stock brother<br>
+            lkfawej flka
+        </div>
+
+    </div>
+
+</div>

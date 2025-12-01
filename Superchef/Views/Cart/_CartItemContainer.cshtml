@@ -1,0 +1,29 @@
+@model CardItemContainerDM
+
+<div class="container cart-item-container">
+    <input type="checkbox" value="@Model.Id" id="cart-item-checkbox-@Model.Id">
+
+    <label for="cart-item-checkbox-@Model.Id">
+        <img src="@Model.Image" alt="Item Image">
+    </label>
+
+    <div class="info">
+        <a href="/Item/@Model.Slug" class="item">@Model.ItemName</a>
+        <div class="variant">@Model.VariantName</div>
+    </div>
+
+    <div class="price">@FormatService.ToRMFormat(Model.Price, false)</div>
+
+    <div class="quantity form-group">
+        <div class="form-input">
+            <button data-quantity-button="minus"></button>
+            <input data-no-negative type="number" min="0" max="10" step="1" value="@Model.Quantity">
+            <button data-quantity-button="add"></button>
+        </div>
+        <span class="error @(Model.Error != null ? "field-validation-error" : "")">
+            <span>@Model.Error</span>
+        </span>
+    </div>
+
+    <a class="delete-button"></a>
+</div>
