@@ -601,6 +601,7 @@ header #search-button {
 main {
 	--main-padding: var(--width-main-padding);
 
+    overflow-x: hidden;
 	width: 100%;
 	position: relative;
 	top: 0;
@@ -1006,14 +1007,14 @@ body:has(.overlay.show) {
 @keyframes detect-overlay-scroll {
 	from,
 	to {
-		--can-scroll: ;
+		--can-overlay-scroll: ;
 	}
 }
 .overlay .body {
 	overflow-y: auto;
 	animation: detect-overlay-scroll linear;
 	animation-timeline: scroll(self);
-	--overlay-padding-right: var(--can-scroll) 0.75rem;
+	--overlay-padding-right: var(--can-overlay-scroll) 0.75rem;
 	padding-left: 1.5rem;
 	padding-right: calc(1.5rem + var(--overlay-padding-right, 0rem));
 	flex: 1;
@@ -2131,12 +2132,12 @@ a[href].order-item-card:hover {
 		"banner slug"
 		"banner venue"
 		"banner joined-at"
-        "view-store view-store";
+		"view-store view-store";
 	column-gap: 0.5rem;
 	row-gap: 0.15rem;
 	align-items: center;
 	font-family: var(--font-primary);
-    font-size: 0.9rem;
+	font-size: 0.9rem;
 	color: var(--text-secondary);
 }
 .store-details-container img {
@@ -2153,7 +2154,7 @@ a[href].order-item-card:hover {
 .store-details-container .rating {
 	grid-area: rating;
 	font-family: var(--font-display);
-    font-size: 1rem;
+	font-size: 1rem;
 }
 .store-details-container .rating img {
 	height: 1rem;
@@ -2162,7 +2163,7 @@ a[href].order-item-card:hover {
 }
 .store-details-container .slug {
 	grid-area: slug;
-    margin-top: 0.5rem;
+	margin-top: 0.5rem;
 }
 .store-details-container .slug::before {
 	content: "@";
@@ -2180,9 +2181,9 @@ a[href].order-item-card:hover {
 	content: "Joined ";
 }
 .store-details-container .view-store {
-    grid-area: view-store;
-    margin-top: 0.8rem;
-    display: inline;
-    width: max-content;
-    justify-self: end;
+	grid-area: view-store;
+	margin-top: 0.8rem;
+	display: inline;
+	width: max-content;
+	justify-self: end;
 }
