@@ -16,9 +16,9 @@
 
     <div class="quantity form-group">
         <div class="form-input">
-            <button data-quantity-button="minus"></button>
-            <input data-no-negative type="number" min="0" max="10" step="1" value="@Model.Quantity">
-            <button data-quantity-button="add"></button>
+            <button type="button" data-quantity-button="minus">&#8203;</button>
+            <input data-no-negative type="number" min="1" max="10" step="1" value="@Model.Quantity">
+            <button type="button" data-quantity-button="add"></button>
         </div>
         <span class="error @(Model.Error != null ? "field-validation-error" : "")">
             <span>@Model.Error</span>

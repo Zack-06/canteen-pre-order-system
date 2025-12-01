@@ -916,8 +916,8 @@ main:has(.container-center) {
 	background-size: contain;
 	background-position: center;
 	background-repeat: no-repeat;
-	width: 1.5rem;
-	height: 1.5rem;
+	height: 100%;
+    aspect-ratio: 1 / 1;
 	margin: 0;
 	margin-right: 0.4rem !important;
 	padding: 0.5rem !important;
@@ -929,8 +929,9 @@ main:has(.container-center) {
 	background-size: contain;
 	background-position: center;
 	background-repeat: no-repeat;
-	width: 1.5rem;
-	height: 1.5rem;
+	height: 100%;
+    aspect-ratio: 1 / 1;
+    vertical-align: middle;
 	margin: 0;
 	margin-right: 0.4rem !important;
 	padding: 0.7rem !important;
@@ -1448,6 +1449,7 @@ main.mobile [data-manage-container="table"] table {
 }
 main.mobile [data-manage-container="table"] thead {
 	display: block;
+	margin-left: -1px;
 	min-width: calc(100% + 2px);
 	margin-bottom: 1.5rem;
 	overflow: auto;
@@ -2106,8 +2108,8 @@ a[href].order-item-card:hover {
 	align-items: center;
 	justify-content: space-between;
 	background-color: var(--bg-header);
-    color: var(--text-price);
-    font-family: var(--font-display);
+	color: var(--text-price);
+	font-family: var(--font-display);
 }
 #summary-container .summary-info {
 	display: flex;
@@ -2161,6 +2163,7 @@ a[href].order-item-card:hover {
 	row-gap: 0.15rem;
 	align-items: center;
 	font-family: var(--font-primary);
+    font-weight: var(--font-weight-semibold);
 	font-size: 0.9rem;
 	color: var(--text-secondary);
 	overflow-wrap: anywhere;
@@ -2225,4 +2228,10 @@ a[href].order-item-card:hover {
 	display: inline;
 	width: max-content;
 	justify-self: center;
+}
+
+/* Medium Zoom */
+.medium-zoom-overlay,
+.medium-zoom-image--opened {
+	z-index: 999;
 }

@@ -116,12 +116,12 @@ public class FormatService
         if (absValue >= 1000000000)
         {
             display = absValue / 1000000000m;
-            suffix = "b";
+            suffix = "B";
         }
         else if (absValue >= 1000000)
         {
             display = absValue / 1000000m;
-            suffix = "m";
+            suffix = "M";
         }
         else if (absValue >= 1000)
         {

@@ -15,6 +15,7 @@ public class ItemController : Controller
 
     public IActionResult Index()
     {
+        ViewBag.CurrentUrl = Request.GetBaseUrl();
         // item info details
         return View();
     }
