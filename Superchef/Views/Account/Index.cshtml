@@ -148,8 +148,6 @@
             <input id="image-x" asp-for="ImageX" hidden>
             <input id="image-y" asp-for="ImageY" hidden>
             <input id="image-scale" asp-for="ImageScale" hidden>
-            <input asp-for="PreviewWidth" hidden>
-            <input asp-for="PreviewHeight" hidden>
 
             <div id="profile-preview-container">
                 <img id="profile-preview" src="/img/pfp.png" class="vertical-fit" alt="Profile Picture" />
@@ -161,13 +159,9 @@
 
             <div class="button-group">
                 <button type="button" id="upload-profile-picture-button" data-button="accent">Upload</button>
-                <button type="button" id="remove-profile-picture-button" data-button="danger">Remove</button>
-                <button type="button" id="reset-profile-picture-button" data-button="info">Reset</button>
-
-                @* <button type="button" id="upload-profile-picture-button" data-button="accent">Upload</button>
-            <button type="button" id="remove-profile-picture-button" data-button="danger" @(ViewBag.AccountImageUrl ==
+                <button type="button" id="remove-profile-picture-button" data-button="danger" @(ViewBag.AccountImageUrl ==
                                                                                                        "/img/pfp.png" ? "disabled" : "")>Remove</button>
-            <button type="button" id="reset-profile-picture-button" data-button="info" disabled>Reset</button> *@
+                <button type="button" id="reset-profile-picture-button" data-button="info" disabled>Reset</button>
             </div>
         </div>
     </form>

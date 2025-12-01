@@ -100,8 +100,6 @@ public class AccountProfileVM
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
-    public double PreviewWidth { get; set; }
-    public double PreviewHeight { get; set; }
     public IFormFile? Image { get; set; }
 }
 
@@ -284,6 +282,7 @@ public class AddCategoryVM
 {
     [MaxLength(50)]
     public string Name { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
@@ -295,6 +294,7 @@ public class EditCategoryVM
     public int Id { get; set; }
     [MaxLength(50)]
     public string Name { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
@@ -335,6 +335,7 @@ public class AddStoreVM
     public int SlotMaxOrders { get; set; }
     [Remote("CheckVenue", "Store", ErrorMessage = "{0} is not a valid venue.")]
     public int Venue { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
@@ -360,10 +361,18 @@ public class EditStoreVM
     public int SlotMaxOrders { get; set; }
     [Remote("CheckVenue", "Store", ErrorMessage = "{0} is not a valid venue.")]
     public int Venue { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
     public IFormFile? Image { get; set; }
+    public bool BannerRemoveImage { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
+    public double BannerImageScale { get; set; } = 1;
+    public double BannerImageX { get; set; } = 0;
+    public double BannerImageY { get; set; } = 0;
+    [DisplayName("Banner Image")]
+    public IFormFile? BannerImage { get; set; }
 
     public List<SelectListItem> AvailableVenues { get; set; } = [];
 }
@@ -428,6 +437,7 @@ public class AddItemVM
     public List<string> Keywords { get; set; } = [];
     [Remote("CheckCategory", "Item", ErrorMessage = "{0} is not a valid category.")]
     public int Category { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
@@ -452,6 +462,7 @@ public class EditItemVM
     public List<string> Keywords { get; set; } = [];
     [Remote("CheckCategory", "Item", ErrorMessage = "{0} is not a valid category.")]
     public int Category { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
@@ -491,6 +502,7 @@ public class AddVariantVM
     [DisplayName("Stock Count")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
     public int StockCount { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
@@ -510,6 +522,7 @@ public class EditVariantVM
     [DisplayName("Stock Count")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
     public int StockCount { get; set; }
+    [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;

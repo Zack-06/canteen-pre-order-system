@@ -2,7 +2,8 @@
 
 @section head {
     <style>
-        #image-preview-container {
+        #image-preview-container,
+        #banner-image-preview-container {
             position: relative;
             overflow: hidden;
             margin-bottom: 0.75rem;
@@ -11,23 +12,33 @@
             aspect-ratio: 1/1;
         }
 
-        #image-preview-container:not(:has(img[src])) {
+        #banner-image-preview-container {
+            aspect-ratio: 3/1;
+            width: 100%;
+            max-width: 30rem;
+        }
+
+        #image-preview-container:not(:has(img[src])),
+        #banner-image-preview-container:not(:has(img[src])) {
             display: none;
         }
 
-        #image-preview {
+        #image-preview,
+        #banner-image-preview {
             position: absolute;
             left: 50%;
             top: 50%;
             transform: translate(-50%, -50%);
         }
 
-        #image-preview.horizontal-fit {
+        #image-preview.horizontal-fit,
+        #banner-image-preview.horizontal-fit {
             width: 100%;
             object-fit: contain;
         }
 
-        #image-preview.vertical-fit {
+        #image-preview.vertical-fit,
+        #banner-image-preview.vertical-fit {
             height: 100%;
             object-fit: contain;
         }
@@ -135,9 +146,36 @@
                 <span asp-validation-for="Image"></span>
             </div>
 
-            <div class="button-group">
+            <div class="button-group" data-flex="wrap">
                 <button type="button" id="upload-image-button" data-button="accent">Upload</button>
                 <button type="button" id="reset-image-button" data-button="info" disabled>Reset</button>
+            </div>
+        </div>
+
+        <label asp-for="BannerImage"></label>
+        <div>:</div>
+        <div class="form-group">
+            <input type="file" id="banner-image-file" asp-for="BannerImage" accept="image/jpeg, image/png" hidden />
+            <input id="banner-remove-image-checkbox" asp-for="BannerRemoveImage" hidden />
+            <input id="banner-image-x" asp-for="BannerImageX" hidden>
+            <input id="banner-image-y" asp-for="BannerImageY" hidden>
+            <input id="banner-image-scale" asp-for="BannerImageScale" hidden>
+            <input id="banner-change-image-checkbox" name="banner-change-image-checkbox" type="checkbox" hidden>
+
+            <div id="banner-image-preview-container">
+                <img id="banner-image-preview" class="vertical-fit" @(ViewBag.BannerImageUrl == null ? "" :
+                                                                                        $"src=/uploads/banner/{ViewBag.BannerImageUrl}") />
+            </div>
+
+            <div class="form-group">
+                <span asp-validation-for="BannerImage"></span>
+            </div>
+
+            <div class="button-group" data-flex="wrap">
+                <button type="button" id="upload-banner-image-button" data-button="accent">Upload</button>
+                <button type="button" id="remove-banner-image-button" data-button="danger" @(ViewBag.BannerImageUrl ==
+                                                                                                               null ? "disabled" : "")>Remove</button>
+                <button type="button" id="reset-banner-image-button" data-button="info" disabled>Reset</button>
             </div>
         </div>
 
@@ -182,6 +220,27 @@
 </div>
 
 <div id="upload-overlay" class="overlay upload-overlay">
+    <div class="content">
+        <div class="header">
+            <div class="title">Upload Image</div>
+            <div class="close"></div>
+        </div>
+        <div class="body">
+            <div class="upload-drop-zone" class="show">
+                <div>Drag and drop your image here or click to select</div>
+            </div>
+            <div class="upload-preview-zone">
+                <div class="upload-preview-container" class="show">
+                    <img class="upload-preview-image" draggable="false" />
+                </div>
+                <input type="range" class="zoom-slider" min="1" max="2" step="0.01" />
+                <button class="confirm-upload" data-button="yellow">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="banner-upload-overlay" class="overlay upload-overlay">
     <div class="content">
         <div class="header">
             <div class="title">Upload Image</div>
@@ -258,6 +317,66 @@
 
             $("#reset-image-button").prop("disabled", true)
             $("#change-image-checkbox").prop("checked", false).trigger("change")
+        })
+
+        const originalBannerSrc = $("#banner-image-preview").attr("src")
+        const noBannerImage = originalBannerSrc == null
+        const bannerUploadOverlay = new UploadOverlay("#banner-image-file", 3, 1, "#banner-upload-overlay")
+
+        $("#upload-banner-image-button").on("click", async function () {
+            const uploadResult = await bannerUploadOverlay.open()
+            if (uploadResult) {
+                if (uploadResult.horizontalFit) {
+                    $("#banner-image-preview").addClass("horizontal-fit")
+                    $("#banner-image-preview").removeClass("vertical-fit")
+                } else {
+                    $("#banner-image-preview").addClass("vertical-fit")
+                    $("#banner-image-preview").removeClass("horizontal-fit")
+                }
+
+                $("#banner-image-preview").attr("src", uploadResult.src)
+                $("#banner-image-x").val(uploadResult.imgX)
+                $("#banner-image-y").val(uploadResult.imgY)
+                $("#banner-image-scale").val(uploadResult.scale)
+                updateImagePreview("#banner-image-preview", $("#banner-image-x").val(), $("#banner-image-y").val(), $("#banner-image-scale").val())
+
+                $("#banner-change-image-checkbox").prop("checked", true).trigger("change")
+                $("#banner-remove-image-checkbox").prop("checked", false).trigger("change")
+                $("#remove-banner-image-button").prop("disabled", false)
+                $("#reset-banner-image-button").prop("disabled", false)
+            }
+        })
+
+        $("#reset-banner-image-button").on("click", async function () {
+            $("#banner-image-file").val("") // remove file input value
+
+            $("#banner-image-x").val(0)
+            $("#banner-image-y").val(0)
+            $("#banner-image-scale").val(1)
+            updateImagePreview("#banner-image-preview", $("#banner-image-x").val(), $("#banner-image-y").val(), $("#banner-image-scale").val())
+
+            $("#banner-image-preview").attr("src", originalBannerSrc)
+            $("#banner-image-preview").addClass("vertical-fit")
+            $("#banner-image-preview").removeClass("horizontal-fit")
+
+            $("#banner-change-image-checkbox").prop("checked", false).trigger("change")
+            $("#banner-remove-image-checkbox").prop("checked", false).trigger("change")
+            $("#remove-banner-image-button").prop("disabled", noBannerImage)
+            $("#reset-banner-image-button").prop("disabled", true)
+        })
+
+        $("#remove-banner-image-button").on("click", async function () {
+            if (await confirmation("Are you sure you want to remove this banner image?", "Yes")) {
+                $("#banner-change-image-checkbox").prop("checked", false).trigger("change")
+                $("#banner-remove-image-checkbox").prop("checked", !noBannerImage).trigger("change")
+                $("#remove-banner-image-button").prop("disabled", true)
+                $("#reset-banner-image-button").prop("disabled", noBannerImage)
+
+                $("#banner-image-preview").css("transform", "")
+                $("#banner-image-preview").addClass("vertical-fit")
+                $("#banner-image-preview").removeClass("horizontal-fit")
+                $("#banner-image-preview").removeAttr("src")
+            }
         })
     </script>
 }

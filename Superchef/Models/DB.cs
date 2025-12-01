@@ -176,6 +176,7 @@ public class Store
     public string Description { get; set; }
     [MaxLength(50)]
     public string Image { get; set; }
+    public string? Banner { get; set; }
     public int SlotMaxOrders { get; set; }
     public string? StripeAccountId { get; set; }
     public bool HasPublishedFirstSlots { get; set; } = false;
