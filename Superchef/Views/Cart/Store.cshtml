@@ -121,6 +121,22 @@
     </style>
 }
 
+@{
+    var storeDetails = new StoreDetailsContainerDM
+    {
+        Image = "abc",
+        Name = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maiores, labore nisi! Repellat itaque minus enim tempore, amet recusandae blanditiis eius!",
+        Slug = "slug",
+        Rating = 2.0m,
+        TotalReviews = 123828319,
+        Venue = "Red Brick",
+        JoinedAt = DateTime.Now,
+        ViewStoreButton = true
+    };
+}
+
+<partial name="_StoreDetailsContainer" model="storeDetails" />
+
 <div class="container cartstore">
     <img src="" alt="">
     <div class="storename">

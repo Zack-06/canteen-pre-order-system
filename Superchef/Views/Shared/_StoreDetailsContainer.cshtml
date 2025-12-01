@@ -2,15 +2,17 @@
 
 @{
     string ratingText;
+    string reviewText;
 
     if (Model.TotalReviews <= 0)
     {
-        ratingText = "No Reviews";
+        ratingText = "?";
+        reviewText = "No Reviews";
     }
     else
     {
         ratingText = FormatService.ToRatingFormat(Model.Rating);
-        ratingText += $" ({FormatService.ToCompactNumber(Model.TotalReviews, 2)} Review{(Model.TotalReviews > 1 ? "s" : "")})";
+        reviewText = $"{FormatService.ToCompactNumber(Model.TotalReviews, 1)} review{(Model.TotalReviews > 1 ? "s" : "")}";
     }
 }
 
@@ -23,6 +25,7 @@
             <img src="/img/star.png" alt="Star">
         }
         @ratingText
+        <span>@reviewText</span>
     </div>
     <div class="slug">@Model.Slug</div>
     <div class="venue">@Model.Venue</div>

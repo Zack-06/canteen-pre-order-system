@@ -2125,15 +2125,16 @@ a[href].order-item-card:hover {
 /* Store Details Container */
 .store-details-container {
 	display: grid;
-	grid-template-columns: auto 1fr;
+	grid-template-columns: 7rem;
+    /* grid-template-rows: auto auto 2rem; */
 	grid-template-areas:
 		"banner name"
-		"banner rating"
 		"banner slug"
+		"banner rating"
 		"banner venue"
 		"banner joined-at"
 		"view-store view-store";
-	column-gap: 0.5rem;
+	column-gap: 1rem;
 	row-gap: 0.15rem;
 	align-items: center;
 	font-family: var(--font-primary);
@@ -2142,8 +2143,9 @@ a[href].order-item-card:hover {
 }
 .store-details-container img {
 	grid-area: banner;
-	width: 7rem;
-	height: 7rem;
+	width: 100%;
+	aspect-ratio: 1 / 1;
+    border-radius: 50%;
 }
 .store-details-container .name {
 	grid-area: name;
@@ -2151,39 +2153,52 @@ a[href].order-item-card:hover {
 	font-weight: var(--font-weight-bold);
 	color: var(--text-primary);
 }
+.store-details-container .slug {
+	grid-area: slug;
+}
+.store-details-container .slug::before {
+	content: "@";
+}
 .store-details-container .rating {
 	grid-area: rating;
 	font-family: var(--font-display);
 	font-size: 1rem;
+    color: var(--text-primary);
 }
 .store-details-container .rating img {
 	height: 1rem;
 	width: 1rem;
 	margin-bottom: -2px;
 }
-.store-details-container .slug {
-	grid-area: slug;
-	margin-top: 0.5rem;
+.store-details-container .rating span {
+    font-size: 0.9rem;
+    font-family: var(--font-primary);
+    color: var(--text-secondary);
+    margin-left: 0.1rem;
 }
-.store-details-container .slug::before {
-	content: "@";
+.store-details-container .rating span::before {
+    content: "( ";
+}
+.store-details-container .rating span::after {
+    content: " )";
 }
 .store-details-container .venue {
 	grid-area: venue;
+    margin-top: 1rem;
 }
 .store-details-container .venue::before {
-	content: "Located in ";
+	content: "📍 Located in ";
 }
 .store-details-container .joined-at {
 	grid-area: joined-at;
 }
 .store-details-container .joined-at::before {
-	content: "Joined ";
+	content: "📅 Joined ";
 }
 .store-details-container .view-store {
 	grid-area: view-store;
-	margin-top: 0.8rem;
+	margin-top: 1rem;
 	display: inline;
 	width: max-content;
-	justify-self: end;
+	justify-self: center;
 }

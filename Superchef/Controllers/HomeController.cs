@@ -32,9 +32,6 @@ public class HomeController : Controller
         vm.LoginDevices = new List<string>();
         vm.LoginDevicesCount = new List<int>();
 
-        Console.WriteLine("HELLO");
-        Console.WriteLine(vm.Page);
-
         return View(vm);
     }
 }
