@@ -104,4 +104,40 @@ public class FormatService
     {
         return status.ToLower().Replace(" ", "-");
     }
+
+    public static string ToCompactNumber(int value, int decimals = 1)
+    {
+        bool isNegative = value < 0;
+        int absValue = Math.Abs(value);
+
+        decimal display;
+        string suffix;
+
+        if (absValue >= 1000000000)
+        {
+            display = absValue / 1000000000m;
+            suffix = "b";
+        }
+        else if (absValue >= 1000000)
+        {
+            display = absValue / 1000000m;
+            suffix = "m";
+        }
+        else if (absValue >= 1000)
+        {
+            display = absValue / 1000m;
+            suffix = "k";
+        }
+        else
+        {
+            // no suffix needed
+            return isNegative ? "-" + absValue : absValue.ToString();
+        }
+
+        string format = "0." + new string('#', decimals);
+        string number = display.ToString(format, CultureInfo.InvariantCulture);
+
+        string result = number + suffix;
+        return isNegative ? "-" + result : result;
+    }
 }

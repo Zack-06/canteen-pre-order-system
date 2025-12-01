@@ -85,3 +85,15 @@ public record ActivityLogCardDM
     public string Details { get; set; }
     public DateTime CreatedAt { get; set; }
 }
+
+public record StoreDetailsContainerDM
+{
+    public string Image { get; set; }
+    public string Name { get; set; }
+    public string Slug { get; set; }
+    public decimal Rating { get; set; }
+    public int TotalReviews { get; set; }
+    public string Venue { get; set; }
+    public DateTime JoinedAt { get; set; }
+    public bool ViewStoreButton { get; set; }
+}

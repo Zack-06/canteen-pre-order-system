@@ -152,12 +152,14 @@
 	--width-category: 7rem;
 	--width-slot: 7rem;
 	--width-custom-tick: 5rem;
+	--width-main-padding: 1.5rem;
 
 	/* Widths (Mobile) */
 	--width-mobile-item: 9.5rem;
 	--width-mobile-store: 9.5rem;
 	--width-mobile-category: 7rem;
 	--width-mobile-slot: 7rem;
+	--width-mobile-main-padding: 1rem;
 }
 
 * {
@@ -307,10 +309,10 @@ button:active {
 .button-group {
 	display: flex;
 	gap: 0.5rem;
-    white-space: nowrap;
+	white-space: nowrap;
 }
 .button-group[data-flex~="wrap"] {
-    flex-wrap: wrap;
+	flex-wrap: wrap;
 }
 .button-group[data-flex~="inline"] {
 	display: inline-flex;
@@ -597,15 +599,17 @@ header #search-button {
 
 /* Main */
 main {
-	width: 100vw;
+	--main-padding: var(--width-main-padding);
+
+	width: 100%;
 	position: relative;
 	top: 0;
 	left: 0;
-	padding: 2rem 1.5rem;
+	padding: 2rem var(--main-padding);
 }
 @media (max-width: 450px) {
 	main {
-		padding: 2rem 1rem;
+		--main-padding: var(--width-mobile-main-padding);
 	}
 }
 
@@ -707,6 +711,12 @@ footer .social-media-icons a:hover {
 }
 .container[data-limit-container] {
 	max-width: 40rem;
+}
+.container[data-full] {
+	margin-left: calc(-1 * var(--main-padding)) !important;
+	width: calc(100% + (var(--main-padding) * 2));
+	padding: var(--main-padding);
+	border-radius: 0;
 }
 .container .container {
 	margin-left: 0;
@@ -2069,12 +2079,9 @@ a[href].order-item-card:hover {
 /* Summary Container */
 #summary-container {
 	margin: 2.5rem 0;
-	margin-left: -1.5rem;
-	width: calc(100% + (1.5rem * 2));
 	display: flex;
 	align-items: center;
 	justify-content: space-between;
-	padding: 1.5rem;
 	background-color: var(--bg-header);
 }
 #summary-container .summary-info {
@@ -2112,4 +2119,70 @@ a[href].order-item-card:hover {
 }
 .divider[data-orientation="horizontal"] {
 	height: 1px;
+}
+
+/* Store Details Container */
+.store-details-container {
+	display: grid;
+	grid-template-columns: auto 1fr;
+	grid-template-areas:
+		"banner name"
+		"banner rating"
+		"banner slug"
+		"banner venue"
+		"banner joined-at"
+        "view-store view-store";
+	column-gap: 0.5rem;
+	row-gap: 0.15rem;
+	align-items: center;
+	font-family: var(--font-primary);
+    font-size: 0.9rem;
+	color: var(--text-secondary);
+}
+.store-details-container img {
+	grid-area: banner;
+	width: 7rem;
+	height: 7rem;
+}
+.store-details-container .name {
+	grid-area: name;
+	font-size: 1.3rem;
+	font-weight: var(--font-weight-bold);
+	color: var(--text-primary);
+}
+.store-details-container .rating {
+	grid-area: rating;
+	font-family: var(--font-display);
+    font-size: 1rem;
+}
+.store-details-container .rating img {
+	height: 1rem;
+	width: 1rem;
+	margin-bottom: -2px;
+}
+.store-details-container .slug {
+	grid-area: slug;
+    margin-top: 0.5rem;
+}
+.store-details-container .slug::before {
+	content: "@";
+}
+.store-details-container .venue {
+	grid-area: venue;
+}
+.store-details-container .venue::before {
+	content: "Located in ";
+}
+.store-details-container .joined-at {
+	grid-area: joined-at;
+}
+.store-details-container .joined-at::before {
+	content: "Joined ";
+}
+.store-details-container .view-store {
+    grid-area: view-store;
+    margin-top: 0.8rem;
+    display: inline;
+    width: max-content;
+    justify-self: end;
 }

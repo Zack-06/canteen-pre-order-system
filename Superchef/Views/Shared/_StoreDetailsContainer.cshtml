@@ -1,0 +1,34 @@
+@model StoreDetailsContainerDM
+
+@{
+    string ratingText;
+
+    if (Model.TotalReviews <= 0)
+    {
+        ratingText = "No Reviews";
+    }
+    else
+    {
+        ratingText = FormatService.ToRatingFormat(Model.Rating);
+        ratingText += $" ({FormatService.ToCompactNumber(Model.TotalReviews, 2)} Review{(Model.TotalReviews > 1 ? "s" : "")})";
+    }
+}
+
+<div class="container store-details-container">
+    <img src="/uploads/store/@Model.Image" alt="Store Profile">
+    <div class="name">@Model.Name</div>
+    <div class="rating">
+        @if (Model.TotalReviews > 0)
+        {
+            <img src="/img/star.png" alt="Star">
+        }
+        @ratingText
+    </div>
+    <div class="slug">@Model.Slug</div>
+    <div class="venue">@Model.Venue</div>
+    <div class="joined-at">@FormatService.GetRelativeTime(Model.JoinedAt)</div>
+    
+    @if (Model.ViewStoreButton) {
+        <a href="/Store/@Model.Slug" data-button="info" class="view-store">View Store</a>
+    }
+</div>
