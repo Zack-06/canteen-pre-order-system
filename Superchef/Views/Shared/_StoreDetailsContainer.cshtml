@@ -19,6 +19,7 @@
 <div class="container store-details-container">
     <img src="/uploads/store/@Model.Image" alt="Store Profile">
     <div class="name">@Model.Name</div>
+    <div class="slug">@Model.Slug</div>
     <div class="rating">
         @if (Model.TotalReviews > 0)
         {
@@ -27,7 +28,6 @@
         @ratingText
         <span>@reviewText</span>
     </div>
-    <div class="slug">@Model.Slug</div>
     <div class="venue">@Model.Venue</div>
     <div class="joined-at">@FormatService.GetRelativeTime(Model.JoinedAt)</div>
     

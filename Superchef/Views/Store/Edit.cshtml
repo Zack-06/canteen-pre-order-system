@@ -12,6 +12,10 @@
             aspect-ratio: 1/1;
         }
 
+        #image-preview-container {
+            border-radius: 50%;
+        }
+
         #banner-image-preview-container {
             aspect-ratio: 3/1;
             width: 100%;
@@ -232,6 +236,7 @@
             <div class="upload-preview-zone">
                 <div class="upload-preview-container" class="show">
                     <img class="upload-preview-image" draggable="false" />
+                    <div class="upload-overlay-circle"></div>
                 </div>
                 <input type="range" class="zoom-slider" min="1" max="2" step="0.01" />
                 <button class="confirm-upload" data-button="yellow">Confirm</button>
@@ -355,7 +360,11 @@
             $("#banner-image-scale").val(1)
             updateImagePreview("#banner-image-preview", $("#banner-image-x").val(), $("#banner-image-y").val(), $("#banner-image-scale").val())
 
-            $("#banner-image-preview").attr("src", originalBannerSrc)
+            if (originalBannerSrc == null) {
+                $("#banner-image-preview").removeAttr("src")
+            } else {
+                $("#banner-image-preview").attr("src", originalBannerSrc)
+            }
             $("#banner-image-preview").addClass("vertical-fit")
             $("#banner-image-preview").removeClass("horizontal-fit")
 
