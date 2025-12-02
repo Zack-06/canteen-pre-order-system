@@ -147,6 +147,28 @@ public class SearchVM
     public List<Category> AvailableCategories { get; set; } = [];
 }
 
+
+public class ItemInfoVM
+{
+    public Item Item { get; set; }
+    public int TotalReviews { get; set; }
+    [Precision(2, 1)]
+    public decimal AverageRating { get; set; }
+    public int TotalSold { get; set; }
+    public string FilterRating { get; set; } = "all";
+    public List<Review> Reviews { get; set; } = [];
+    public ReviewInputVM NewReview { get; set; } = new();
+}
+
+public class ReviewInputVM
+{
+    public int Id { get; set; }
+    [Range(1, 5, ErrorMessage = "{0} must be between {1} and {2}")]
+    public int Rating { get; set; }
+    [StringLength(100, ErrorMessage = "{0} must not exceed {1} characters.")]
+    public string Comment { get; set; }
+}
+
 public class ManageCustomerVM
 {
     public string? Dir { get; set; }

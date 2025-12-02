@@ -13,11 +13,43 @@ public class ItemController : Controller
         this.db = db;
     }
 
-    public IActionResult Index()
+    [HttpGet]
+    [Route("Item/Info/{slug}")]
+    public IActionResult Info(string slug, ItemInfoVM vm)
     {
-        ViewBag.CurrentUrl = Request.GetBaseUrl();
+        vm.Item = new Item
+        {
+            Id = 1,
+            Name = "abc",
+            Slug = "abc",
+            Description = "abc",
+            Category = new() { Id = 1, Name = "abc" },
+            Keywords = [],
+            Image = "",
+            CreatedAt = DateTime.Now,
+            Variants = [],
+            CategoryId = 1,
+            Favourites = [],
+            Reviews = [],
+            IsActive = true,
+            IsDeleted = false,
+            StoreId = 1,
+        };
+        vm.Reviews = [
+            new Review { Account = new Account { Name = "abc", Image = null }, Comment = "abc", Rating = 4, CreatedAt = DateTime.Now },
+            new Review { Account = new Account { Name = "abc", Image = null }, Comment = "abc", Rating = 4, CreatedAt = DateTime.Now },
+            new Review { Account = new Account { Name = "abc", Image = null }, Comment = "abc", Rating = 4, CreatedAt = DateTime.Now }
+        ];
+        vm.TotalReviews = 10;
+        vm.AverageRating = 4.5m;
+        vm.TotalSold = 10;
+
+        ViewBag.HasCommented = false;
+        ViewBag.HasBought = true;
+        ViewBag.Authenticated = true;
+
         // item info details
-        return View();
+        return View(vm);
     }
 
     public IActionResult Manage(ManageItemVM vm)

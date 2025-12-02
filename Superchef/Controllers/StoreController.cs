@@ -18,7 +18,9 @@ public class StoreController : Controller
         cf = configuration;
     }
 
-    public IActionResult Index()
+    [HttpGet]
+    [Route("Store/Info/{slug}")]
+    public IActionResult Info(string slug)
     {
         // store details/info
         return View();
