@@ -917,29 +917,10 @@ main:has(.container-center) {
 	background-position: center;
 	background-repeat: no-repeat;
 	height: 100%;
-    aspect-ratio: 1 / 1;
+	aspect-ratio: 1 / 1;
 	margin: 0;
 	margin-right: 0.4rem !important;
 	padding: 0.5rem !important;
-}
-
-/* Quantity Button */
-[data-quantity-button] {
-	background-image: url(/img/add.png);
-	background-size: contain;
-	background-position: center;
-	background-repeat: no-repeat;
-	height: 100%;
-    aspect-ratio: 1 / 1;
-    vertical-align: middle;
-	margin: 0;
-	margin-right: 0.4rem !important;
-	padding: 0.7rem !important;
-}
-[data-quantity-button="minus"] {
-	background-image: url(/img/minus.png);
-	margin-right: 0 !important;
-	margin-left: 0.4rem !important;
 }
 
 /* Toast Message */
@@ -2163,7 +2144,7 @@ a[href].order-item-card:hover {
 	row-gap: 0.15rem;
 	align-items: center;
 	font-family: var(--font-primary);
-    font-weight: var(--font-weight-semibold);
+	font-weight: var(--font-weight-semibold);
 	font-size: 0.9rem;
 	color: var(--text-secondary);
 	overflow-wrap: anywhere;
@@ -2228,6 +2209,30 @@ a[href].order-item-card:hover {
 	display: inline;
 	width: max-content;
 	justify-self: center;
+}
+
+/* Quantity Button */
+[data-quantity-button] {
+	background-image: url(/img/add.png);
+	background-size: contain;
+	background-position: center;
+	background-repeat: no-repeat;
+	height: 100%;
+	aspect-ratio: 1 / 1;
+	vertical-align: middle;
+	margin: 0;
+	margin-right: 0.4rem !important;
+	padding: 0.7rem !important;
+}
+[data-quantity-button="minus"] {
+	background-image: url(/img/minus.png);
+	margin-right: 0 !important;
+	margin-left: 0.4rem !important;
+}
+[data-quantity-button="minus"] + input {
+	text-align: center;
+	padding-left: 0.4rem !important;
+	padding-right: 0.4rem !important;
 }
 
 /* Medium Zoom */

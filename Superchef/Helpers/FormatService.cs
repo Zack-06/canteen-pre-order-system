@@ -140,4 +140,19 @@ public class FormatService
         string result = number + suffix;
         return isNegative ? "-" + result : result;
     }
+
+    public static string ToStockCountFormat(int count)
+    {
+        if (count <= 0)
+        {
+            return "Sold out";
+        }
+
+        if (count > 999)
+        {
+            return "999+ left";
+        }
+
+        return $"{count} left";
+    }
 }
