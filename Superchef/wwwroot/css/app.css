@@ -521,7 +521,7 @@ header .search-container button[type="button"]:hover {
 }
 header .search-container button[type="submit"] {
 	border-left: 2px solid var(--border-primary);
-	padding: 0 0.7rem 0 0.7rem;
+	padding: 0 0.7rem 0 0.4rem;
 	background-color: var(--bg-pure);
 }
 header .search-container button[type="submit"] img {
@@ -1970,7 +1970,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	width: 100%;
 }
 #qr-container > canvas {
-	display: none;
+	width: 100%;
 }
 @media (max-width: 520px) {
 	#qr-container {
