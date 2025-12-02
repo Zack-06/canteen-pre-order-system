@@ -75,6 +75,17 @@
         .sales-container button:hover {
             filter: brightness(3);
         }
+
+        @@media (max-width: 400px) {
+            .sales-container .form-group {
+                width: 100%;
+            }
+
+            .sales-container .form-input {
+                display: flex;
+                flex-direction: column;
+            }
+        }
     </style>
 }
 
