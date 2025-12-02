@@ -135,6 +135,17 @@
                     "checkbox img info delete"
                     "price price quantity quantity"
                 ;
+                row-gap: 1.5rem;
+            }
+
+            .cart-item-container>.price,
+            .cart-item-container>.quantity {
+                align-self: baseline;
+                min-height: unset !important;
+            }
+
+            .cart-item-container .error {
+                grid-area: 2/1;
             }
         }
     </style>
