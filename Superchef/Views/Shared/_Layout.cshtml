@@ -23,20 +23,20 @@
 </head>
 
 <body>
-    @* @if (ViewBag.AccountType == null || ViewBag.AccountType == "Customer")
-    {
-        <partial name="_Header" />
-    }
-    else
-    {
-        <partial name="_AdminHeader" />
-    } *@
-
     <div class="page">
-        @* <partial name="_Header" /> *@
-        <partial name="_VendorHeader" />
-        @* <partial name="_AdminHeader" /> *@
-
+        @if (ViewBag.AccountType == null || ViewBag.AccountType == "Customer")
+        {
+            <partial name="_Header" />
+        }
+        else if (ViewBag.AccountType == "Vendor")
+        {
+            <partial name="_VendorHeader" />
+        }
+        else
+        {
+            <partial name="_AdminHeader" />
+        }
+        
         <main>
             @RenderBody()
         </main>

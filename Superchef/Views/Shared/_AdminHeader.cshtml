@@ -7,26 +7,27 @@
     </div>
 
     <div class="wrapper">
-        <a href="/" class="header-nav-link">
+        <a href="@Url.Action("Manage", "Customer")" class="header-nav-link">
             <img src="/img/header_icon/customer.png" alt="Customers">
         </a>
-        <a href="/" class="header-nav-link">
+        <a href="@Url.Action("Manage", "Vendor")" class="header-nav-link">
             <img src="/img/header_icon/vendor.png" alt="Vendors">
         </a>
-        <a href="/" class="header-nav-link">
+        <a href="@Url.Action("Manage", "Admin")" class="header-nav-link">
             <img src="/img/header_icon/admin.png" alt="Administrators">
         </a>
-        <a href="/" class="header-nav-link">
+        <a href="@Url.Action("Manage", "Venue")" class="header-nav-link">
             <img src="/img/header_icon/venue.png" alt="Venues">
         </a>
-        <a href="/" class="header-nav-link">
+        <a href="@Url.Action("Manage", "Category")" class="header-nav-link">
             <img src="/img/header_icon/category.png" alt="Categories">
         </a>
         <button class="header-nav-link pfp">
             <img src="/img/pfp.png" alt="Pfp">
             <div class="dropdown-menu">
-                <a href="/Account">Account</a>
-                <a href="/Account/Device">Device</a>
+                <a href="@Url.Action("Index", "Account")">Account</a>
+                <a href="@Url.Action("Device", "Account")">Device</a>
+                <div data-link id="logout-button">Logout</div>
             </div>
         </button>
     </div>

@@ -11,7 +11,8 @@
 
     <form class="search-container" method="get" action="@Url.Action("Index", "Search")">
         <input type="text" name="Query" placeholder="Search" value="@ViewBag.SearchQuery">
-        <button type="button" onclick="this.parentElement.querySelector('input').value = ''; this.parentElement.querySelector('input').focus()">
+        <button type="button"
+            onclick="this.parentElement.querySelector('input').value = ''; this.parentElement.querySelector('input').focus()">
             <img src="/img/cross.png" alt="Clear">
         </button>
         <button type="submit">
@@ -20,17 +21,26 @@
     </form>
 
     <div class="wrapper">
-        <div id="search-button" href="/" class="header-nav-link">
+        <div id="search-button" class="header-nav-link">
             <img src="/img/header_icon/search.png" alt="Search">
         </div>
-        <a href="/" class="header-nav-link">
+        <a href="@Url.Action("Index", "Cart")" class="header-nav-link">
             <img src="/img/header_icon/cart.png" alt="Cart">
         </a>
         <button class="header-nav-link pfp">
             <img src="/img/pfp.png" alt="Pfp">
             <div class="dropdown-menu">
-                <a href="/Auth/Login">Login</a>
-                <a href="/Auth/Register">Register</a>
+                @if (ViewBag.Authenticated == null || ViewBag.Authenticated == false)
+                {
+                    <a href="@Url.Action("Login", "Auth")">Login</a>
+                    <a href="@Url.Action("Register", "Auth")">Register</a>
+                } else {
+                    <a href="@Url.Action("Index", "Account")">Account</a>
+                    <a href="@Url.Action("Device", "Account")">Device</a>
+                    <a href="@Url.Action("History", "Account")">History</a>
+                    <a href="@Url.Action("Favourite", "Account")">Favourite</a>
+                    <div data-link id="logout-button">Logout</div>
+                }
             </div>
         </button>
     </div>

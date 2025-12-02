@@ -46,7 +46,6 @@ public class ItemController : Controller
 
         ViewBag.HasCommented = false;
         ViewBag.HasBought = true;
-        ViewBag.Authenticated = true;
 
         // item info details
         return View(vm);
