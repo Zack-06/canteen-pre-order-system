@@ -15,6 +15,15 @@ public class VerificationService
 
     public Verification CreateVerification(string action, string baseUrl, int accountId, int? deviceId = null)
     {
+        if (deviceId != null)
+        {
+            var existingRequest = db.Verifications.FirstOrDefault(u => u.DeviceId == deviceId);
+            if (existingRequest != null)
+            {
+                return existingRequest;
+            }
+        }
+
         // Generate token
         var token = GeneratorService.RandomString(50);
         while (db.Verifications.Any(u => u.Token == token))

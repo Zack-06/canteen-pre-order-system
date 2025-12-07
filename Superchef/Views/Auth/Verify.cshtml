@@ -217,5 +217,48 @@
                 .join(""))
             window.location.href = window.location.pathname + "?" + urlParams.toString()
         }
+
     </script>
+
+
+    @if (ViewBag.VerificationDeviceId != null && ViewBag.VerificationToken != null)
+    {
+        {
+            <script>
+                const verificationDeviceId = @ViewBag.VerificationDeviceId;
+                const verificationConnection = new signalR.HubConnectionBuilder().withUrl("/VerificationHub").build()
+
+                verificationConnection.on("Error", (message) => showToast(message))
+
+                verificationConnection.on("Initialized", (serverDeviceId) => {
+                    if (serverDeviceId !== verificationDeviceId) {
+                        verificationConnection.stop()
+                    }
+                })
+
+                verificationConnection.on("Disconnect", () => {
+                    verificationConnection.stop()
+                })
+
+                verificationConnection.on("Verified", async (serverDeviceId) => {
+                    if (serverDeviceId !== verificationDeviceId) return
+
+                    $.ajax({
+                        url: "/Auth/ClaimSession",
+                        method: "post",
+                    })
+                    .done(function () {
+                        window.location.href = "@ViewBag.ReturnUrl";
+                    })
+                    .fail(function (response) {
+                        showToast(response.responseText)
+                    })
+                })
+
+                verificationConnection.start().then(() => {
+                    verificationConnection.invoke("Initialize", "@ViewBag.VerificationToken")
+                })
+            </script>
+        }
+    }
 }

@@ -1,9 +1,11 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Superchef.Controllers;
 
 public class InfoController : Controller
 {
+    [Authorize]
     public IActionResult About()
     {
         return View();

@@ -1,7 +1,9 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Superchef.Controllers;
 
+[Authorize]
 public class AccountController : Controller
 {
     private readonly DB db;
@@ -49,7 +51,7 @@ public class AccountController : Controller
         ViewBag.DeviceAddress = deviceInfo.Location;
 
         var devices = db.Devices
-                        // .Where(d => d.AccountId.ToString() == User.Identity!.Name)
+                        .Where(d => d.AccountId.ToString() == User.Identity!.Name)
                         .Where(d => !(
                             d.DeviceOS == deviceInfo.OS
                             && d.DeviceType == deviceInfo.Type

@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Microsoft.AspNetCore.DataProtection;
 
 namespace Superchef.Services;
 
@@ -6,14 +7,14 @@ public class DeviceService
 {
     private readonly DB db;
     private readonly IHttpContextAccessor ct;
-    private readonly VerificationService vs;
+    private readonly IDataProtectionProvider dp;
     private readonly IConfiguration cf;
 
-    public DeviceService(DB db, IHttpContextAccessor ct, VerificationService vs, IConfiguration cf)
+    public DeviceService(DB db, IHttpContextAccessor ct, IDataProtectionProvider dp, IConfiguration cf)
     {
         this.db = db;
         this.ct = ct;
-        this.vs = vs;
+        this.dp = dp;
         this.cf = cf;
     }
 
@@ -106,13 +107,13 @@ public class DeviceService
             && u.DeviceOS == deviceInfo.OS
             && u.DeviceType == deviceInfo.Type
             && u.DeviceBrowser == deviceInfo.Browser
+            && u.Address == deviceInfo.Location
         );
     }
 
-    public async Task<(int, string)> CreateDevice(Account account, string baseUrl, bool verified = false)
+    public async Task<Device> CreateDevice(Account account, bool verified = false)
     {
         var deviceInfo = await GetCurrentDeviceInfo();
-
 
         // Add new device
         Device device = new()
@@ -127,15 +128,50 @@ public class DeviceService
         db.Devices.Add(device);
         db.SaveChanges();
 
-        // Add new verification
-        var token = "";
-        if (!verified)
+        return device;
+    }
+
+    public void createFullShortSession(int deviceId)
+    {
+        var httpContext = ct.HttpContext;
+        if (httpContext == null) return;
+
+        // Remove all sessions for this device
+        db.Sessions.RemoveRange(db.Sessions.Where(u => u.DeviceId == deviceId));
+
+        // Create session token in database
+        var sessionToken = createSession(deviceId, true);
+
+        string protectedSessionToken = dp.CreateProtector("SessionToken").Protect(sessionToken);
+
+        // Create short term cookie
+        httpContext.Response.Cookies.Append("PreAuthSession", protectedSessionToken, new()
         {
-            var verification = vs.CreateVerification("Login", baseUrl, account.Id, device.Id);
-            token = verification.Token;
+            Expires = DateTime.Now.AddMinutes(5),
+            HttpOnly = true,
+            SameSite = SameSiteMode.Lax
+        });
+    }
+
+    public string createSession(int deviceId, bool isShort)
+    {
+        // Generate session token
+        var sessionToken = GeneratorService.RandomString(50);
+        while (db.Sessions.Any(u => u.Token == sessionToken))
+        {
+            sessionToken = GeneratorService.RandomString(50);
         }
 
-        return (device.Id, token);
+        // Create session
+        db.Sessions.Add(new()
+        {
+            Token = sessionToken,
+            ExpiresAt = isShort ? DateTime.Now.AddMinutes(5) : DateTime.Now.AddDays(30),
+            DeviceId = deviceId
+        });
+        db.SaveChanges();
+
+        return sessionToken;
     }
 }
 

@@ -64,7 +64,6 @@ public class PaymentService
             OrderId = order.Id,
             StripePaymentIntentId = paymentIntent.Id,
             Amount = paymentIntent.AmountReceived / 100m, // convert cents to RM
-            TransferStatus = "Pending",
             PaymentMethod = methodStr,
             Details = details,
         };
@@ -105,8 +104,7 @@ public class PaymentService
             var transfer = transferService.Create(transferOptions);
 
             // 3. Update transfer status
-            order.Payment.TransferStatus = "Completed";
-            order.Payment.TransferId = transfer.Id;
+            order.Payment.IsPayoutFinished = true;
             db.SaveChanges();
         }
     }
@@ -133,5 +131,12 @@ public class PaymentService
         {
             Charge = charge.Id,
         });
+
+        // 3. Update payment status
+        var payment = db.Payments.FirstOrDefault(p => p.StripePaymentIntentId == paymentIntentId);
+        if (payment == null) return;
+
+        payment.IsRefunded = true;
+        db.SaveChanges();
     }
 }
