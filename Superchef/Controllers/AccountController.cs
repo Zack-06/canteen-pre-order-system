@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace Superchef.Controllers;
 
@@ -13,8 +14,9 @@ public class AccountController : Controller
     private readonly SecurityService secSrv;
     private readonly EmailService emlSrv;
     private readonly ImageService imgSrv;
+    private readonly IHubContext<AccountHub> accHubCtx;
 
-    public AccountController(DB db, IWebHostEnvironment en, DeviceService devSrv, VerificationService verSrv, SecurityService secSrv, EmailService emlSrv, ImageService imgSrv)
+    public AccountController(DB db, IWebHostEnvironment en, DeviceService devSrv, VerificationService verSrv, SecurityService secSrv, EmailService emlSrv, ImageService imgSrv, IHubContext<AccountHub> accHubCtx)
     {
         this.db = db;
         this.en = en;
@@ -23,6 +25,7 @@ public class AccountController : Controller
         this.secSrv = secSrv;
         this.emlSrv = emlSrv;
         this.imgSrv = imgSrv;
+        this.accHubCtx = accHubCtx;
     }
 
     public IActionResult Index()
@@ -60,6 +63,51 @@ public class AccountController : Controller
                         ))
                         .ToList();
         return View(devices);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> LogoutDevice(int? id)
+    {
+        var device = db.Devices.FirstOrDefault(d => d.Id == id && d.AccountId.ToString() == User.Identity!.Name);
+        if (device != null)
+        {
+            db.Verifications.RemoveRange(db.Verifications.Where(v => v.DeviceId == device.Id));
+            db.Devices.Remove(device);
+            db.SaveChanges();
+
+            await accHubCtx.Clients.All.SendAsync("LogoutDevice", device.Id);
+        }
+
+        var deviceInfo = await devSrv.GetCurrentDeviceInfo();
+
+        var devices = db.Devices
+            .Where(d => d.AccountId.ToString() == User.Identity!.Name)
+            .Where(d => !(
+                d.DeviceOS == deviceInfo.OS
+                && d.DeviceType == deviceInfo.Type
+                && d.DeviceBrowser == deviceInfo.Browser
+                && d.Address == deviceInfo.Location
+            ))
+            .ToList();
+
+        return PartialView("_Device", devices);
+    }
+
+    [HttpPost]
+    public async void LogoutAllDevices()
+    {
+        var accountId = User.Identity!.Name;
+
+        var devices = db.Devices.Where(d => d.AccountId.ToString() == accountId).ToList();
+        foreach (var device in devices)
+        {
+            db.Verifications.RemoveRange(db.Verifications.Where(v => v.DeviceId == device.Id));
+            db.Devices.Remove(device);
+        }
+        db.SaveChanges();
+        await accHubCtx.Clients.All.SendAsync("LogoutAll", accountId);
+
+        TempData["Message"] = "Logged out all known devices successfully";
     }
 
     public IActionResult History()

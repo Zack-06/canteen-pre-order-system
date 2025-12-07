@@ -4,6 +4,13 @@ namespace Superchef.Hubs;
 
 public class AccountHub : Hub
 {
+    private readonly DB db;
+
+    public AccountHub(DB db)
+    {
+        this.db = db;
+    }
+
     public async Task Initialize()
     {
         var httpContext = Context.GetHttpContext();
@@ -25,6 +32,14 @@ public class AccountHub : Hub
             return;
         }
 
-        await Clients.Caller.SendAsync("Initialize", account.Id, token);
+        var session = db.Sessions.FirstOrDefault(s => s.Token == token);
+        if (session == null)
+        {
+            return;
+        }
+
+        var hashedToken = BCrypt.Net.BCrypt.HashPassword(token);
+
+        await Clients.Caller.SendAsync("Initialized", account.Id, session.DeviceId, hashedToken);
     }
 }

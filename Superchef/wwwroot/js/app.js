@@ -155,7 +155,7 @@ $("[data-quantity-button]").each(function () {
 quantityInputs.forEach(function ($input) {
 	$input.on("change", updateButtonState)
 	$input.on("input", updateButtonState)
-    updateButtonState()
+	updateButtonState()
 
 	function updateButtonState() {
 		const minusButton = $input.prev()
@@ -172,19 +172,19 @@ quantityInputs.forEach(function ($input) {
 
 		if (quantity >= max) {
 			addButton.prop("disabled", true)
-            quantity = max
+			quantity = max
 		} else {
 			addButton.prop("disabled", false)
 		}
 
 		if (quantity <= min) {
 			minusButton.prop("disabled", true)
-            quantity = min
+			quantity = min
 		} else {
 			minusButton.prop("disabled", false)
 		}
 
-        $input.val(quantity)
+		$input.val(quantity)
 	}
 })
 
@@ -883,3 +883,63 @@ function setPlaceholder(selectElement) {
 $("[data-manage-container='query'] select").each(function () {
 	setPlaceholder($(this))
 })
+
+// ==========Logout Button==========
+$("#logout-button").on("click", async function () {
+	if (await confirmation("Are you sure you want to log out?")) {
+		$.ajax({
+			url: "/Auth/Logout",
+			type: "POST",
+			success: function (data) {
+				window.location.href = "/"
+			}
+		})
+	}
+})
+
+// ==========Account Logout Notification==========
+const accountConnection = new signalR.HubConnectionBuilder().withUrl("/AccountHub").build()
+var accountConnectionId = null
+var accountConnectionDevice = null
+var accountConnectionToken = null
+accountConnection.on("Error", (message) => showToast(message))
+accountConnection.on("Initialized", (accountId, deviceId, hashedSessionToken) => {
+	if (accountId == null || deviceId == null || hashedSessionToken == null) return
+
+	accountConnectionId = accountId
+	accountConnectionDevice = deviceId
+	accountConnectionToken = hashedSessionToken
+})
+accountConnection.on("Logout", (sessionToken) => {
+	if (sessionToken == null || !bcrypt.compareSync(sessionToken, accountConnectionToken)) return
+
+	handleLoggedOut()
+})
+accountConnection.on("LogoutDevice", (deviceId) => {
+	if (deviceId == null || deviceId != accountConnectionDevice) return
+
+	handleLoggedOut()
+})
+accountConnection.on("LogoutAll", (accountId) => {
+	if (accountId == null || accountId != accountConnectionId) return
+
+	handleLoggedOut()
+})
+accountConnection.start().then(() => {
+	accountConnection.invoke("Initialize")
+})
+function notifyLoggedOut() {
+	showToast("You've been logged out. Reload to take effect.")
+}
+function handleLoggedOut() {
+	if (document.hidden) {
+		document.addEventListener("visibilitychange", function onVisible() {
+			if (!document.hidden) {
+				notifyLoggedOut()
+				document.removeEventListener("visibilitychange", onVisible) // remove listener after first run
+			}
+		})
+	} else {
+		notifyLoggedOut()
+	}
+}

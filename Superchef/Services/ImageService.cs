@@ -73,10 +73,7 @@ public class ImageService
         positionYPercent: vertical offset from center (-50 to +50%) of the resized image
         scale: scale applied to the image
     */
-    public void SpecialCrop(Image image,
-    double outputWidth, double outputHeight,
-    double positionXPercent, double positionYPercent,
-    double scale)
+    public void SpecialCrop(Image image, double outputWidth, double outputHeight, double positionXPercent, double positionYPercent, double scale)
     {
         // Resize the image according to scale while keeping aspect ratio
         double currentRatio = (double)image.Height / image.Width;

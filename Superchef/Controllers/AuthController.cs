@@ -8,22 +8,24 @@ namespace Superchef.Controllers;
 public class AuthController : Controller
 {
     private readonly DB db;
+    private readonly IDataProtectionProvider dp;
     private readonly SecurityService secSrv;
     private readonly VerificationService verSrv;
     private readonly DeviceService devSrv;
     private readonly EmailService emailSrv;
-    private readonly IDataProtectionProvider dp;
-    private readonly IHubContext<VerificationHub> vh;
+    private readonly IHubContext<VerificationHub> verHubCtx;
+    private readonly IHubContext<AccountHub> accHubCtx;
 
-    public AuthController(DB db, SecurityService secSrv, VerificationService verSrv, DeviceService devSrv, EmailService emailSrv, IDataProtectionProvider dp, IHubContext<VerificationHub> vh)
+    public AuthController(DB db, IDataProtectionProvider dp, SecurityService secSrv, VerificationService verSrv, DeviceService devSrv, EmailService emailSrv, IHubContext<VerificationHub> verHubCtx, IHubContext<AccountHub> accHubCtx)
     {
         this.db = db;
+        this.dp = dp;
         this.secSrv = secSrv;
         this.verSrv = verSrv;
         this.devSrv = devSrv;
         this.emailSrv = emailSrv;
-        this.dp = dp;
-        this.vh = vh;
+        this.verHubCtx = verHubCtx;
+        this.accHubCtx = accHubCtx;
     }
 
     public IActionResult Login()
@@ -185,8 +187,7 @@ public class AuthController : Controller
             // Create cookie claim
             secSrv.SignIn(account.Id.ToString(), account.AccountType.Name, sessionToken);
 
-
-            TempData["Message"] = "Account created successfully";
+            TempData["Message"] = "Welcome, " + account.Name;
             if (ReturnUrl == null)
             {
                 return RedirectToAction("Index", "Home");
@@ -278,13 +279,18 @@ public class AuthController : Controller
                     )
                     {
                         // broadcast if device not the same
-                        await vh.Clients.All.SendAsync("Verified", request.DeviceId);
-                    } else
+                        await verHubCtx.Clients.All.SendAsync("Verified", request.DeviceId);
+                    }
+                    else
                     {
-                        var error = await secSrv.ClaimSession();
+                        var (error, message) = await secSrv.ClaimSession();
                         if (error != null)
                         {
                             TempData["Message"] = error;
+                        }
+                        else if (message != null)
+                        {
+                            TempData["Message"] = message;
                         }
                     }
                 }
@@ -321,18 +327,40 @@ public class AuthController : Controller
 
     public async Task<IActionResult> ClaimSession()
     {
-        var error = await secSrv.ClaimSession();
+        var (error, message) = await secSrv.ClaimSession();
         if (error != null)
         {
             return BadRequest(error);
         }
 
+        TempData["Message"] = message;
         return Ok();
     }
 
-    public IActionResult Logout()
+    [HttpPost]
+    public async Task Logout()
     {
-        return BadRequest();
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            var token = User.FindFirst("SessionToken")?.Value;
+            var accountId = User.Identity.Name;
+
+            if (token != null && accountId != null)
+            {
+                var session = db.Sessions.FirstOrDefault(s => s.Device.AccountId.ToString() == accountId && s.Token == token);
+
+                if (session != null)
+                {
+                    await accHubCtx.Clients.All.SendAsync("Logout", session.Token);
+
+                    db.Sessions.Remove(session);
+                    db.SaveChanges();
+                }
+            }
+        }
+
+        secSrv.SignOut();
+        TempData["Message"] = "Logged out successfully";
     }
 
     // ==========REMOTE==========

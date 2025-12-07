@@ -246,12 +246,12 @@
                     $.ajax({
                         url: "/Auth/ClaimSession",
                         method: "post",
-                    })
-                    .done(function () {
-                        window.location.href = "@ViewBag.ReturnUrl";
-                    })
-                    .fail(function (response) {
-                        showToast(response.responseText)
+                        success: funtion() {
+                            window.location.href = "@ViewBag.ReturnUrl";
+                        },
+                        error: function(xhr, textStatus, errorThrown) {
+                            showToast(xhr.responseText)
+                        },
                     })
                 })
 

@@ -1,3 +1,8 @@
+@{
+    var currentController = ViewContext.RouteData.Values["controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["action"]?.ToString();
+}
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -63,7 +68,7 @@
         </div>
     </footer>
 
-    <div class="toast-container" data-toast-message="@TempData["Message"]"></div>
+    <div class="toast-container" data-toast-message="@(currentController == "Auth" && currentAction == "Verify" ? "" : TempData["Message"])"></div>
 
     <div id="confirmation-popup" class="overlay">
         <div class="content">
@@ -82,6 +87,7 @@
     <script src="/js/jquery.validate.min.js"></script>
     <script src="/js/jquery.validate.unobtrusive.min.js"></script>
     <script src="/js/signalr.min.js"></script>
+    <script src="/js/bcrypt.min.js"></script>
     <script src="/js/app.js" asp-append-version="true"></script>
     @RenderSection("foot", false)
 </body>

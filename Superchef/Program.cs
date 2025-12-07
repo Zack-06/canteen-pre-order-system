@@ -63,9 +63,8 @@ app.UseMiddleware<AuthSessionMiddleware>();
 
 // Add hubs
 app.MapHub<VerificationHub>("/VerificationHub");
-// app.MapHub<BookingHub>("/BookingHub");
+app.MapHub<AccountHub>("/AccountHub");
 // app.MapHub<FnbOrderHub>("/FnbOrderHub");
-// app.MapHub<AccountHub>("/AccountHub");
 
 app.MapDefaultControllerRoute();
 app.Run();

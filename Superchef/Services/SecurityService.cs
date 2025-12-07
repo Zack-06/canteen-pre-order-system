@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
 using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Services;
@@ -62,19 +63,19 @@ public class SecurityService
         ct.HttpContext!.SignOutAsync();
     }
 
-    public async Task<string?> ClaimSession()
+    public async Task<(string?, string?)> ClaimSession()
     {
         var httpContext = ct.HttpContext;
         if (httpContext == null)
         {
-            return "No HTTP context available";
+            return ("No HTTP context available", null);
         }
 
         var protectedSessionToken = httpContext.Request.Cookies["PreAuthSession"];
 
         if (string.IsNullOrEmpty(protectedSessionToken))
         {
-            return "Invalid session cookie";
+            return ("Invalid session cookie", null);
         }
 
         try
@@ -102,7 +103,7 @@ public class SecurityService
                 );
             if (session == null)
             {
-                return "Session expired or invalid device";
+                return ("Session expired or invalid device", null);
             }
 
             // extend session
@@ -111,12 +112,12 @@ public class SecurityService
 
             // claim session
             SignIn(session.Device.AccountId.ToString(), session.Device.Account.AccountType.Name, session.Token);
+
+            return (null, "Welcome back, " + session.Device.Account.Name);
         }
         catch (System.Security.Cryptography.CryptographicException)
         {
-            return "Invalid session signature";
+            return ("Invalid session signature", null);
         }
-
-        return null;
     }
 }
