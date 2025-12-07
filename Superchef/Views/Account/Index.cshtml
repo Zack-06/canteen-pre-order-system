@@ -102,7 +102,7 @@
             <div class="form-group">
                 <label asp-for="PhoneNumber"></label>
                 <div class="form-input">
-                    <input asp-for="PhoneNumber" data-phone />
+                    <input asp-for="PhoneNumber" data-phone placeholder="01X-XXXXXXX"/>
                 </div>
                 <span asp-validation-for="PhoneNumber"></span>
             </div>
@@ -115,7 +115,7 @@
                         <input type="checkbox" class="password-show-button">
 
                         <a data-ajax="true" data-ajax-loading="#change-email-button-loader"
-                            data-ajax-url="/Account/RequestChangeEmail" data-ajax-method="post"
+                            data-ajax-url="@Url.Action("RequestChangeEmail", "Account")" data-ajax-method="post"
                             data-ajax-confirm="Are you sure you want to change your email address?"
                             data-ajax-begin="changeEmailBegin" data-ajax-complete="changeEmailComplete"
                             data-ajax-success="changeEmailSuccess" id="change-email-button"></a>
@@ -127,10 +127,10 @@
 
             <div class="button-group" data-flex="column">
                 <button data-enable-on-change type="submit" data-button="success" disabled>Save Changes</button>
-                <a href="/Account/ChangePassword" data-button="info">Change
+                <a href="@Url.Action("ChangePassword", "Account")" data-button="info">Change
                     Password</a>
 
-                <a data-ajax="true" data-ajax-method="post" data-ajax-url="/Account/RequestDeleteAccount"
+                <a data-ajax="true" data-ajax-method="post" data-ajax-url="@Url.Action("RequestDeleteAccount", "Account")"
                     data-ajax-confirm="Are you sure you want to delete your account?"
                     data-ajax-begin="deleteAccountBegin" data-ajax-complete="deleteAccountComplete"
                     data-ajax-success="deleteAccountSuccess" id="delete-account-button" data-button="danger">Delete
@@ -150,7 +150,7 @@
             <input id="image-scale" asp-for="ImageScale" hidden>
 
             <div id="profile-preview-container">
-                <img id="profile-preview" src="/img/pfp.png" class="vertical-fit" alt="Profile Picture" />
+                <img id="profile-preview" src="@ViewBag.AccountImageUrl" class="vertical-fit" alt="Profile Picture" />
             </div>
 
             <div class="form-group">

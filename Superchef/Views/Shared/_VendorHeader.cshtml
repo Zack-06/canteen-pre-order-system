@@ -23,7 +23,7 @@
             <img src="/img/header_icon/order.png" alt="Orders">
         </a>
         <button class="header-nav-link pfp">
-            <img src="/img/pfp.png" alt="Pfp">
+            <img src="@ViewBag.AccountImageUrl" alt="Pfp">
             <div class="dropdown-menu">
                 <a href="@Url.Action("Index", "Account")">Account</a>
                 <a href="@Url.Action("Device", "Account")">Device</a>

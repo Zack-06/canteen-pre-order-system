@@ -101,8 +101,8 @@ public class ImageService
         }));
 
         // Convert percentage offsets to pixels relative to resized image
-        double posX = positionXPercent / 100.0 * resizedWidth;
-        double posY = positionYPercent / 100.0 * resizedHeight;
+        double posX = positionXPercent / scale / 100.0 * resizedWidth;
+        double posY = positionYPercent / scale / 100.0 * resizedHeight;
 
         // Calculate crop rectangle (centered)
         int cropX = (int)Math.Round((resizedWidth / 2) - (outputWidth / 2) - posX);

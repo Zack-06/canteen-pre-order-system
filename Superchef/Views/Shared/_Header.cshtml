@@ -28,7 +28,7 @@
             <img src="/img/header_icon/cart.png" alt="Cart">
         </a>
         <button class="header-nav-link pfp">
-            <img src="/img/pfp.png" alt="Pfp">
+            <img src="@ViewBag.AccountImageUrl" alt="Pfp">
             <div class="dropdown-menu">
                 @if (ViewBag.Authenticated == null || ViewBag.Authenticated == false)
                 {

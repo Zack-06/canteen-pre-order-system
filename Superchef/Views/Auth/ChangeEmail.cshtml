@@ -3,7 +3,7 @@
 <div class="container container-center" data-limit-container>
     <div class="title">Change Email Address</div>
 
-    <form method="post">
+    <form method="post" data-expired-timestamp="@ViewBag.ExpiredTimestamp">
         <div class="form-group">
             <label asp-for="Email"></label>
             <div class="form-input">

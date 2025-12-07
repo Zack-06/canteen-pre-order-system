@@ -30,18 +30,126 @@ public class AccountController : Controller
 
     public IActionResult Index()
     {
-        var model = new AccountProfileVM
+        var acc = HttpContext.GetAccount();
+        if (acc == null) return RedirectToAction("Index", "Home");
+
+        var vm = new AccountProfileVM
         {
-            Name = "John Doe",
-            Email = "john@doe.com",
-            PhoneNumber = "012-3456789"
+            Name = acc.Name,
+            Email = acc.Email,
+            PhoneNumber = acc.PhoneNumber,
+            RemoveImage = false,
+            ImageScale = 1,
+            ImageX = 0,
+            ImageY = 0
         };
-        return View(model);
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult Index(AccountProfileVM vm)
+    {
+        var acc = HttpContext.GetAccount();
+        if (acc == null) return RedirectToAction("Index", "Home");
+
+        if (vm.Image != null && !vm.RemoveImage)
+        {
+            var e = imgSrv.ValidateImage(vm.Image, 1);
+            if (e != "") ModelState.AddModelError("Image", e);
+        }
+
+        if (ModelState.IsValid)
+        {
+            if (vm.RemoveImage)
+            {
+                // remove image
+                if (acc.Image != null)
+                {
+                    imgSrv.DeleteImage(acc.Image, "account");
+                    acc.Image = null;
+                }
+            }
+            else if (vm.Image != null)
+            {
+                try
+                {
+                    var newFile = imgSrv.SaveImage(vm.Image, "account", 200, 200, vm.ImageX, vm.ImageY, vm.ImageScale);
+
+                    // remove image
+                    if (acc.Image != null) imgSrv.DeleteImage(acc.Image, "account");
+                    acc.Image = newFile;
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("Image", ex.Message);
+                }
+            }
+        }
+
+        if (ModelState.IsValid)
+        {
+            // update name & phone number
+            acc.Name = vm.Name;
+            acc.PhoneNumber = vm.PhoneNumber;
+            db.SaveChanges();
+
+            TempData["Message"] = "Account updated successfully";
+            return RedirectToAction("Index");
+        }
+
+        vm.Email = acc.Email;
+        return View(vm);
     }
 
     public IActionResult ChangePassword()
     {
+        var acc = HttpContext.GetAccount();
+        if (acc == null) return RedirectToAction("Index", "Home");
+
         return View();
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> ChangePassword(ChangePasswordVM vm)
+    {
+        var acc = HttpContext.GetAccount();
+        if (acc == null) return RedirectToAction("Index", "Home");
+
+        if (!secSrv.VerifyPassword(acc.PasswordHash, vm.CurrentPassword))
+        {
+            ModelState.AddModelError("CurrentPassword", "Incorrect password");
+        }
+
+        if (ModelState.IsValid("NewPassword") && secSrv.VerifyPassword(acc.PasswordHash, vm.NewPassword))
+        {
+            ModelState.AddModelError("NewPassword", "Cannot use the same password as before.");
+        }
+
+        if (ModelState.IsValid)
+        {
+            // Remove sessions
+            var sessions = db.Sessions.Where(s => s.Device.AccountId == acc.Id);
+            foreach (var session in sessions)
+            {
+                db.Sessions.Remove(session);
+            }
+
+            // Update password
+            acc.PasswordHash = secSrv.HashPassword(vm.NewPassword);
+
+            // Save changes
+            db.SaveChanges();
+
+            // Send email notification
+            emlSrv.SendPasswordChangedEmail(acc, Url.Action("ForgotPassword", null, null, Request.Scheme, Request.Host.Value));
+
+            await accHubCtx.Clients.All.SendAsync("LogoutAll", acc.Id);
+
+            TempData["Message"] = "Password reset successfully. Please login again";
+            return RedirectToAction("Login", "Auth");
+        }
+
+        return View(vm);
     }
 
     public async Task<IActionResult> Device()
@@ -122,20 +230,20 @@ public class AccountController : Controller
 
     // ==========REQUEST==========
     [HttpPost]
-    async public Task<string> RequestChangeEmail()
+    public string RequestChangeEmail()
     {
-        // wait for 5 seconds before return
-        await Task.Delay(5000);
+        // Create verification
+        var verification = verSrv.CreateVerification("ChangeEmail", Request.GetBaseUrl(), HttpContext.GetAccount()!.Id);
 
-        return "test_token";
+        return verification.Token;
     }
 
     [HttpPost]
-    async public Task<string> RequestDeleteAccount()
+    public string RequestDeleteAccount()
     {
-        // wait for 5 seconds before return
-        await Task.Delay(5000);
+        // Create verification
+        var verification = verSrv.CreateVerification("DeleteAccount", Request.GetBaseUrl(), HttpContext.GetAccount()!.Id);
 
-        return "test_token";
+        return verification.Token;
     }
 }

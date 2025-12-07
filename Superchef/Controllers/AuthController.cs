@@ -12,18 +12,18 @@ public class AuthController : Controller
     private readonly SecurityService secSrv;
     private readonly VerificationService verSrv;
     private readonly DeviceService devSrv;
-    private readonly EmailService emailSrv;
+    private readonly EmailService emlSrv;
     private readonly IHubContext<VerificationHub> verHubCtx;
     private readonly IHubContext<AccountHub> accHubCtx;
 
-    public AuthController(DB db, IDataProtectionProvider dp, SecurityService secSrv, VerificationService verSrv, DeviceService devSrv, EmailService emailSrv, IHubContext<VerificationHub> verHubCtx, IHubContext<AccountHub> accHubCtx)
+    public AuthController(DB db, IDataProtectionProvider dp, SecurityService secSrv, VerificationService verSrv, DeviceService devSrv, EmailService emlSrv, IHubContext<VerificationHub> verHubCtx, IHubContext<AccountHub> accHubCtx)
     {
         this.db = db;
         this.dp = dp;
         this.secSrv = secSrv;
         this.verSrv = verSrv;
         this.devSrv = devSrv;
-        this.emailSrv = emailSrv;
+        this.emlSrv = emlSrv;
         this.verHubCtx = verHubCtx;
         this.accHubCtx = accHubCtx;
     }
@@ -309,22 +309,195 @@ public class AuthController : Controller
         return View();
     }
 
-    public IActionResult ResetPassword()
+    [HttpPost]
+    public IActionResult ForgotPassword(ForgotPasswordVM vm)
     {
+        if (ModelState.IsValid("Email") && !CheckEmailExist(vm.Email))
+        {
+            ModelState.AddModelError("Email", "Email is not registered.");
+        }
+
+        if (ModelState.IsValid)
+        {
+            // Get account
+            var acc = db.Accounts.FirstOrDefault(a => a.Email == vm.Email && !a.IsDeleted);
+
+            // Create verification
+            var verification = verSrv.CreateVerification("ResetPassword", Request.GetBaseUrl(), acc!.Id);
+
+            // Redirect to verify request
+            return RedirectToAction("Verify", new { token = verification.Token });
+        }
+
+        return View(vm);
+    }
+
+    public IActionResult ResetPassword(string? token)
+    {
+        var request = verSrv.GetVerificationRequest(token, "ResetPassword");
+        if (request == null)
+        {
+            return RedirectToAction("Verify", new { token });
+        }
+
+        ViewBag.ExpiredTimestamp = new DateTimeOffset(request.ExpiresAt).ToUnixTimeMilliseconds();
         return View();
     }
 
-    public IActionResult ChangeEmail()
+    [HttpPost]
+    public async Task<IActionResult> ResetPassword(ResetPasswordVM vm, string? token)
     {
+        var request = verSrv.GetVerificationRequest(token, "ResetPassword");
+        if (request == null)
+        {
+            return RedirectToAction("Verify", new { token });
+        }
+
+        if (ModelState.IsValid("Password") && secSrv.VerifyPassword(request.Account.PasswordHash, vm.Password))
+        {
+            ModelState.AddModelError("Password", "Cannot change password to the same password");
+        }
+
+        if (ModelState.IsValid)
+        {
+            // Remove sessions
+            var sessions = db.Sessions.Where(s => s.Device.AccountId == request.Account.Id);
+            foreach (var session in sessions)
+            {
+                db.Sessions.Remove(session);
+            }
+
+            // Update password
+            request.Account.PasswordHash = secSrv.HashPassword(vm.Password);
+            db.Verifications.Remove(request);
+            db.SaveChanges();
+
+            // Send email notification
+            emlSrv.SendPasswordChangedEmail(request.Account, Url.Action("ForgotPassword", null, null, Request.Scheme, Request.Host.Value));
+
+            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId);
+            TempData["Message"] = "Password reset successfully. Please login again";
+            return RedirectToAction("Login");
+        }
+
+        ViewBag.ExpiredTimestamp = new DateTimeOffset(request.ExpiresAt).ToUnixTimeMilliseconds();
+        return View(vm);
+    }
+
+    public IActionResult ChangeEmail(string? token)
+    {
+        var request = verSrv.GetVerificationRequest(token, "ChangeEmail");
+        if (request == null)
+        {
+            return RedirectToAction("Verify", new { token });
+        }
+
+
+        ViewBag.ExpiredTimestamp = new DateTimeOffset(request.ExpiresAt).ToUnixTimeMilliseconds();
         return View();
     }
 
-    public IActionResult DeleteAccount()
+    [HttpPost]
+    public async Task<IActionResult> ChangeEmail(ChangeEmailVM vm, string? token)
     {
-        ViewBag.ExpiredTimestamp = new DateTimeOffset(DateTime.Now.AddMinutes(2)).ToUnixTimeMilliseconds();
+        var request = verSrv.GetVerificationRequest(token, "ChangeEmail");
+        if (request == null)
+        {
+            return RedirectToAction("Verify", new { token });
+        }
+
+        if (ModelState.IsValid("Email"))
+        {
+            if (vm.Email == request.Account.Email)
+            {
+                ModelState.AddModelError("Email", "Cannot change to the same email.");
+            }
+            else if (CheckEmailExist(vm.Email))
+            {
+                ModelState.AddModelError("Email", "Email already registered.");
+            }
+        }
+
+        if (ModelState.IsValid)
+        {
+            // Remove sessions
+            var sessions = db.Sessions.Where(s => s.Device.AccountId == request.Account.Id);
+            foreach (var session in sessions)
+            {
+                db.Sessions.Remove(session);
+            }
+
+            // Update email
+            string originalEmail = request.Account.Email;
+            request.Account.Email = vm.Email;
+            db.Verifications.Remove(request);
+            db.SaveChanges();
+
+            // Send email notification
+            emlSrv.SendEmailChangedEmail(request.Account, originalEmail, Url.Action("Contact", "Info", null, Request.Scheme, Request.Host.Value));
+
+            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId);
+            TempData["Message"] = "Email changed successfully. Please login again";
+            return RedirectToAction("Login");
+        }
+
+
+        ViewBag.ExpiredTimestamp = new DateTimeOffset(request.ExpiresAt).ToUnixTimeMilliseconds();
+        return View(vm);
+    }
+
+    public async Task<IActionResult> DeleteAccount(string? token)
+    {
+        var request = verSrv.GetVerificationRequest(token, "DeleteAccount");
+        if (request == null)
+        {
+            return RedirectToAction("Verify", new { token });
+        }
+
+        db.Entry(request).Reference(r => r.Account).Load();
+        db.Entry(request.Account).Reference(a => a.AccountType).Load();
+
+        ViewBag.RequestAccountType = request.Account.AccountType.Name;
+        ViewBag.ExpiredTimestamp = new DateTimeOffset(request.ExpiresAt).ToUnixTimeMilliseconds();
+
+        if (Request.Method == "POST")
+        {
+            // Remove sessions
+            var sessions = db.Sessions.Where(s => s.Device.AccountId == request.Account.Id);
+            foreach (var session in sessions)
+            {
+                db.Sessions.Remove(session);
+            }
+
+            // Remove devices
+            var devices = db.Devices.Where(d => d.AccountId == request.Account.Id);
+            foreach (var device in devices)
+            {
+                db.Devices.Remove(device);
+            }
+
+            var message = "Account scheduled for deletion";
+            if (ViewBag.RequestAccountType == "Customer" || ViewBag.RequestAccountType == "Vendor")
+            {
+                request.Account.DeletionAt = DateTime.Now.AddDays(7);
+            }
+            else
+            {
+                message = "Account deleted successfully";
+                db.Accounts.Remove(request.Account);
+            }
+            db.Verifications.Remove(request);
+            db.SaveChanges();
+
+            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId);
+            TempData["Message"] = message;
+            return RedirectToAction("Index", "Home");
+        }
+
         return View();
     }
 
+    [HttpPost]
     public async Task<IActionResult> ClaimSession()
     {
         var (error, message) = await secSrv.ClaimSession();

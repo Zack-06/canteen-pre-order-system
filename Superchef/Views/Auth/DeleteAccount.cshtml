@@ -7,7 +7,7 @@
 
     <form method="post" data-expired-timestamp="@ViewBag.ExpiredTimestamp">
         <div class="form-group">
-            @if (ViewBag.RequestAccountType == "Customer")
+            @if (ViewBag.RequestAccountType == "Customer" || ViewBag.RequestAccountType == "Vendor")
             {
                 <div>By confirming, your account will be scheduled for deletion in <strong>7 days</strong>.</div>
             }
@@ -19,10 +19,10 @@
         <div class="form-group">
             <div>This action is permanent and cannot be undone.</div>
         </div>
-        @if (ViewBag.RequestAccountType == "Customer")
+        @if (ViewBag.RequestAccountType == "Customer" || ViewBag.RequestAccountType == "Vendor")
         {
             <div class="form-group">
-                <div>If you change your mind, simply <a href="/Auth/Login"><strong>LOGIN</strong></a> again within 7 days to
+                <div>If you change your mind, simply <a href="@Url.Action("Login", "Auth")"><strong>LOGIN</strong></a> again within 7 days to
                     cancel the deletion.
                 </div>
             </div>
