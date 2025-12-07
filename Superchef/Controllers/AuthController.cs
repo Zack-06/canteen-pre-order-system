@@ -44,6 +44,7 @@ public class AuthController : Controller
 
     public IActionResult DeleteAccount()
     {
+        ViewBag.ExpiredTimestamp = new DateTimeOffset(DateTime.Now.AddMinutes(2)).ToUnixTimeMilliseconds();
         return View();
     }
 

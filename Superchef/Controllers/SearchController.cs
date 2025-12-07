@@ -4,26 +4,21 @@ namespace Superchef.Controllers;
 
 public class SearchController : Controller
 {
-    // public IActionResult Index(SearchVM vm)
-    // {
-    //     ViewBag.SearchQuery = vm.Query;
-
-    //     vm.AvailableTypes = ["Items", "Stores"];
-    //     vm.Type ??= vm.AvailableTypes.First();
-
-    //     if (Request.IsAjax())
-    //     {
-    //         return PartialView("_SearchResults", vm);
-    //     }
-
-    //     return View(vm);
-    // }
-
     public IActionResult Index()
     {
-        return View(new SearchVM
+        var vm = new SearchVM
         {
-            Query = "abc"
-        });
+            Query = "abc",
+            AvailableTypes = new List<string> { "Items", "Stores" }
+        };
+
+        ViewBag.SearchQuery = vm.Query;
+
+        if (vm.Type == null || !vm.AvailableTypes.Contains(vm.Type))
+        {
+            vm.Type = vm.AvailableTypes.First();
+        }
+
+        return View(vm);
     }
 }

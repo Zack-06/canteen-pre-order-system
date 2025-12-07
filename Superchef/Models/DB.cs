@@ -176,8 +176,10 @@ public class Store
     public string Description { get; set; }
     [MaxLength(50)]
     public string Image { get; set; }
+    [MaxLength(50)]
     public string? Banner { get; set; }
     public int SlotMaxOrders { get; set; }
+    [MaxLength(50)]
     public string? StripeAccountId { get; set; }
     public bool HasPublishedFirstSlots { get; set; } = false;
     public bool IsDeleted { get; set; } = false;
@@ -342,7 +344,7 @@ public class Order
     [MaxLength(20)]
     public string Status { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
-    public DateTime ExpiresAt { get; set; }
+    public DateTime? ExpiresAt { get; set; }
     public int SlotId { get; set; }
     public int AccountId { get; set; }
     public int StoreId { get; set; }
@@ -378,9 +380,9 @@ public class Payment
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     [Precision(10, 2)]
     public decimal Amount { get; set; }
+    [MaxLength(100)]
     public string StripePaymentIntentId { get; set; }
-    public string TransferStatus { get; set; }
-    public string TransferId { get; set; }
+    public bool IsPayoutFinished { get; set; } = false;
     public bool IsRefunded { get; set; } = false;
     [MaxLength(20)]
     public string PaymentMethod { get; set; }
@@ -395,7 +397,9 @@ public class AuditLog
 {
     public int Id { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
+    [MaxLength(20)]
     public string Action { get; set; }
+    [MaxLength(20)]
     public string Entity { get; set; }
     public int EntityId { get; set; }
     public int AccountId { get; set; }

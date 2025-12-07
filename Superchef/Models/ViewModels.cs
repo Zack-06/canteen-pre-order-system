@@ -308,7 +308,7 @@ public class AddCategoryVM
     public double ImageScale { get; set; } = 1;
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
-    public IFormFile? Image { get; set; }
+    public IFormFile Image { get; set; }
 }
 
 public class EditCategoryVM
@@ -345,6 +345,7 @@ public class ManageStoreVM
 public class AddStoreVM
 {
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [Remote("IsNameUnique", "Store", ErrorMessage = "{0} exists.")]
     public string Name { get; set; }
     [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
     [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
@@ -580,6 +581,7 @@ public class OrderCustomerVM
     public string Id { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
+    [StringLength(12, MinimumLength = 11, ErrorMessage = "{0} must be between {2} and {1} characters.")]
     [DisplayName("Contact Number")]
     [RegularExpression(@"^01\d-\d{7,8}$", ErrorMessage = "{0} must be in the format 01X-XXXXXXX")]
     public string ContactNumber { get; set; }

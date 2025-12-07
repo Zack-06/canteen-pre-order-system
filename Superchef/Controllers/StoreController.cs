@@ -99,9 +99,9 @@ public class StoreController : Controller
 
         vm.AvailableTypes = ["Custom", "Recurring"];
         vm.AvailableDates = [
-            DateOnly.FromDateTime(DateTime.Now),
-            DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
-            DateOnly.FromDateTime(DateTime.Now.AddDays(2))
+            DateOnly.FromDateTime(DateTime.Now.AddDays(2)),
+            DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
+            DateOnly.FromDateTime(DateTime.Now.AddDays(4))
         ];
         vm.AvailableDays = new()
         {
@@ -113,7 +113,7 @@ public class StoreController : Controller
             [5] = "Fri",
             [6] = "Sat"
         };
-        ViewBag.InitSlot = true;
+        ViewBag.InitSlot = false;
 
         if (vm.Type == null || !vm.AvailableTypes.Contains(vm.Type))
         {
@@ -170,7 +170,7 @@ public class StoreController : Controller
             return PartialView("_Slots", vm);
         }
 
-        ViewBag.StoreName = "abc";
+        ViewBag.StoreName = "Hainan Chicken Rice";
         return View(vm);
     }
 
