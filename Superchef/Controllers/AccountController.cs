@@ -43,6 +43,7 @@ public class AccountController : Controller
             ImageX = 0,
             ImageY = 0
         };
+
         return View(vm);
     }
 

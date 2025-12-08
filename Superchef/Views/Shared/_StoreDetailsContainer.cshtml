@@ -32,6 +32,6 @@
     <div class="joined-at">@FormatService.GetRelativeTime(Model.JoinedAt)</div>
     
     @if (Model.ViewStoreButton) {
-        <a href="/Store/@Model.Slug" data-button="info" class="view-store">View Store</a>
+        <a href="@Url.Action("Info", "Store", new { Slug = Model.Slug })" data-button="info" class="view-store">View Store</a>
     }
 </div>

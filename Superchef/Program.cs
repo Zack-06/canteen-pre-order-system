@@ -7,6 +7,7 @@ using Superchef.Middlewares;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
 
+
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSignalR(options =>
 {
@@ -68,3 +69,4 @@ app.MapHub<AccountHub>("/AccountHub");
 
 app.MapDefaultControllerRoute();
 app.Run();
+

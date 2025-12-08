@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Controllers;
 
@@ -17,37 +18,62 @@ public class ItemController : Controller
     [Route("Item/Info/{slug}")]
     public IActionResult Info(string slug, ItemInfoVM vm)
     {
-        vm.Item = new Item
+        var item = db.Items
+            .Include(i => i.Variants)
+            .Include(i => i.Store)
+            .Include(i => i.Store.Venue)
+            .Include(i => i.Reviews)
+            .FirstOrDefault(i => i.Slug == slug && i.IsActive && !i.IsDeleted);
+        if (item == null)
         {
-            Id = 1,
-            Name = "abc",
-            Slug = "abc",
-            Description = "abc",
-            Category = new() { Id = 1, Name = "abc" },
-            Keywords = [],
-            Image = "",
-            CreatedAt = DateTime.Now,
-            Variants = [],
-            CategoryId = 1,
-            Favourites = [],
-            Reviews = [],
-            IsActive = true,
-            IsDeleted = false,
-            StoreId = 1,
-        };
-        vm.Reviews = [
-            new Review { Account = new Account { Name = "abc", Image = null }, Comment = "abc", Rating = 4, CreatedAt = DateTime.Now },
-            new Review { Account = new Account { Name = "abc", Image = null }, Comment = "abc", Rating = 4, CreatedAt = DateTime.Now },
-            new Review { Account = new Account { Name = "abc", Image = null }, Comment = "abc", Rating = 4, CreatedAt = DateTime.Now }
-        ];
-        vm.TotalReviews = 10;
-        vm.AverageRating = 4.5m;
-        vm.TotalSold = 10;
+            return NotFound();
+        }
 
+        var acc = HttpContext.GetAccount();
+
+        // reviews
+        List<Review> reviews = [];
+        foreach (var review in item.Reviews.OrderBy(r => r.CreatedAt).ToList())
+        {
+            if (acc?.Id == review.AccountId) continue;
+            if (vm.FilterRating != "all" && review.Rating.ToString() != vm.FilterRating) continue;
+            reviews.Add(review);
+        }
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_Reviews", reviews);
+        }
+
+        // info
+        vm.Item = item;
+        vm.Reviews = reviews;
+
+        // stats
+        vm.TotalReviews = db.Reviews.Count(r => r.ItemId == item.Id);
+        vm.AverageRating = db.Reviews.Where(r => r.ItemId == item.Id).Select(r => (decimal?)r.Rating).Average() ?? 0m;
+        vm.TotalSold = db.OrderItems
+            .Where(oi =>
+                oi.Variant.ItemId == item.Id &&
+                oi.Order.Status == "Completed"
+            )
+            .Sum(oi => oi.Quantity);
+
+        // own review
         ViewBag.HasCommented = false;
-        ViewBag.HasBought = true;
+        var ownReview = acc != null ? db.Reviews.FirstOrDefault(r => r.AccountId == acc.Id && r.ItemId == item.Id) : null;
+        if (ownReview != null)
+        {
+            vm.NewReview = new()
+            {
+                Id = item.Id,
+                Rating = ownReview.Rating,
+                Comment = ownReview.Comment
+            };
+            ViewBag.HasCommented = true;
+        }
+        ViewBag.HasBought = acc != null && db.OrderItems.Any(oi => oi.Order.AccountId == acc.Id && oi.Variant.ItemId == item.Id && oi.Order.Status == "Completed");
 
-        // item info details
         return View(vm);
     }
 

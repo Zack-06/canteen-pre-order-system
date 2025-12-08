@@ -182,6 +182,7 @@ public class Store
     [MaxLength(50)]
     public string? StripeAccountId { get; set; }
     public bool HasPublishedFirstSlots { get; set; } = false;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
     public bool IsDeleted { get; set; } = false;
     public int VenueId { get; set; }
     public int AccountId { get; set; }

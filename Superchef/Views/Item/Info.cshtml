@@ -1,8 +1,10 @@
+@inject DB db
 @model ItemInfoVM
 
 @{
     decimal ratingValue = Model.AverageRating;
-    var currentUrl = $"{ViewContext.HttpContext.Request.Scheme}://{ViewContext.HttpContext.Request.Host}{ViewContext.HttpContext.Request.Path}{ViewContext.HttpContext.Request.QueryString}";
+    var currentUrl =
+    $"{ViewContext.HttpContext.Request.Scheme}://{ViewContext.HttpContext.Request.Host}{ViewContext.HttpContext.Request.Path}{ViewContext.HttpContext.Request.QueryString}";
 }
 
 @section head {
@@ -632,40 +634,43 @@
     <div class="info-container">
         <div class="name">abc</div>
         <div class="stat">
-            <div class="rating-container">
-                <span>@FormatService.ToRatingFormat(ratingValue)</span>
-                <div class="rating-stars-container">
-                    <div class="empty-star">
-                        <div class="star-setter">
-                            <div class="star"></div>
+            @if (Model.TotalReviews > 0)
+            {
+                <div class="rating-container">
+                    <span>@FormatService.ToRatingFormat(ratingValue)</span>
+                    <div class="rating-stars-container">
+                        <div class="empty-star">
+                            <div class="star-setter">
+                                <div class="star"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="empty-star">
-                        <div class="star-setter">
-                            <div class="star"></div>
+                        <div class="empty-star">
+                            <div class="star-setter">
+                                <div class="star"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="empty-star">
-                        <div class="star-setter">
-                            <div class="star"></div>
+                        <div class="empty-star">
+                            <div class="star-setter">
+                                <div class="star"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="empty-star">
-                        <div class="star-setter">
-                            <div class="star"></div>
+                        <div class="empty-star">
+                            <div class="star-setter">
+                                <div class="star"></div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="empty-star">
-                        <div class="star-setter">
-                            <div class="star"></div>
+                        <div class="empty-star">
+                            <div class="star-setter">
+                                <div class="star"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <span>|</span>
+            }
+            <span class="review" data-count="@Model.TotalReviews">@Model.TotalReviews</span>
             <span>|</span>
-            <span class="review" data-count="5">5</span>
-            <span>|</span>
-            <span>6 Sold</span>
+            <span>@Model.TotalSold Sold</span>
         </div>
         <div class="price">
             <span>@FormatService.ToRMFormat(100, false)</span>
@@ -721,13 +726,13 @@
 @{
     var storeDetails = new StoreDetailsContainerDM
     {
-        Image = "abc",
-        Name = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maiores, labore nisi! Repellat itaque minus enim tempore, amet recusandae blanditiis eius!",
-        Slug = "slug",
-        Rating = 2.0m,
-        TotalReviews = 123828319,
-        Venue = "Red Brick",
-        JoinedAt = DateTime.Now,
+        Image = Model.Item.Store.Image,
+        Name = Model.Item.Store.Name,
+        Slug = Model.Item.Store.Slug,
+        Rating = db.Reviews.Where(r => r.Item.StoreId == Model.Item.StoreId).Select(r => (decimal?)r.Rating).Average() ?? 0m,
+        TotalReviews = db.Reviews.Where(r => r.Item.StoreId == Model.Item.StoreId).Count(),
+        Venue = Model.Item.Store.Venue.Name,
+        JoinedAt = Model.Item.Store.CreatedAt,
         ViewStoreButton = true
     };
 }
@@ -736,21 +741,7 @@
 
 <div class="container">
     <div class="title">Description</div>
-    <p style="white-space: pre-wrap;">Lorem ipsum dolor sit amet consectetur, adipisicing elit. A labore voluptatem modi
-        in consequatur ipsum cum dicta
-        corporis consectetur illo, magni fugit nobis saepe ex fuga possimus doloribus fugiat ullam molestiae quisquam
-        neque quos. Reiciendis quidem illo cum est beatae quam architecto a eveniet maiores voluptatem quae sequi,
-        impedit asperiores ad rem distinctio neque, error obcaecati aperiam! Labore quam quae aliquid beatae nihil alias
-        sequi accusantium accusamus a fugit? Laudantium magni harum maiores error vitae perferendis incidunt? Corrupti,
-        iste molestias. Excepturi, tempore. Aperiam, quisquam! Eius maxime vel molestiae minus voluptas tempora
-        architecto iste ullam perspiciatis aliquid, earum veniam quas. Impedit error eum molestias libero, velit,
-        temporibus distinctio consectetur aut voluptates tempore aspernatur odit earum facere? Labore nobis consequatur
-        quaerat eligendi, atque totam. Nostrum, quis! Ab incidunt nihil porro ipsam reprehenderit aliquam aperiam quas
-        eius. Dolore, doloribus aperiam aliquid illo reprehenderit sunt molestiae reiciendis consequuntur blanditiis,
-        eum sapiente consectetur vero dolores. Nisi a, perspiciatis modi vel, officia in laborum illo ipsam ducimus
-        vitae, dolorum consequatur quis accusamus error libero cumque. Molestias non architecto animi soluta velit
-        pariatur praesentium cum, optio quasi sunt? Laboriosam et vero molestias repellat praesentium accusamus, eum vel
-        temporibus alias iste numquam. Adipisci vel eaque eum architecto rem!</p>
+    <p style="white-space: pre-wrap;">@Model.Item.Description</p>
 </div>
 
 <div id="review-container" class="container">
@@ -787,8 +778,8 @@
             </div>
         </div>
 
-        <form method="post" class="custom-tick-container center-text" data-specified-width
-            asp-action="Info" method="get" data-ajax="true" data-ajax-update="#review-list-container">
+        <form method="post" class="custom-tick-container center-text" data-specified-width asp-action="Info"
+            method="get" data-ajax="true" data-ajax-update="#review-list-container">
             <label>
                 <input data-auto-submit type="radio" asp-for="FilterRating" value="all">
                 <div class="custom-tick-text">All</div>
