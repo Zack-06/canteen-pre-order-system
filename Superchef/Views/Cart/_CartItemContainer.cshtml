@@ -25,5 +25,6 @@
         </span>
     </div>
 
-    <a class="delete-button"></a>
+    <a class="delete-button" href="@Url.Action("RemoveItem", new { id = Model.Id })" data-ajax="true"
+        data-ajax-method="post" data-ajax-success="reloadPage" data-ajax-failure="defaultOnFailure"></a>
 </div>

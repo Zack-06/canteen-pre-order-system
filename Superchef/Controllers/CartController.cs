@@ -109,6 +109,23 @@ public class CartController : Controller
         return Ok();
     }
 
+    [HttpPost]
+    public IActionResult RemoveItem(int id)
+    {
+        var cart = db.Carts
+            .Include(c => c.Variant)
+            .FirstOrDefault(c => c.VariantId == id);
+        if (cart == null)
+        {
+            return NotFound("Item not found");
+        }
+
+        db.Carts.Remove(cart);
+        db.SaveChanges();
+
+        return Ok();
+    }
+
     public IActionResult Checkout(CartStoreVM vm)
     {
         var store = db.Stores
@@ -188,9 +205,12 @@ public class CartController : Controller
                 Price = cItem.Variant.Price
             });
 
-            // Remove stock
+            // Edit stock
             cItem.Variant.Stock -= cItem.Quantity;
         }
+
+        // Remove cart items
+        db.RemoveRange(cartItems);
 
         db.Orders.Add(order);
         db.SaveChanges();
