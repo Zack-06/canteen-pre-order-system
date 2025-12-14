@@ -17,11 +17,15 @@
         main form:has(input[name="Type"][value="Stores"]:checked) [data-form-group-store] {
             display: none !important;
         }
+
+        main form:has(input[name="Type"][value="Items"]:checked) [data-form-group-item] {
+            display: none !important;
+        }
     </style>
 }
 
 <form asp-action="Index" method="get" data-ajax="true" data-ajax-update="#ajax-result-container"
-    data-ajax-complete="closeOverlay('filter-overlay')" class="container" data-no="color padding"
+    data-ajax-complete="closeOverlay('filter-overlay'); checkRedirect(xhr)" class="container" data-no="color padding"
     data-flex="between gap">
     <input type="hidden" name="Query" asp-for="Query" data-clear-form-ignore>
 
@@ -36,81 +40,96 @@
                 <div class="form-group">
                     <label>Venue</label>
                     <div class="custom-tick-container center-text small-text rounded-border">
-                        <label>
-                            <input type="checkbox" name="Venues" value="items">
-                            <div>
-                                <div class="text">Items</div>
-                            </div>
-                        </label>
-
-                        <label>
-                            <input type="checkbox" name="Venues" value="items">
-                            <div>
-                                <div class="text">Items</div>
-                            </div>
-                        </label>
-
-                        <label>
-                            <input type="checkbox" name="Venues" value="items">
-                            <div>
-                                <div class="text">Items</div>
-                            </div>
-                        </label>
+                        @foreach (var venue in Model.AvailableVenues)
+                        {
+                            <label>
+                                <input type="checkbox" name="Venues" value="@venue.Id" @(Model.Venues.Contains(venue.Id) ?
+                                                                                                                       "checked" : "")>
+                                <div>
+                                    <div class="text">@venue.Name</div>
+                                </div>
+                            </label>
+                        }
                     </div>
                 </div>
 
                 <div class="form-group" data-form-group-store>
                     <label>Price</label>
                     <div class="custom-tick-container center-text small-text rounded-border">
-                        <label>
-                            <input type="radio" name="Price" value="items">
-                            <div>
-                                <div class="text">Items</div>
-                            </div>
-                        </label>
+                        @foreach (var price in Model.AvailablePrices)
+                        {
+                            <label>
+                                <input type="radio" name="Price" value="@price.Key" @(Model.Price == price.Key ? "checked" :
+                                                                                                                    "")>
+                                <div>
+                                    <div class="text">@price.Value</div>
+                                </div>
+                            </label>
+                        }
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Rating</label>
                     <div class="custom-tick-container center-text small-text rounded-border">
-                        <label>
-                            <input type="radio" name="Rating" value="items">
-                            <div>
-                                <div class="text">Items</div>
-                            </div>
-                        </label>
+                        @foreach (var rating in Model.AvailableRatings)
+                        {
+                            <label>
+                                <input type="radio" name="Rating" value="@rating.Key" @(Model.Rating == rating.Key ?
+                                                                                                                      "checked" : "")>
+                                <div>
+                                    <div class="text">@rating.Value</div>
+                                </div>
+                            </label>
+                        }
                     </div>
                 </div>
 
-                <div class="form-group">
+                <div class="form-group" data-form-group-store>
                     <label>Sort By</label>
                     <div class="custom-tick-container center-text small-text rounded-border">
-                        <label>
-                            <input type="radio" name="Sort" value="items">
-                            <div>
-                                <div class="text">Items</div>
-                            </div>
-                        </label>
+                        @foreach (var sortOption in Model.AvailableItemSortBy)
+                        {
+                            <label>
+                                <input type="radio" name="Sort" value="@sortOption.Key" @(Model.Sort == sortOption.Key ?
+                                                                                                                          "checked" : "")>
+                                <div>
+                                    <div class="text">@sortOption.Value</div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
 
-                        <label>
-                            <input type="radio" name="Sort" value="items">
-                            <div>
-                                <div class="text">Items</div>
-                            </div>
-                        </label>
+                <div class="form-group" data-form-group-item>
+                    <label>Sort By</label>
+                    <div class="custom-tick-container center-text small-text rounded-border">
+                        @foreach (var sortOption in Model.AvailableStoreSortBy)
+                        {
+                            <label>
+                                <input type="radio" name="Sort" value="@sortOption.Key" @(Model.Sort == sortOption.Key ?
+                                                                                                                          "checked" : "")>
+                                <div>
+                                    <div class="text">@sortOption.Value</div>
+                                </div>
+                            </label>
+                        }
                     </div>
                 </div>
 
                 <div class="form-group" data-form-group-store>
                     <label>Category</label>
                     <div class="custom-tick-container center-text small-text rounded-border">
-                        <label>
-                            <input type="checkbox" name="Categories" value="items">
-                            <div>
-                                <div class="text">Items</div>
-                            </div>
-                        </label>
+                        @foreach (var category in Model.AvailableCategories)
+                        {
+                            <label>
+                                <input type="checkbox" name="Categories" value="@category.Id"
+                                    @(Model.Categories.Contains(category.Id) ? "checked" : "")>
+                                <div>
+                                    <div class="text">@category.Name</div>
+                                </div>
+                            </label>
+                        }
                     </div>
                 </div>
 
@@ -157,5 +176,16 @@
 
             $form.submit()
         })
+
+        function checkRedirect(xhr) {
+            if (!xhr) return
+
+            try {
+                var redirectUrl = xhr.getResponseHeader("X-Redirect-Url")
+                if (redirectUrl) {
+                    window.location.href = redirectUrl
+                }
+            } catch (e) {}
+        }
     </script>
 }

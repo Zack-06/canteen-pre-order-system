@@ -4,7 +4,9 @@ namespace Superchef.Helpers;
 
 public class ExpressionService
 {
-    public static Expression<Func<Store, bool>> ShowStoreToCustomer
+    
+
+    public static Expression<Func<Store, bool>> ShowStoreToCustomerExpr
     {
         get
         {
@@ -12,7 +14,18 @@ public class ExpressionService
         }
     }
 
-    public static Expression<Func<Item, bool>> ShowItemToCustomer
+    public static bool ShowToCustomer(Item i)
+    {
+        return i.IsActive &&
+                !i.IsDeleted &&
+                !i.Store.IsDeleted &&
+                i.Variants.Any(v =>
+                    v.IsActive &&
+                    !v.IsDeleted
+                );
+    }
+
+    public static Expression<Func<Item, bool>> ShowItemToCustomerExpr
     {
         get
         {
@@ -27,7 +40,16 @@ public class ExpressionService
         }
     }
 
-    public static Expression<Func<Variant, bool>> ShowVariantToCustomer
+    public static bool ShowToCustomer(Variant v)
+    {
+        return v.IsActive &&
+                !v.IsDeleted &&
+                v.Item.IsActive &&
+                !v.Item.IsDeleted &&
+                !v.Item.Store.IsDeleted;
+    }
+
+    public static Expression<Func<Variant, bool>> ShowVariantToCustomerExpr
     {
         get
         {
@@ -41,7 +63,7 @@ public class ExpressionService
 
     }
 
-    public static Expression<Func<OrderItem, bool>> AllowCalculateOrderItemQuantity
+    public static Expression<Func<OrderItem, bool>> AllowCalculateOrderItemQuantityExpr
     {
         get
         {

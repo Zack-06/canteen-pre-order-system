@@ -1,8 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Superchef.Controllers;
-using Superchef.Helpers;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using X.PagedList;
@@ -143,10 +141,10 @@ public class SearchVM
     public List<Venue> AvailableVenues { get; set; } = [];
     public Dictionary<string, string> AvailablePrices { get; set; } = [];
     public Dictionary<string, string> AvailableRatings { get; set; } = [];
-    public Dictionary<string, string> AvailableSortBy { get; set; } = [];
+    public Dictionary<string, string> AvailableStoreSortBy { get; set; } = [];
+    public Dictionary<string, string> AvailableItemSortBy { get; set; } = [];
     public List<Category> AvailableCategories { get; set; } = [];
 }
-
 
 public class ItemInfoVM
 {
@@ -158,6 +156,13 @@ public class ItemInfoVM
     public string FilterRating { get; set; } = "all";
     public List<Review> Reviews { get; set; } = [];
     public ReviewInputVM NewReview { get; set; } = new();
+    public AddToCartVM AddToCart { get; set; } = new();
+}
+
+public class AddToCartVM
+{
+    public int? Variant { get; set; }
+    public int? Quantity { get; set; }
 }
 
 public class ReviewInputVM

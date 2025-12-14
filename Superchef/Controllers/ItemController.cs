@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -21,9 +22,11 @@ public class ItemController : Controller
         var item = db.Items
             .Include(i => i.Variants)
             .Include(i => i.Store)
-            .Include(i => i.Store.Venue)
+                .ThenInclude(s => s.Venue)
             .Include(i => i.Reviews)
-            .FirstOrDefault(i => i.Slug == slug && i.IsActive && !i.IsDeleted);
+                .ThenInclude(r => r.Account)
+            .Where(ExpressionService.ShowItemToCustomerExpr)
+            .FirstOrDefault(i => i.Slug == slug);
         if (item == null)
         {
             return NotFound();
@@ -75,6 +78,90 @@ public class ItemController : Controller
         ViewBag.HasBought = acc != null && db.OrderItems.Any(oi => oi.Order.AccountId == acc.Id && oi.Variant.ItemId == item.Id && oi.Order.Status == "Completed");
 
         return View(vm);
+    }
+
+    public IActionResult VariantStockCount(int id)
+    {
+        var variant = db.Variants
+            .Where(ExpressionService.ShowVariantToCustomerExpr)
+            .FirstOrDefault(v => v.Id == id);
+
+        if (variant == null)
+        {
+            return NotFound();
+        }
+
+        return Json(new
+        {
+            stock = FormatService.ToStockCountFormat(variant.Stock)
+        });
+    }
+
+    [Authorize]
+    [HttpPost]
+    public IActionResult AddToCart(AddToCartVM vm)
+    {
+        if (vm.Variant == null)
+        {
+            return BadRequest("Please select a variant");
+        }
+
+        var variant = db.Variants
+            .Where(ExpressionService.ShowVariantToCustomerExpr)
+            .FirstOrDefault(v => v.Id == vm.Variant);
+        if (variant == null)
+        {
+            return BadRequest("Variant does not exist");
+        }
+
+        if (vm.Quantity == null)
+        {
+            return BadRequest("Quantity is required");
+        }
+
+        if (vm.Quantity < 1)
+        {
+            return BadRequest("Quantity must be greater than 1");
+        }
+
+        if (vm.Quantity > 10)
+        {
+            return BadRequest("Quantity must be less than 10");
+        }
+
+        if (variant.Stock < vm.Quantity)
+        {
+            return BadRequest("Not enough stock");
+        }
+
+        // add to cart logic
+        var cartItem = db.Carts.FirstOrDefault(ci =>
+            ci.AccountId == HttpContext.GetAccount()!.Id &&
+            ci.VariantId == variant.Id
+        );
+        if (cartItem == null)
+        {
+            db.Carts.Add(new Cart
+            {
+                AccountId = HttpContext.GetAccount()!.Id,
+                VariantId = variant.Id,
+                Quantity = (int)vm.Quantity
+            });
+        }
+        else if (cartItem.Quantity + vm.Quantity > 10)
+        {
+            return BadRequest("You have reached the maximum quantity per variant");
+        } else if (cartItem.Quantity + vm.Quantity > variant.Stock)
+        {
+            return BadRequest("Not enough stock");
+        }
+        else
+        {
+            cartItem.Quantity += (int)vm.Quantity;
+        }
+        db.SaveChanges();
+
+        return Ok();
     }
 
     public IActionResult Manage(ManageItemVM vm)

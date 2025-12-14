@@ -118,7 +118,7 @@ $(".password-show-button").on("change", function () {
 })
 
 // ==========Quantity Button==========
-$("[data-quantity-button]").on("click", function () {
+$(document).on("click", "[data-quantity-button]", function () {
 	var $input = $(this).closest(".form-input").find("input")
 	var action = $(this).data("quantity-button")
 

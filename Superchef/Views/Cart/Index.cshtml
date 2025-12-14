@@ -1,18 +1,20 @@
+@model (List<Store> stores, Dictionary<int, int> itemsCount)
+
 <div class="container" data-no="padding color">
     <div class="title">My Cart</div>
 
     <partial name="_NoResults" model="@("Your cart is empty")" />
 
     <div class="container listing-container" data-no="padding color" data-result-container>
-        @for (int i = 0; i < 10; i++)
+        @foreach (var store in Model.stores)
         {
             var card = new StoreCardDM
             {
-                Link = "/",
-                Image = "",
-                Name = "store",
-                Rating = 4.9m,
-                ItemCount = i
+                Link = $"/Cart/Store/{store.Id}",
+                Image = $"/uploads/store/{store.Image}",
+                Name = store.Name,
+                Rating = store.Items.SelectMany(i => i.Reviews).Average(r => (decimal?)r.Rating) ?? 0m,
+                ItemCount = Model.itemsCount[store.Id]
             };
             <partial name="_StoreCard" model="@card" />
         }

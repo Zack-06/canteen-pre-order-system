@@ -3,6 +3,8 @@
 
 @{
     decimal ratingValue = Model.AverageRating;
+    decimal minPrice = Model.Item.Variants.Min(v => (decimal?)v.Price) ?? 0m;
+    decimal maxPrice = Model.Item.Variants.Max(v => (decimal?)v.Price) ?? 0m;
     var currentUrl =
     $"{ViewContext.HttpContext.Request.Scheme}://{ViewContext.HttpContext.Request.Host}{ViewContext.HttpContext.Request.Path}{ViewContext.HttpContext.Request.QueryString}";
 }
@@ -175,8 +177,7 @@
         }
 
         #gallery-container {
-            width: calc(100% + 2px);
-            margin-left: -1px;
+            width: 100%;
             display: flex;
             gap: 0.75rem;
             height: 4.5rem;
@@ -309,22 +310,58 @@
             align-items: flex-start;
             max-height: 15rem;
             overflow: auto;
-        }
-
-        .info-container [data-column-container]>div:has(.form-group) {
-            display: flex;
-            align-items: baseline;
-            gap: 1rem;
+            padding-right: 0.5rem;
         }
 
         .info-container [data-column-container] .form-group {
-            flex: 1;
-            max-width: 10rem;
+            width: 100%;
+            margin-bottom: 0;
+        }
+
+        #quantity-container {
+            display: grid;
+            grid-template-columns: minmax(auto, 10rem) auto;
+            grid-template-areas:
+                "quantity stock-count"
+                "error error"
+            ;
+            align-items: baseline;
+            column-gap: 1rem;
+            margin-bottom: 1.5rem
+        }
+
+        #quantity-container .form-group {
+            grid-area: quantity;
         }
 
         #stock-count {
+            grid-area: stock-count;
             color: var(--text-secondary);
             font-size: 0.8rem;
+        }
+
+        #error-field {
+            grid-area: error;
+            display: none;
+            color: var(--text-error);
+            background-color: var(--bg-error);
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            margin-top: 0.5rem;
+            border-radius: 0.25rem;
+        }
+
+        #error-field.field-validation-error {
+            display: block;
+        }
+
+        #quantity-container:has(.field-validation-error) .form-group .form-input {
+            border-color: var(--text-error) !important;
+        }
+
+        #quantity-container:has(.field-validation-error) .form-group .form-input:focus-within {
+            border-color: var(--text-error) !important;
+            box-shadow: var(--shadow-danger) !important;
         }
 
         #add-to-favourite-button {
@@ -609,26 +646,13 @@
 
 <div id="item-details-container" class="container">
     <div class="image-container">
-        <img src="" alt="">
+        <img src="/uploads/item/@Model.Item.Image" alt="Preview Image">
         <div id="gallery-container">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
-            <img src="" alt="">
+            <img src="/uploads/item/@Model.Item.Image" alt="Item Image" class="selected">
+            @foreach (var variants in Model.Item.Variants.Where(v => ExpressionService.ShowToCustomer(v)))
+            {
+                <img src="/uploads/variant/@variants.Image" alt="Variant Image" data-variant-id="@variants.Id">
+            }
         </div>
     </div>
     <div class="info-container">
@@ -673,39 +697,42 @@
             <span>@Model.TotalSold Sold</span>
         </div>
         <div class="price">
-            <span>@FormatService.ToRMFormat(100, false)</span>
-            <span>@FormatService.ToRMFormat(200, false)</span>
+            <span>@FormatService.ToRMFormat(minPrice, false)</span>
+            @if (maxPrice != minPrice)
+            {
+                <span>@FormatService.ToRMFormat(maxPrice, false)</span>
+            }
         </div>
 
-        <form action="">
+        <form asp-action="AddToCart" method="post" data-ajax="true" data-ajax-failure="addToCartFailure"
+            data-ajax-success="addToCartSuccess">
+
             <div data-column-container="2">
                 <div>Variant</div>
                 <div class="custom-tick-container center-text-container">
-                    @for (int i = 0; i < 30; i++)
+                    @foreach (var variant in Model.Item.Variants.Where(v =>
+                                        ExpressionService.ShowToCustomer(v)))
                     {
                         <label>
-                            <input type="radio" name="Variant" value="@i">
+                            <input type="radio" name="Variant" value="@variant.Id">
                             <div>
-                                <div class="text">@i Variant</div>
+                                <div class="text">@variant.Name</div>
                             </div>
                         </label>
                     }
                 </div>
 
                 <div>Quantity</div>
-                <div>
+                <div id="quantity-container">
                     <div class="form-group">
                         <div class="form-input">
                             <button type="button" data-quantity-button="minus">&#8203;</button>
-                            <input data-no-negative type="number" min="1" max="10" step="1">
+                            <input name="Quantity" data-no-negative type="number" min="1" max="10" step="1">
                             <button type="button" data-quantity-button="add"></button>
                         </div>
-                        <span class="field-validation-error">
-                            <span>sample error</span>
-                        </span>
                     </div>
-
-                    <span id="stock-count">@FormatService.ToStockCountFormat(0)</span>
+                    <span id="stock-count"></span>
+                    <span id="error-field"></span>
                 </div>
             </div>
 
@@ -736,7 +763,6 @@
         ViewStoreButton = true
     };
 }
-
 <partial name="_StoreDetailsContainer" model="@storeDetails" />
 
 <div class="container">
@@ -778,8 +804,8 @@
             </div>
         </div>
 
-        <form method="post" class="custom-tick-container center-text" data-specified-width asp-action="Info"
-            method="get" data-ajax="true" data-ajax-update="#review-list-container">
+        <form class="custom-tick-container center-text" data-specified-width asp-action="Info" method="get"
+            data-ajax="true" data-ajax-update="#review-list-container">
             <label>
                 <input data-auto-submit type="radio" asp-for="FilterRating" value="all">
                 <div class="custom-tick-text">All</div>
@@ -828,6 +854,26 @@
             $(".image-container>img").attr("src", $(this).attr("src"))
         })
 
+        $(document).on("change", "input[name='Variant']", function () {
+            // Update image
+            const variantImage = $(`#gallery-container img[data-variant-id='${$(this).val()}']`)
+            if (variantImage.length > 0) {
+                $("#gallery-container img.selected").removeClass("selected")
+                variantImage.addClass("selected")
+                $(".image-container>img").attr("src", variantImage.attr("src"))
+            }
+
+            // Update stock count
+            $.ajax({
+                url: '/Item/VariantStockCount',
+                type: 'GET',
+                data: { id: $(this).val() },
+                success: function (data) {
+                    $("#stock-count").text(data.stock)
+                }
+            })
+        })
+
         mediumZoom('.image-container>img', {
             scrollOffset: 0,
             background: 'rgba(0, 0, 0, 0.9)',
@@ -838,5 +884,27 @@
             $(this).closest(".rating-stars-container").attr("data-rating", rating)
             $("#own-review-rating-input").val(rating)
         })
+
+        function addToCartFailure(xhr, status, error) {
+            if (xhr.status === 400 || xhr.status === 404) {
+                const errorField = $("#error-field")
+                if (errorField.length === 0) return
+
+                errorField.text(xhr.responseText)
+                errorField.addClass("field-validation-error")
+            } else if (xhr.status === 401 || xhr.status === 403) {
+                window.location.href = "@Url.Action("Login", "Auth", new { ReturnUrl = currentUrl })"
+            }
+        }
+
+        function addToCartSuccess(data, status, xhr) {
+            const errorField = $("#error-field")
+            if (errorField.length > 0) {
+                errorField.text("")
+                errorField.removeClass("field-validation-error")
+            }
+
+            showToast("Item added to cart")
+        }
     </script>
 }

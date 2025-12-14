@@ -1,7 +1,5 @@
-using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Superchef.Helpers;
 
 namespace Superchef.Controllers;
 
@@ -19,7 +17,7 @@ public class HomeController : Controller
 
         // Trending Items: Top 10 items based on quantity sold in the last 7 days
         var trendingItems = db.OrderItems
-            .Where(ExpressionService.AllowCalculateOrderItemQuantity)
+            .Where(ExpressionService.AllowCalculateOrderItemQuantityExpr)
             .Where(oi =>
                 oi.Order.Status == "Completed" &&
                 oi.Order.CreatedAt >= DateTime.Now.AddDays(-7)
@@ -42,14 +40,14 @@ public class HomeController : Controller
             .ToList();
 
         // Categories: Get all categories
-        vm.Categories = db.Categories.ToList();
+        vm.Categories = db.Categories.Where(c => c.Id != 1).ToList();
 
         // Order Again Items: Last 10 items ordered by the user
         if (User.Identity?.IsAuthenticated == true)
         {
             var accountId = User.Identity.Name;
             var orderAgainItems = db.OrderItems
-                .Where(ExpressionService.AllowCalculateOrderItemQuantity)
+                .Where(ExpressionService.AllowCalculateOrderItemQuantityExpr)
                 .Where(oi =>
                     oi.Order.Status == "Completed" &&
                     oi.Order.AccountId.ToString() == accountId
@@ -77,7 +75,7 @@ public class HomeController : Controller
             .Include(i => i.Variants)
                 .ThenInclude(v => v.OrderItems)
             .Include(i => i.Reviews)
-            .Where(ExpressionService.ShowItemToCustomer)
+            .Where(ExpressionService.ShowItemToCustomerExpr)
             .OrderBy(r => Guid.NewGuid())
             .Take(30)
             .ToList();

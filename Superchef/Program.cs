@@ -1,5 +1,6 @@
 global using Superchef.Models;
 global using Superchef.Services;
+global using Superchef.Helpers;
 global using Superchef.Hubs;
 global using X.PagedList.Extensions;
 // using Superchef.BackgroundWorkers;
@@ -33,6 +34,27 @@ builder.Services.AddAuthentication().AddCookie("Cookies", options =>
     options.LoginPath = "/Auth/Login";
     options.LogoutPath = "/Auth/Logout";
     options.AccessDeniedPath = "/Error/403";
+});
+
+// Redirection
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
+    {
+        // If it's AJAX
+        if (context.Request.Headers.XRequestedWith == "XMLHttpRequest") 
+        {
+            // Set the HTTP status code to 401 Unauthorized
+            context.Response.StatusCode = 401;
+            
+            // Prevent the default redirect
+            return Task.CompletedTask;
+        }
+        
+        // For standard (non-AJAX) browser requests, proceed with the default redirect
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
 });
 
 // Add http context accessor

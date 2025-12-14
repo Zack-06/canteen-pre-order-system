@@ -20,6 +20,8 @@ public class FormatService
 
     public static string ToRatingFormat(decimal rating)
     {
+        if (rating <= 0) return "?";
+
         return rating.ToString("0.0");
     }
 

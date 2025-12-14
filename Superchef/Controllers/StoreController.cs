@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Stripe;
 
 namespace Superchef.Controllers;
@@ -22,8 +21,21 @@ public class StoreController : Controller
     [Route("Store/Info/{slug}")]
     public IActionResult Info(string slug)
     {
-        // store details/info
-        return View();
+        var store = db.Stores
+            .Include(s => s.Venue)
+            .Include(s => s.Items)
+                .ThenInclude(r => r.Reviews)
+            .Include(s => s.Items)
+                .ThenInclude(v => v.Variants)
+                    .ThenInclude(oi => oi.OrderItems)
+            .Where(ExpressionService.ShowStoreToCustomerExpr)
+            .FirstOrDefault(s => s.Slug == slug);
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        return View(store);
     }
 
     public IActionResult Manage(ManageStoreVM vm)

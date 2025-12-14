@@ -12,13 +12,13 @@
             var card = new ItemCardDM
             {
                 Link = $"/Item/Info/{item.Slug}",
-                Image = item.Image,
+                Image = $"/uploads/item/{item.Image}",
                 Name = item.Name,
-                Price = item.Variants.Min(v => v.Price),
-                Rating = item.Reviews.Any() ? (decimal)item.Reviews.Average(r => r.Rating) : 0m,
-                Sold = item.Variants.Sum(v => v.OrderItems.Sum(oi => oi.Quantity))
+                Price = item.Variants.Min(v => (decimal?)v.Price) ?? 0m,
+                Rating = item.Reviews.Average(r => (decimal?)r.Rating) ?? 0m,
+                Sold = item.Variants.SelectMany(v => v.OrderItems).Sum(oi => (int?)oi.Quantity) ?? 0
             };
-            <partial name="_ItemCard" model="@item" />
+            <partial name="_ItemCard" model="@card" />
         }
     </div>
 </div>
@@ -50,13 +50,13 @@
                 var card = new ItemCardDM
                 {
                     Link = $"/Item/Info/{item.Slug}",
-                    Image = item.Image,
+                    Image = $"/uploads/item/{item.Image}",
                     Name = item.Name,
-                    Price = item.Variants.Min(v => v.Price),
-                    Rating = item.Reviews.Any() ? (decimal)item.Reviews.Average(r => r.Rating) : 0m,
-                    Sold = item.Variants.Sum(v => v.OrderItems.Sum(oi => oi.Quantity))
+                    Price = item.Variants.Min(v => (decimal?)v.Price) ?? 0m,
+                    Rating = item.Reviews.Average(r => (decimal?)r.Rating) ?? 0m,
+                    Sold = item.Variants.SelectMany(v => v.OrderItems).Sum(oi => (int?)oi.Quantity) ?? 0
                 };
-                <partial name="_ItemCard" model="@item" />
+                <partial name="_ItemCard" model="@card" />
             }
         </div>
     </div>
@@ -70,13 +70,13 @@
             var card = new ItemCardDM
             {
                 Link = $"/Item/Info/{item.Slug}",
-                Image = item.Image,
+                Image = $"/uploads/item/{item.Image}",
                 Name = item.Name,
-                Price = item.Variants.Min(v => v.Price),
-                Rating = item.Reviews.Any() ? (decimal)item.Reviews.Average(r => r.Rating) : 0m,
-                Sold = item.Variants.Sum(v => v.OrderItems.Sum(oi => oi.Quantity))
+                Price = item.Variants.Min(v => (decimal?)v.Price) ?? 0m,
+                Rating = item.Reviews.Average(r => (decimal?)r.Rating) ?? 0m,
+                Sold = item.Variants.SelectMany(v => v.OrderItems).Sum(oi => (int?)oi.Quantity) ?? 0
             };
-            <partial name="_ItemCard" model="@item" />
+            <partial name="_ItemCard" model="@card" />
         }
     </div>
 </div>

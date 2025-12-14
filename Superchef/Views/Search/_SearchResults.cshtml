@@ -8,55 +8,52 @@
 </div>
 
 <div class="listing-container container" data-no="color padding" data-result-container>
-    @for (int i = 0; i < 10; i++)
-    {
-        var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem soluta  nobis. Tempora sequi omnis odit dolorum rerum quam!";
-        var card = new ItemCardDM
+    @if (Model.Type == "Stores") {
+        @foreach (var obj in Model.Results) 
         {
-            Link = "/",
-            Image = "",
-            Name = i == 0 ? superlongName : "item",
-            Price = 100.00m,
-            Rating = 4.9m,
-            Sold = 100
-        };
-        <partial name="_ItemCard" model="@card" />
-    }
-
-    @* @for (int i = 0; i < 10; i++)
-        {
-            var card = new StoreCard
+            Store store = (Store)obj;
+            var card = new StoreCardDM
             {
-                Link = "/",
-                Image = "",
-                Name = "store",
-                Rating = 4.9m,
-                ItemCount = i
+                Image = $"/uploads/store/{store.Image}",
+                Link = $"/Store/Info/{store.Slug}",
+                Name = store.Name,
+                ItemCount = store.Items.Count,
+                Rating = store.Items.SelectMany(i => i.Reviews).Average(r => (decimal?)r.Rating) ?? 0m,
             };
             <partial name="_StoreCard" model="@card" />
-        } *@
+        }
+    } 
+    else if (Model.Type == "Items")
+    {
+        @foreach (var obj in Model.Results) 
+        {
+            Item item = (Item)obj;
+            ItemCardDM? card = new ItemCardDM
+            {
+                Link = $"/Item/Info/{item.Slug}",
+                Image = $"/uploads/item/{item.Image}",
+                Name = item.Name,
+                Price = item.Variants.Select(v => (decimal?)v.Price).Min() ?? 0m,
+                Rating = item.Reviews.Average(r => (decimal?)r.Rating) ?? 0m,
+                Sold = item.Variants.SelectMany(v => v.OrderItems).Sum(oi => (int?)oi.Quantity) ?? 0
+            };
+            <partial name="_ItemCard" model="@card" />
+        }
+    }
 </div>
 
 <partial name="_NoResults" model="null" />
 
-<div class="pagination-container">
-    <ul class="pagination">
-        <li class="PagedList-skipToFirst disabled"><a>
-                <div class="paging-symbol first"></div>
-            </a></li>
-        <li class="PagedList-skipToPrevious"><a rel="prev">
-                <div class="paging-symbol prev"></div>
-            </a></li>
-        <li class="active"><span>1</span></li>
-        <li class=""><span>201</span></li>
-        <li class=""><span>2</span></li>
-        <li class=""><span>2</span></li>
-        <li class=""><span>2</span></li>
-        <li class="PagedList-skipToNext disabled"><a rel="next">
-                <div class="paging-symbol next"></div>
-            </a></li>
-        <li class="PagedList-skipToLast disabled"><a>
-                <div class="paging-symbol last"></div>
-            </a></li>
-    </ul>
-</div>
+@Html.PagedListPager(Model.Results,
+    page => Url.Action("Index", new {
+        Query = Model.Query,
+        Type = Model.Type,
+        Venues = Model.Venues,
+        Price = Model.Price,
+        Rating = Model.Rating,
+        Sort = Model.Sort,
+        Categories = Model.Categories,
+        Page = page
+    }),
+    PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(), ManagePageService.GetAjaxOption())
+)

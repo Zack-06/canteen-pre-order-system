@@ -1,4 +1,4 @@
-@model SearchVM
+@model Store
 
 @{
     ViewBag.Title = "Store Details | Superchef";
@@ -56,49 +56,44 @@
 }
 
 <div id="banner-container" class="container" data-full data-no="color padding">
-    <img src="" alt="Store Banner">
+    <img 
+        src="/uploads/@(string.IsNullOrEmpty(Model.Banner) ? $"store/{Model.Image}" : $"banner/{Model.Banner}")"
+        alt="Store Banner">
 
     @{
         var storeDetails = new StoreDetailsContainerDM
         {
-            Image = "abc",
-            Name = "abc",
-            Slug = "slug",
-            Rating = 2.0m,
-            TotalReviews = 123828319,
-            Venue = "Red Brick",
-            JoinedAt = DateTime.Now,
+            Image = $"/uploads/store/{Model.Image}",
+            Name = Model.Name,
+            Slug = Model.Slug,
+            Rating = Model.Items.SelectMany(i => i.Reviews).Average(r => (decimal?)r.Rating) ?? 0m,
+            TotalReviews = Model.Items.SelectMany(i => i.Reviews).Count(),
+            Venue = Model.Venue.Name,
+            JoinedAt = Model.CreatedAt,
         };
     }
-
     <partial name="_StoreDetailsContainer" model="@storeDetails" />
 </div>
 
 <div class="container">
     <div class="title">Description</div>
-    <p style="white-space: pre-wrap;">Lorem, ipsum dolor sit amet consectetur adipisicing elit. Ipsum et sapiente odio officia tempore earum omnis
-        nulla voluptatum error minima! Iste aperiam consectetur iure quibusdam quisquam inventore nihil, fuga modi
-        maxime id tempora voluptas, cum aspernatur alias sunt similique? Culpa nam repellat debitis iusto explicabo
-        nesciunt rem quos ut, commodi enim maiores aliquam fugit molestias error suscipit ea dolor incidunt hic
-        inventore voluptas corporis quod laborum. Ducimus libero pariatur ex voluptates aliquam? Rerum quaerat nesciunt
-        dolorum expedita ullam sequi delectus voluptatibus, laborum ex magni accusamus eos perferendis cumque natus
-        quidem quibusdam maxime, itaque ipsam suscipit quis aspernatur odio quasi. Provident?</p>
+    <p style="white-space: pre-wrap;">@Model.Description</p>
 </div>
 
 <div class="container">
     <div class="title">Items</div>
 
     <div class="container listing-container" data-no="padding color" data-result-container>
-        @for (int i = 0; i < 10; i++)
+        @foreach (var item in Model.Items.Where(i => ExpressionService.ShowToCustomer(i)))
         {
             var card = new ItemCardDM
             {
-                Link = "/",
-                Image = "",
-                Name = "item",
-                Rating = 4.9m,
-                Price = 100.00m,
-                Sold = 100,
+                Link = $"/Item/Info/{item.Slug}",
+                Image = $"/uploads/item/{item.Image}",
+                Name = item.Name,
+                Rating = item.Reviews.Average(r => (decimal?)r.Rating) ?? 0m,
+                Price = item.Variants.Select(v => (decimal?)v.Price).Min() ?? 0m,
+                Sold = item.Variants.SelectMany(v => v.OrderItems).Sum(oi => (int?)oi.Quantity) ?? 0
             };
             <partial name="_ItemCard" model="@card" />
         }
