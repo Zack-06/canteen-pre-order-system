@@ -4,29 +4,22 @@
     ViewBag.Title = "Home | Superchef";
 }
 
-@section head {
-    <style>
-
-    </style>
-}
 <div class="container">
     <div class="title">Trending</div>
     <div class="listing-container container" data-no="color padding" data-result-container>
-        @for (int i = 0; i < 10; i++)
+        @foreach (var item in Model.TrendingItems)
         {
-            var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem    soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
             var card = new ItemCardDM
             {
-                Link = "/",
-                Image = "",
-                Name = i == 0 ? superlongName : "item",
-                Price = 100.00m,
-                Rating = 4.9m,
-                Sold = 100
+                Link = $"/Item/Info/{item.Slug}",
+                Image = item.Image,
+                Name = item.Name,
+                Price = item.Variants.Min(v => v.Price),
+                Rating = item.Reviews.Any() ? (decimal)item.Reviews.Average(r => r.Rating) : 0m,
+                Sold = item.Variants.Sum(v => v.OrderItems.Sum(oi => oi.Quantity))
             };
-            <partial name="_ItemCard" model="@card" />
+            <partial name="_ItemCard" model="@item" />
         }
-
     </div>
 </div>
 
@@ -34,58 +27,56 @@
 <div class="container">
     <div class="title">Categoty</div>
     <div class="listing-container container" data-no="color padding" data-result-container>
-        @for (int i = 0; i < 9; i++)
+        @foreach (var category in Model.Categories)
         {
             var card = new CategoryCardDM
             {
-                Link = "/",
-                Image = "",
-                Name = "category",
+                Link = $"/Search?Categories={category.Id}",
+                Image = category.Image,
+                Name = category.Name,
             };
             <partial name="_CategoryCard" model="@card" />
         }
-
     </div>
 </div>
 
-<div class="container">
-    <div class="title">Order Again</div>
-    <div class="listing-container container" data-no="color padding" data-result-container>
-        @for (int i = 0; i < 7; i++)
-        {
-            var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem       soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
-            var card = new ItemCardDM
+@if (ViewBag.Authenticated == true)
+{
+    <div class="container">
+        <div class="title">Order Again</div>
+        <div class="listing-container container" data-no="color padding" data-result-container>
+            @foreach (var item in Model.OrderAgainItems)
             {
-                Link = "/",
-                Image = "",
-                Name = i == 0 ? superlongName : "item",
-                Price = 100.00m,
-                Rating = 4.9m,
-                Sold = 100
-            };
-            <partial name="_ItemCard" model="@card" />
-        }
-
+                var card = new ItemCardDM
+                {
+                    Link = $"/Item/Info/{item.Slug}",
+                    Image = item.Image,
+                    Name = item.Name,
+                    Price = item.Variants.Min(v => v.Price),
+                    Rating = item.Reviews.Any() ? (decimal)item.Reviews.Average(r => r.Rating) : 0m,
+                    Sold = item.Variants.Sum(v => v.OrderItems.Sum(oi => oi.Quantity))
+                };
+                <partial name="_ItemCard" model="@item" />
+            }
+        </div>
     </div>
-</div>
+}
 
 <div class="container">
     <div class="title">Daliy Discover</div>
     <div class="listing-container container" data-no="color padding" data-result-container>
-        @for (int i = 0; i < 14; i++)
+        @foreach (var item in Model.DailyDiscoverItems)
         {
-            var superlongName = "Lorem ipsum dolor sit amet consectetur adipisicing elit. Quisquam quas exercitationem    soluta nobis. Tempora sequi omnis odit dolorum rerum quam!";
             var card = new ItemCardDM
             {
-                Link = "/",
-                Image = "",
-                Name = i == 0 ? superlongName : "item",
-                Price = 100.00m,
-                Rating = 4.9m,
-                Sold = 100
+                Link = $"/Item/Info/{item.Slug}",
+                Image = item.Image,
+                Name = item.Name,
+                Price = item.Variants.Min(v => v.Price),
+                Rating = item.Reviews.Any() ? (decimal)item.Reviews.Average(r => r.Rating) : 0m,
+                Sold = item.Variants.Sum(v => v.OrderItems.Sum(oi => oi.Quantity))
             };
-            <partial name="_ItemCard" model="@card" />
+            <partial name="_ItemCard" model="@item" />
         }
-
     </div>
 </div>
