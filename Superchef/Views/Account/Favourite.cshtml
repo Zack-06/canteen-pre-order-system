@@ -1,22 +1,23 @@
+@model List<Item>
+
 <div class="container" data-no="padding color">
     <div class="title">My Favourites</div>
 
     <partial name="_NoResults" model="@("Your favourite is empty")" />
 
     <div class="container listing-container" data-no="padding color" data-result-container>
-        @for (int i = 0; i < 10; i++)
+        @foreach (var item in Model)
         {
             var card = new ItemCardDM
             {
-                Link = "/",
-                Image = "",
-                Name = "item",
-                Rating = 4.9m,
-                Price = 100.00m,
-                Sold = 100,
-                DeleteLink = "/",
+                Link = $"/Item/Info/{item.Slug}",
+                Image = $"/uploads/item/{item.Image}",
+                Name = item.Name,
+                Rating = item.Reviews.Average(r => (decimal?)r.Rating) ?? 0m,
+                Price = item.Variants.Min(v => (decimal?)v.Price) ?? 0m,
+                Sold = item.Variants.SelectMany(v => v.OrderItems).Sum(oi => (int?)oi.Quantity) ?? 0,
+                DeleteLink = $"/Item/ToggleFavourite/{item.Id}?isDelete=true",
                 DeleteMsg = "Are you sure you want to delete this item from your favourites?"
-
             };
             <partial name="_ItemCard" model="@card" />
         }

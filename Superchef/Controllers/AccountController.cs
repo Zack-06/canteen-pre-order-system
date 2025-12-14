@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
+using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Controllers;
 
@@ -226,7 +227,21 @@ public class AccountController : Controller
 
     public IActionResult Favourite()
     {
-        return View();
+        var acc = HttpContext.GetAccount();
+
+        var itemIds = db.Favourites
+            .Where(f => f.AccountId == acc!.Id)
+            .Select(f => f.ItemId)
+            .ToList();
+
+        var items = db.Items
+            .Include(i => i.Reviews)
+            .Include(i => i.Variants)
+                .ThenInclude(v => v.OrderItems)
+            .Where(i => itemIds.Contains(i.Id))
+            .ToList();
+
+        return View(items);
     }
 
     // ==========REQUEST==========

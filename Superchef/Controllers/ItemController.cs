@@ -172,7 +172,7 @@ public class ItemController : Controller
 
     [Authorize]
     [HttpPost]
-    public IActionResult ToggleFavourite(int id)
+    public IActionResult ToggleFavourite(int id, bool isDelete)
     {
         var item = db.Items.FirstOrDefault(i => i.Id == id);
         if (item == null)
@@ -181,7 +181,14 @@ public class ItemController : Controller
         }
 
         var fav = db.Favourites.FirstOrDefault(f => f.AccountId == HttpContext.GetAccount()!.Id && f.ItemId == item.Id);
-        if (fav == null)
+        if (isDelete)
+        {
+            if (fav != null)
+            {
+                db.Favourites.Remove(fav);
+            }
+        }
+        else if (fav == null)
         {
             db.Favourites.Add(new Favourite
             {
