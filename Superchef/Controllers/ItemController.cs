@@ -77,6 +77,11 @@ public class ItemController : Controller
         }
         ViewBag.HasBought = acc != null && db.OrderItems.Any(oi => oi.Order.AccountId == acc.Id && oi.Variant.ItemId == item.Id && oi.Order.Status == "Completed");
 
+        if (acc != null)
+        {
+            ViewBag.IsFavourite = db.Favourites.Any(f => f.AccountId == acc.Id && f.ItemId == item.Id);
+        }
+
         return View(vm);
     }
 
@@ -151,7 +156,8 @@ public class ItemController : Controller
         else if (cartItem.Quantity + vm.Quantity > 10)
         {
             return BadRequest("You have reached the maximum quantity per variant");
-        } else if (cartItem.Quantity + vm.Quantity > variant.Stock)
+        }
+        else if (cartItem.Quantity + vm.Quantity > variant.Stock)
         {
             return BadRequest("Not enough stock");
         }
@@ -162,6 +168,34 @@ public class ItemController : Controller
         db.SaveChanges();
 
         return Ok();
+    }
+
+    [Authorize]
+    [HttpPost]
+    public IActionResult ToggleFavourite(int id)
+    {
+        var item = db.Items.FirstOrDefault(i => i.Id == id);
+        if (item == null)
+        {
+            return NotFound();
+        }
+
+        var fav = db.Favourites.FirstOrDefault(f => f.AccountId == HttpContext.GetAccount()!.Id && f.ItemId == item.Id);
+        if (fav == null)
+        {
+            db.Favourites.Add(new Favourite
+            {
+                AccountId = HttpContext.GetAccount()!.Id,
+                ItemId = item.Id
+            });
+        }
+        else
+        {
+            db.Favourites.Remove(fav);
+        }
+        db.SaveChanges();
+
+        return Content(fav == null ? "added" : "removed");
     }
 
     public IActionResult Manage(ManageItemVM vm)

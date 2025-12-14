@@ -738,7 +738,10 @@
 
             <div class="container" data-no="padding color margin" data-flex="gap between">
                 <button data-button="accent">Add to Cart</button>
-                <a href="/" id="add-to-favourite-button"></a>
+                <a data-ajax="true" data-ajax-method="POST" data-ajax-failure="toggleFavouriteFailure"
+                    data-ajax-success="toggleFavouriteSuccess" 
+                    href="@Url.Action("ToggleFavourite", new { Id = Model.Item.Id })"
+                    id="add-to-favourite-button" class="@(ViewBag.IsFavourite == true ? "favourite" : "")"></a>
             </div>
         </form>
     </div>
@@ -905,6 +908,25 @@
             }
 
             showToast("Item added to cart")
+        }
+
+        function toggleFavouriteFailure(xhr, status, error) {
+            if (xhr.status === 401 || xhr.status === 403) {
+                window.location.href = "@Url.Action("Login", "Auth", new { ReturnUrl = currentUrl })"
+                return
+            }
+
+            defaultOnFailure(xhr, status, error)
+        }
+
+        function toggleFavouriteSuccess(data, status, xhr) {
+            if (xhr.responseText == "added") {
+                showToast("Item added to favourites")
+                $("#add-to-favourite-button").addClass("favourite")
+            } else {
+                showToast("Item removed from favourites")
+                $("#add-to-favourite-button").removeClass("favourite")
+            }
         }
     </script>
 }
