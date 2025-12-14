@@ -24,6 +24,7 @@
             background-repeat: no-repeat;
             transition: all 0.3s ease;
             position: relative;
+            cursor: pointer;
         }
 
         .delete-button:hover,
@@ -176,7 +177,7 @@
             <span>Select All</span>
         </label>
         <div>
-            <a id="multiple-delete" class="delete-button"></a>
+            <div id="multiple-delete" class="delete-button"></div>
         </div>
     </div>
 </div>
@@ -188,9 +189,12 @@
     @foreach (var cItem in Model.CartItems)
     {
         string? errorText = null;
-        if (cItem.Quantity < 1 || cItem.Quantity > 10) {
+        if (cItem.Quantity < 1 || cItem.Quantity > 10)
+        {
             errorText = "Invalid value";
-        } else if (cItem.Quantity > cItem.Variant.Stock) {
+        }
+        else if (cItem.Quantity > cItem.Variant.Stock)
+        {
             errorText = "Not enough stock";
         }
 
@@ -278,5 +282,21 @@
                 }
             } catch (e) { }
         }
+
+        $("#multiple-delete").on("click", async function () {
+            if ($("main > form input[type='checkbox']:checked").length === 0) return
+
+            if (!await confirmation("Are you sure you want to remove all selected items from your cart?")) return
+
+            $("main > form input[type='checkbox']:checked").each(function () {
+                $.ajax({
+                    url: "/Cart/RemoveItem",
+                    method: "POST",
+                    data: { id: $(this).val() }
+                })
+            })
+
+            reloadPage()
+        })
     </script>
 }
