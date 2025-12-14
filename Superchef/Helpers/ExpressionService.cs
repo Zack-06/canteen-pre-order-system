@@ -77,4 +77,17 @@ public class ExpressionService
                 );
         }
     }
+
+    public static Expression<Func<Cart, bool>> ShowCartToCustomerExpr
+    {
+        get
+        {
+            return c => 
+                c.Variant.IsActive &&
+                !c.Variant.IsDeleted &&
+                c.Variant.Item.IsActive &&
+                !c.Variant.Item.IsDeleted &&
+                !c.Variant.Item.Store.IsDeleted;
+        }
+    }
 }

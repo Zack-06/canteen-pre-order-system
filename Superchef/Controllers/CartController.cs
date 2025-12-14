@@ -33,9 +33,9 @@ public class CartController : Controller
         foreach (var store in stores)
         {
             itemsCount.Add(
-                store.Id, 
-                db.Carts.Count(c => 
-                    c.AccountId == HttpContext.GetAccount()!.Id && 
+                store.Id,
+                db.Carts.Count(c =>
+                    c.AccountId == HttpContext.GetAccount()!.Id &&
                     c.Variant.Item.StoreId == store.Id
                 )
             );
@@ -48,6 +48,159 @@ public class CartController : Controller
     {
         // display items for store with id
 
-        return View();
+        var store = db.Stores
+            .Include(s => s.Items)
+                .ThenInclude(i => i.Reviews)
+            .Include(s => s.Venue)
+            .Where(ExpressionService.ShowStoreToCustomerExpr)
+            .FirstOrDefault(s => s.Id == id);
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        var cartItems = db.Carts
+            .Include(c => c.Variant)
+            .Include(c => c.Variant.Item)
+            .Where(c => c.AccountId == HttpContext.GetAccount()!.Id && c.Variant.Item.StoreId == store.Id)
+            .Where(ExpressionService.ShowCartToCustomerExpr)
+            .OrderBy(c => c.Variant.Item.Id)
+            .ToList();
+
+        if (cartItems.Count == 0)
+        {
+            return RedirectToAction("Index");
+        }
+
+        var vm = new CartStoreVM
+        {
+            Id = id,
+            Store = store,
+            CartItems = cartItems
+        };
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult UpdateQuantity(int id, int quantity)
+    {
+        var cart = db.Carts
+            .Include(c => c.Variant)
+            .FirstOrDefault(c => c.VariantId == id);
+        if (cart == null)
+        {
+            return NotFound("Invalid item");
+        }
+
+        cart.Quantity = quantity;
+        db.SaveChanges();
+
+        if (cart.Quantity < 1 || cart.Quantity > 10)
+        {
+            return BadRequest("Invalid value");
+        }
+
+        if (cart.Quantity > cart.Variant.Stock)
+        {
+            return BadRequest("Not enough stock");
+        }
+
+        return Ok();
+    }
+
+    public IActionResult Checkout(CartStoreVM vm)
+    {
+        var store = db.Stores
+            .Where(ExpressionService.ShowStoreToCustomerExpr)
+            .FirstOrDefault(s => s.Id == vm.Id);
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        var cartItems = db.Carts
+            .Include(c => c.Variant)
+            .Where(c =>
+                c.AccountId == HttpContext.GetAccount()!.Id &&
+                c.Variant.Item.StoreId == store.Id &&
+                vm.SelectedItems.Contains(c.VariantId)
+            )
+            .Where(ExpressionService.ShowCartToCustomerExpr)
+            .ToList();
+
+        bool isValid = true;
+        decimal totalPrice = 0;
+        int TotalItems = 0;
+        foreach (var cItem in cartItems)
+        {
+            if (cItem.Quantity < 1 || cItem.Quantity > 10 || cItem.Quantity > cItem.Variant.Stock)
+            {
+                totalPrice = 0;
+                TotalItems = 0;
+                isValid = false;
+                break;
+            }
+
+            totalPrice += cItem.Variant.Price * cItem.Quantity;
+            TotalItems += cItem.Quantity;
+        }
+
+        if (Request.Method == "GET")
+        {
+            return PartialView("_SummaryContainer", new SummaryContainerDM
+            {
+                TotalPrice = totalPrice,
+                TotalItems = TotalItems,
+                SubmitText = "Checkout"
+            });
+        }
+        else if (vm.SelectedItems.Count == 0)
+        {
+            return BadRequest("Checkout failed! Please select at least one item");
+        }
+        else if (!isValid || totalPrice < 2 || TotalItems < 1)
+        {
+            return BadRequest("Checkout failed! Please check your cart");
+        }
+
+        var acc = HttpContext.GetAccount();
+
+        // Create Order
+        var order = new Order
+        {
+            Name = acc!.Name,
+            PhoneNumber = acc!.PhoneNumber ?? "",
+            Status = "Pending",
+            ExpiresAt = DateTime.Now.AddMinutes(7),
+            AccountId = acc.Id,
+            StoreId = store.Id
+        };
+
+        // Add Order Items
+        foreach (var cItem in cartItems)
+        {
+            order.OrderItems.Add(new OrderItem
+            {
+                OrderId = order.Id,
+                VariantId = cItem.VariantId,
+                Quantity = cItem.Quantity,
+                Price = cItem.Variant.Price
+            });
+
+            // Remove stock
+            cItem.Variant.Stock -= cItem.Quantity;
+        }
+
+        db.Orders.Add(order);
+        db.SaveChanges();
+
+        Response.Headers.Append("X-Redirect-Url", Url.Action("Customer", "Order", new { id = order.Id }));
+        return PartialView("_SummaryContainer", new SummaryContainerDM
+        {
+            TotalPrice = totalPrice,
+            TotalItems = TotalItems,
+            SubmitText = "Checkout"
+        });
     }
 }

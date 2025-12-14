@@ -346,11 +346,11 @@ public class Order
     public string Status { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? ExpiresAt { get; set; }
-    public int SlotId { get; set; }
+    public int? SlotId { get; set; }
     public int AccountId { get; set; }
     public int StoreId { get; set; }
 
-    public Slot Slot { get; set; }
+    public Slot? Slot { get; set; }
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public Account Account { get; set; }
     [DeleteBehavior(DeleteBehavior.Restrict)]

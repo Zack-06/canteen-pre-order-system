@@ -1,3 +1,5 @@
+@model CartStoreVM
+
 @section head {
     <style>
         input[type="checkbox"] {
@@ -154,13 +156,13 @@
 @{
     var storeDetails = new StoreDetailsContainerDM
     {
-        Image = "abc",
-        Name = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maiores, labore nisi! Repellat itaque minus enim tempore, amet recusandae blanditiis eius!",
-        Slug = "slug",
-        Rating = 2.0m,
-        TotalReviews = 123828319,
-        Venue = "Red Brick",
-        JoinedAt = DateTime.Now,
+        Image = $"/uploads/store/{Model.Store.Image}",
+        Name = Model.Store.Name,
+        Slug = Model.Store.Slug,
+        Rating = Model.Store.Items.SelectMany(i => i.Reviews).Average(r => (decimal?)r.Rating) ?? 0m,
+        TotalReviews = Model.Store.Items.SelectMany(i => i.Reviews).Count(),
+        Venue = Model.Store.Venue.Name,
+        JoinedAt = Model.Store.CreatedAt,
         ViewStoreButton = true
     };
 }
@@ -179,34 +181,102 @@
     </div>
 </div>
 
-@for (int i = 0; i < 10; i++)
-{
-    var errorText = i == 0 ? "Not enough stock" : null;
-    errorText = i == 1 ? "Invalid value" : errorText; // only these 2 errors
+<form action="@Url.Action("Checkout")" method="post" data-ajax="true" data-ajax-success="checkoutSuccess"
+    data-ajax-failure="defaultOnFailure">
+    <input type="hidden" asp-for="Id">
 
-    var itemDetails = new CardItemContainerDM
+    @foreach (var cItem in Model.CartItems)
     {
-        Id = i,
-        Slug = "slug",
-        ItemName = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maiores, labore nisi! Repellat itaque minus enim tempore, amet recusandae blanditiis eius!",
-        VariantName = "Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maiores, labore nisi! Repellat itaque minus enim tempore, amet recusandae blanditiis eius!",
-        Image = "image",
-        Price = 100,
-        Quantity = 10,
-        Error = errorText
-    };
+        string? errorText = null;
+        if (cItem.Quantity < 1 || cItem.Quantity > 10) {
+            errorText = "Invalid value";
+        } else if (cItem.Quantity > cItem.Variant.Stock) {
+            errorText = "Not enough stock";
+        }
 
-    <partial name="_CartItemContainer" model="@itemDetails" />
+        var card = new CardItemContainerDM
+        {
+            Id = cItem.Variant.Id,
+            Slug = cItem.Variant.Item.Slug,
+            ItemName = cItem.Variant.Item.Name,
+            VariantName = cItem.Variant.Name,
+            Image = $"/uploads/variant/{cItem.Variant.Image}",
+            Price = cItem.Variant.Price,
+            Quantity = cItem.Quantity,
+            Error = errorText
+        };
+        <partial name="_CartItemContainer" model="@card" />
+    }
+
+    @{
+        var summary = new SummaryContainerDM
+        {
+            TotalPrice = 0,
+            TotalItems = 0,
+            SubmitText = "Checkout"
+        };
+    }
+    <div id="ajax-result-container" data-sticky-bottom>
+        <partial name="_SummaryContainer" model="summary" />
+    </div>
+</form>
+
+@section foot {
+    <script>
+        const mainForm = $("main > form")
+
+        $("#select-all-checkbox").on("change", function () {
+            $("main > form input[type='checkbox']").prop("checked", this.checked)
+        })
+
+        $("main > form input[type='checkbox']").on("change", function () {
+            $("#select-all-checkbox").prop("checked",
+                $("main > form input[type='checkbox']").length ===
+                $("main > form input[type='checkbox']:checked").length
+            )
+
+
+            mainForm.attr("method", "get")
+            mainForm.submit()
+            mainForm.attr("method", "post")
+        })
+
+        $(document).on("change input", "main > form input[type='number']", function () {
+            const quantity = $(this).val()
+            const variantId = $(this).closest(".cart-item-container").find("input[type='checkbox']").val()
+            const errorEle = $(this).closest(".form-group").find(".error")
+
+            // update quantity
+            $.ajax({
+                url: "/Cart/UpdateQuantity",
+                method: "POST",
+                data: { id: variantId, quantity },
+                success: function (data, status, xhr) {
+                    errorEle.removeClass("field-validation-error")
+                    errorEle.text("")
+                },
+                error: function (xhr, status, error) {
+                    errorEle.text(xhr.responseText)
+                    errorEle.addClass("field-validation-error")
+                },
+            })
+
+            mainForm.attr("method", "get")
+            mainForm.submit()
+            mainForm.attr("method", "post")
+        })
+
+        function checkoutSuccess(data, status, xhr) {
+            $("#ajax-result-container").html(data);
+
+            if (!xhr) return
+
+            try {
+                var redirectUrl = xhr.getResponseHeader("X-Redirect-Url")
+                if (redirectUrl) {
+                    window.location.href = redirectUrl
+                }
+            } catch (e) { }
+        }
+    </script>
 }
-
-@{
-    var summary = new SummaryContainerDM{
-        TotalPrice = 0,
-        TotalItems = 0,
-        SubmitText = "Checkout"
-    };
-}
-
-<div data-sticky-bottom>
-    <partial name="_SummaryContainer" model="summary" />
-</div>

@@ -19,12 +19,6 @@ public class OrderController : Controller
         this.cf = cf;
     }
 
-    [HttpPost]
-    public bool Create()
-    {
-        return true;
-    }
-
     [HttpGet]
     public IActionResult Customer(string id)
     {

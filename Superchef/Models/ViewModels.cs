@@ -174,6 +174,14 @@ public class ReviewInputVM
     public string Comment { get; set; }
 }
 
+public class CartStoreVM
+{
+    public int Id { get; set; }
+    public Store Store { get; set; }
+    public List<Cart> CartItems { get; set; } = [];
+    public List<int> SelectedItems { get; set; } = [];
+}
+
 public class ManageCustomerVM
 {
     public string? Dir { get; set; }

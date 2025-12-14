@@ -359,7 +359,7 @@ namespace Superchef.Migrations
                         .HasMaxLength(12)
                         .HasColumnType("nvarchar(12)");
 
-                    b.Property<int>("SlotId")
+                    b.Property<int?>("SlotId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -836,9 +836,7 @@ namespace Superchef.Migrations
 
                     b.HasOne("Superchef.Models.Slot", "Slot")
                         .WithMany("Orders")
-                        .HasForeignKey("SlotId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("SlotId");
 
                     b.HasOne("Superchef.Models.Store", "Store")
                         .WithMany("Orders")

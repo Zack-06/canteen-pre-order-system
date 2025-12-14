@@ -1,14 +1,14 @@
 @model CardItemContainerDM
 
 <div class="container cart-item-container">
-    <input type="checkbox" value="@Model.Id" id="cart-item-checkbox-@Model.Id">
+    <input type="checkbox" value="@Model.Id" name="SelectedItems" id="cart-item-checkbox-@Model.Id">
 
     <label for="cart-item-checkbox-@Model.Id">
         <img src="@Model.Image" alt="Item Image">
     </label>
 
     <div class="info">
-        <a href="/Item/@Model.Slug" class="item">@Model.ItemName</a>
+        <a href="/Item/Info/@Model.Slug" class="item">@Model.ItemName</a>
         <div class="variant">@Model.VariantName</div>
     </div>
 
