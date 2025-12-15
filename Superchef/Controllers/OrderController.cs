@@ -341,10 +341,28 @@ public class OrderController : Controller
         return View("Status", "failed");
     }
 
-    public IActionResult Info()
+    public IActionResult Info(string id)
     {
+        var order = db.Orders
+            .Include(o => o.Payment)
+            .Include(o => o.Slot)
+            .Include(o => o.Store)
+                .ThenInclude(s => s.Venue)
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Variant)
+                    .ThenInclude(v => v.Item)
+            .FirstOrDefault(o => 
+                o.Id == id &&
+                o.AccountId == HttpContext.GetAccount()!.Id &&
+                o.Status != "Pending"
+            );
+        if (order == null)
+        {
+            return NotFound();
+        }
+
         // show order info
-        return View();
+        return View(order);
     }
 
     public IActionResult Manage(ManageOrderVM vm)

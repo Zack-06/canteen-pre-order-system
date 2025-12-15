@@ -1,3 +1,6 @@
+@using Microsoft.SqlServer.Server
+@model Order
+
 <div class="container" data-limit-container>
     <div class="title">Order Details</div>
 
@@ -6,23 +9,23 @@
         <div data-column-container="3">
             <div>Id</div>
             <div>:</div>
-            <div>idk Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quidem, itaque?</div>
+            <div>@Model.Id</div>
 
             <div>Date</div>
             <div>:</div>
-            <div>IDK SUERP LONG</div>
+            <div>@FormatService.ToDateTimeFormat(Model.CreatedAt, "dd MMM yyyy (ddd)")</div>
 
             <div>Time</div>
             <div>:</div>
-            <div>IDK SUERP LONG</div>
+            <div>@FormatService.ToDateTimeFormat(Model.CreatedAt, "h:mm tt")</div>
 
             <div>Total Price</div>
             <div>:</div>
-            <div>IDK SUERP LONG</div>
+            <div>@FormatService.ToRMFormat(Model.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m)</div>
 
             <div>Status</div>
             <div>:</div>
-            <div>IDK SUERP LONG</div>
+            <div>@Model.Status</div>
         </div>
     </div>
 </div>
@@ -33,19 +36,20 @@
     <div data-column-container="3">
         <div>Date</div>
         <div>:</div>
-        <div>idk</div>
+        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "dd MMM yyyy (ddd)")</div>
 
         <div>Time</div>
         <div>:</div>
-        <div>idk</div>
+        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "h:mm tt") -
+            @FormatService.ToDateTimeFormat(Model.Slot.EndTime, "h:mm tt")</div>
 
         <div>Store</div>
         <div>:</div>
-        <div><a href="">store link</a></div>
+        <div><a href="/Store/Info/@Model.Store.Slug">@Model.Store.Name</a></div>
 
         <div>Venue</div>
         <div>:</div>
-        <div>Redbrick</div>
+        <div>@Model.Store.Venue.Name</div>
     </div>
 </div>
 
@@ -55,43 +59,53 @@
     <div data-column-container="3">
         <div>Name</div>
         <div>:</div>
-        <div>idk</div>
+        <div>@Model.Name</div>
 
         <div>Phone Number</div>
         <div>:</div>
-        <div>idk</div>
+        <div>@Model.PhoneNumber</div>
     </div>
 </div>
 
-<div class="container" data-limit-container>
-    <div class="title">Payment Details</div>
+@if (Model.Payment != null)
+{
+    <div class="container" data-limit-container>
+        <div class="title">Payment Details</div>
 
-    <div data-column-container="3">
-        <div>Payment Option</div>
-        <div>:</div>
-        <div>Grab Pay</div>
+        <div data-column-container="3">
+            <div>Payment Option</div>
+            <div>:</div>
+            <div>@Model.Payment.PaymentMethod</div>
 
-        <div>Paid At</div>
-        <div>:</div>
-        <div>29 Oct 2025 - 09:21 PM</div>
+            @if (!string.IsNullOrEmpty(Model.Payment.Details))
+            {
+                <div>Details</div>
+                <div>:</div>
+                <div>@Model.Payment.Details</div>
+            }
+
+            <div>Paid At</div>
+            <div>:</div>
+            <div>@FormatService.ToDateTimeFormat(Model.Payment.CreatedAt, "dd MMM yyyy - h:mm tt")</div>
+        </div>
     </div>
-</div>
+}
+
 
 <div class="container" data-limit-container>
     <div class="title">Ordered Items</div>
 
     <div class="container" data-no="padding margin" data-flex="column gap">
-        @for (int i = 0; i < 10; i++)
+        @foreach (var item in Model.OrderItems)
         {
             var card = new OrderItemCardDM
             {
-                Link = i == 0 ? null : "breh",
-                Image = "",
-                Id = i,
-                Name = "item",
-                Variant = "variant",
-                Quantity = i,
-                Subtotal = 100.00m
+                Id = item.VariantId,
+                Name = item.Variant.Item.Name,
+                Variant = item.Variant.Name,
+                Quantity = item.Quantity,
+                Subtotal = item.Price * item.Quantity,
+                Link = item.Variant.Item.IsActive ? $"/Item/Info/{item.Variant.Item.Slug}" : null
             };
             <partial name="_OrderItemCard" model="@card" />
         }
@@ -101,7 +115,7 @@
 @section foot {
     <script src="/js/qrcode.min.js"></script>
     <script>
-        var bookingId = "12345";
+        var bookingId = "@Model.Id";
         new QRCode(document.getElementById("qr-container"), bookingId);
     </script>
 }
