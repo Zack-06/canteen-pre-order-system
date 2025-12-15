@@ -91,7 +91,7 @@ public class AccountController : Controller
         if (ModelState.IsValid)
         {
             // update name & phone number
-            acc.Name = vm.Name;
+            acc.Name = vm.Name.Trim();
             acc.PhoneNumber = vm.PhoneNumber;
             db.SaveChanges();
 

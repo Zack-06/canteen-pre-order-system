@@ -101,27 +101,84 @@ public class StoreController : Controller
         return RedirectToAction("Edit", "Store");
     }
 
+    [Authorize(Roles = "Vendor")]
     public IActionResult Add()
     {
         var vm = new AddStoreVM
         {
             AvailableVenues = db.Venues.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
         };
+        vm.Venue = int.Parse(vm.AvailableVenues.First().Value);
 
         return View(vm);
     }
 
     [HttpPost]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Add(AddStoreVM vm)
     {
-        if (ModelState.IsValid)
+        if (ModelState.IsValid("Name") && !IsNameUnique(vm.Name, vm.Venue))
         {
-            // add store logic here
+            ModelState.AddModelError("Name", "Name has been taken in this venue.");
         }
+
+        if (ModelState.IsValid("Slug") && !IsSlugUnique(vm.Slug))
+        {
+            ModelState.AddModelError("Slug", "Slug has been taken.");
+        }
+
+        if (ModelState.IsValid("Venue") && !CheckVenue(vm.Venue))
+        {
+            ModelState.AddModelError("Venue", "Venue is invalid.");
+        }
+
+        if (vm.Image != null)
+        {
+            var e = imgSrv.ValidateImage(vm.Image, 5);
+            if (e != "") ModelState.AddModelError("Image", e);
+        }
+
+        string? newImageFile = null;
+        if (ModelState.IsValid && vm.Image != null)
+        {
+            try
+            {
+                newImageFile = imgSrv.SaveImage(vm.Image, "store", 700, 700, vm.ImageX, vm.ImageY, vm.ImageScale);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("Image", ex.Message);
+            }
+        }
+
+        if (ModelState.IsValid && newImageFile != null)
+        {
+            var store = new Store
+            {
+                Name = vm.Name,
+                Slug = vm.Slug,
+                Description = vm.Description,
+                Image = newImageFile,
+                Banner = null,
+                SlotMaxOrders = vm.SlotMaxOrders,
+                StripeAccountId = null,
+                VenueId = vm.Venue,
+                AccountId = HttpContext.GetAccount()!.Id
+            };
+
+            db.Stores.Add(store);
+            db.SaveChanges();
+
+            TempData["Message"] = "Store created successfully";
+            return RedirectToAction("Edit", "Store", new { id = store.Id });
+        }
+
+        vm.AvailableVenues = db.Venues.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList();
 
         return View(vm);
     }
 
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Edit(int? id)
     {
         if (id == null)
@@ -167,6 +224,7 @@ public class StoreController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Edit(EditStoreVM vm)
     {
         var store = db.Stores.FirstOrDefault(s =>
@@ -179,6 +237,11 @@ public class StoreController : Controller
             return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Edit") });
         }
 
+        if (ModelState.IsValid("Name") && !IsNameUnique(vm.Name, vm.Venue, vm.Id))
+        {
+            ModelState.AddModelError("Name", "Name has been taken in this venue.");
+        }
+
         if (ModelState.IsValid("Slug") && !IsSlugUnique(vm.Slug, vm.Id))
         {
             ModelState.AddModelError("Slug", "Slug has been taken.");
@@ -186,7 +249,7 @@ public class StoreController : Controller
 
         if (ModelState.IsValid("Venue") && !CheckVenue(vm.Venue))
         {
-            ModelState.AddModelError("Venue", "Venue not a valid venue.");
+            ModelState.AddModelError("Venue", "Venue is invalid.");
         }
 
         if (vm.Image != null)
@@ -250,9 +313,9 @@ public class StoreController : Controller
 
         if (ModelState.IsValid)
         {
-            store.Name = vm.Name;
+            store.Name = vm.Name.Trim();
             store.Slug = vm.Slug;
-            store.Description = vm.Description;
+            store.Description = vm.Description.Trim();
             store.SlotMaxOrders = vm.SlotMaxOrders;
             store.VenueId = vm.Venue;
             db.SaveChanges();
@@ -470,8 +533,8 @@ public class StoreController : Controller
     {
         if (!Request.IsAjax()) return NotFound();
 
-        var store = db.Stores.FirstOrDefault(s => 
-            s.Id == id && 
+        var store = db.Stores.FirstOrDefault(s =>
+            s.Id == id &&
             s.AccountId == HttpContext.GetAccount()!.Id
         );
         if (store == null) return NotFound("Store not found");
@@ -487,14 +550,24 @@ public class StoreController : Controller
     }
 
     // ==========Remote==========
-    public bool IsSlugUnique(string slug, int? id)
+    public bool IsSlugUnique(string slug, int? id = null)
     {
         if (id == null)
         {
-            return !db.Stores.Any(s => s.Slug == slug);
+            return !db.Stores.Any(s => s.Slug == slug && !s.IsDeleted);
         }
 
-        return !db.Stores.Any(s => s.Slug == slug && s.Id != id);
+        return !db.Stores.Any(s => s.Slug == slug && s.Id != id && !s.IsDeleted);
+    }
+
+    public bool IsNameUnique(string name, int venue, int? id = null)
+    {
+        if (id == null)
+        {
+            return !db.Stores.Any(s => s.Name == name.Trim() && !s.IsDeleted && s.VenueId == venue);
+        }
+
+        return !db.Stores.Any(s => s.Name == name.Trim() && s.Id != id && !s.IsDeleted && s.VenueId == venue);
     }
 
     public bool CheckVenue(int venue)

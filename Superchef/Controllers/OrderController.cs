@@ -70,7 +70,7 @@ public class OrderController : Controller
 
         if (ModelState.IsValid)
         {
-            order.Name = vm.Name;
+            order.Name = vm.Name.Trim();
             order.PhoneNumber = vm.ContactNumber;
             db.Orders.Update(order);
             db.SaveChanges();

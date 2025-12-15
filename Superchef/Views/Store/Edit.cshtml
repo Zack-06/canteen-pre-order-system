@@ -93,7 +93,7 @@
         <div>:</div>
         <div class="form-group">
             <div class="form-input">
-                <input asp-for="Name">
+                <input asp-for="Name" id="store-name-input">
             </div>
             <span asp-validation-for="Name"></span>
         </div>
@@ -128,7 +128,7 @@
         <div class="form-group">
             <div class="input-group">
                 <div class="custom-select">
-                    <select asp-for="Venue" asp-items="Model.AvailableVenues"></select>
+                    <select id="venue-select" asp-for="Venue" asp-items="Model.AvailableVenues"></select>
                 </div>
             </div>
             <span asp-validation-for="Venue"></span>
@@ -188,7 +188,7 @@
         <div>:</div>
         @if (String.IsNullOrEmpty(Model.StripeAccountId))
         {
-            <div>You haven't connect with stripe yet.</div>
+            <div class="form-group">You haven't connect with stripe yet.</div>
         }
         else
         {
@@ -208,7 +208,6 @@
                 </div>
             </div>
         }
-
     </div>
 
     <button data-enable-on-change data-button="success" disabled>Save Changes</button>
@@ -393,6 +392,10 @@
                 $("#banner-image-preview").removeClass("horizontal-fit")
                 $("#banner-image-preview").removeAttr("src")
             }
+        })
+
+        $("#venue-select").on("change", function() {
+            $("#store-name-input").valid()
         })
     </script>
 }

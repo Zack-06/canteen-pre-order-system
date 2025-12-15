@@ -358,7 +358,7 @@ public class ManageStoreVM
 public class AddStoreVM
 {
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
-    [Remote("IsNameUnique", "Store", ErrorMessage = "{0} exists.")]
+    [Remote("IsNameUnique", "Store", AdditionalFields = "Venue", ErrorMessage = "{0} has been taken in this venue.")]
     public string Name { get; set; }
     [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
     [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
@@ -368,8 +368,8 @@ public class AddStoreVM
     public string Description { get; set; }
     [DisplayName("Max Orders Per Slot")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
-    public int SlotMaxOrders { get; set; }
-    [Remote("CheckVenue", "Store", ErrorMessage = "{0} is not a valid venue.")]
+    public int SlotMaxOrders { get; set; } = 20;
+    [Remote("CheckVenue", "Store", ErrorMessage = "{0} is invalid.")]
     public int Venue { get; set; }
     [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
@@ -386,6 +386,7 @@ public class EditStoreVM
     public int VendorId { get; set; }
     public string? StripeAccountId { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [Remote("IsNameUnique", "Store", AdditionalFields = "Venue,Id", ErrorMessage = "{0} has been taken in this venue.")]
     public string Name { get; set; }
     [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
     [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
@@ -395,8 +396,8 @@ public class EditStoreVM
     public string Description { get; set; }
     [DisplayName("Max Orders Per Slot")]
     [Range(0, int.MaxValue, ErrorMessage = "{0} cannot be negative.")]
-    public int SlotMaxOrders { get; set; }
-    [Remote("CheckVenue", "Store", ErrorMessage = "{0} is not a valid venue.")]
+    public int SlotMaxOrders { get; set; } = 20;
+    [Remote("CheckVenue", "Store", ErrorMessage = "{0} is invalid.")]
     public int Venue { get; set; }
     [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
