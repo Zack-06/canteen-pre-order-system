@@ -1,10 +1,8 @@
 using System.Linq.Expressions;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
-using Stripe;
 using Stripe.Checkout;
 
 namespace Superchef.Controllers;
@@ -13,15 +11,11 @@ namespace Superchef.Controllers;
 public class OrderController : Controller
 {
     private readonly DB db;
-    private readonly PaymentService paySrv;
-    private readonly IConfiguration cf;
     private readonly IHubContext<OrderHub> orderHubContext;
 
-    public OrderController(DB db, PaymentService paySrv, IConfiguration cf, IHubContext<OrderHub> orderHubContext)
+    public OrderController(DB db, IHubContext<OrderHub> orderHubContext)
     {
         this.db = db;
-        this.paySrv = paySrv;
-        this.cf = cf;
         this.orderHubContext = orderHubContext;
     }
 
@@ -98,7 +92,8 @@ public class OrderController : Controller
         var order = db.Orders
             .Include(o => o.Slot)
             .Include(o => o.OrderItems)
-            .FirstOrDefault(o => o.Id == vm.Id &&
+            .FirstOrDefault(o =>
+                o.Id == vm.Id &&
                 o.AccountId == HttpContext.GetAccount()!.Id &&
                 o.Status == "Pending"
             );
@@ -169,8 +164,10 @@ public class OrderController : Controller
     public async Task<IActionResult> SelectSlot(OrderSlotVM vm)
     {
         var order = db.Orders
+            .Include(o => o.Slot)
             .Include(o => o.OrderItems)
-            .FirstOrDefault(o => o.Id == vm.Id &&
+            .FirstOrDefault(o =>
+                o.Id == vm.Id &&
                 o.AccountId == HttpContext.GetAccount()!.Id &&
                 o.Status == "Pending"
             );
@@ -194,6 +191,11 @@ public class OrderController : Controller
         if (vm.Slot == null)
         {
             return BadRequest("Slot invalid");
+        }
+
+        if (DateOnly.FromDateTime(order.Slot.StartTime) == vm.Date && TimeOnly.FromDateTime(order.Slot.StartTime) == vm.Slot)
+        {
+            return Ok();
         }
 
         var startOrderTime = tmpNow.AddMinutes(8 + 30);
@@ -233,13 +235,13 @@ public class OrderController : Controller
                 var previousSlot = db.Slots.Include(s => s.Orders).FirstOrDefault(s => s.Id == previousSlotId)!;
 
                 await orderHubContext.Clients.All.SendAsync(
-                    "SlotActive", 
+                    "SlotActive",
                     DateOnly.FromDateTime(currentSlot.StartTime),
                     TimeOnly.FromDateTime(currentSlot.StartTime).ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture),
                     currentSlot.MaxOrders > currentSlot.Orders.Count
                 );
                 await orderHubContext.Clients.All.SendAsync(
-                    "SlotActive", 
+                    "SlotActive",
                     DateOnly.FromDateTime(previousSlot.StartTime),
                     TimeOnly.FromDateTime(previousSlot.StartTime).ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture),
                     previousSlot.MaxOrders > previousSlot.Orders.Count
@@ -256,7 +258,16 @@ public class OrderController : Controller
     {
         var order = db.Orders
             .Include(o => o.Slot)
-            .FirstOrDefault(o => o.Id == id);
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Variant)
+                    .ThenInclude(v => v.Item)
+            .Include(o => o.Store)
+                .ThenInclude(s => s.Venue)
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.AccountId == HttpContext.GetAccount()!.Id &&
+                o.Status == "Pending"
+            );
         if (order == null)
         {
             return NotFound();
@@ -269,7 +280,15 @@ public class OrderController : Controller
 
         if (Request.Method == "GET")
         {
-            return View();
+            ViewBag.TotalPrice = order.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m;
+            ViewBag.TotalItems = order.OrderItems.Sum(i => (int?)i.Quantity) ?? 0;
+
+            if (order.ExpiresAt != null)
+            {
+                ViewBag.ExpiredTimestamp = ViewBag.ExpiredTimestamp = new DateTimeOffset(order.ExpiresAt.Value).ToUnixTimeMilliseconds();
+            }
+
+            return View(order);
         }
 
         var baseUrl = Request.GetBaseUrl();
@@ -281,7 +300,13 @@ public class OrderController : Controller
             Mode = "payment",
             PaymentMethodTypes = ["card", "fpx", "grabpay"],
             CustomerEmail = HttpContext.GetAccount()!.Email,
-            Metadata = new Dictionary<string, string> { { "OrderId", order.Id.ToString() } }
+            PaymentIntentData = new SessionPaymentIntentDataOptions
+            {
+                Metadata = new Dictionary<string, string>
+                {
+                    ["OrderId"] = order.Id.ToString()
+                }
+            }
         };
 
         // Fill line items
@@ -291,7 +316,7 @@ public class OrderController : Controller
             {
                 PriceData = new SessionLineItemPriceDataOptions
                 {
-                    UnitAmount = (long)(item.Price / item.Quantity * 100),
+                    UnitAmount = (long)(item.Price * 100),
                     Currency = "myr",
                     ProductData = new SessionLineItemPriceDataProductDataOptions
                     {
@@ -314,47 +339,6 @@ public class OrderController : Controller
     public IActionResult Failed()
     {
         return View("Status", "failed");
-    }
-
-    public async Task<IActionResult> Webhook()
-    {
-        var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-        string endpointSecret = cf["Stripe:EndpointSecret"] ?? "";
-        try
-        {
-            var stripeEvent = EventUtility.ParseEvent(json);
-            var signatureHeader = Request.Headers["Stripe-Signature"];
-
-            stripeEvent = EventUtility.ConstructEvent(json, signatureHeader, endpointSecret);
-
-            // Handle the event
-            if (stripeEvent.Type == EventTypes.PaymentIntentSucceeded)
-            {
-                if (stripeEvent.Data.Object is not PaymentIntent paymentIntent)
-                {
-                    return BadRequest("PaymentIntent not found");
-                }
-                paySrv.HandlePaymentIntentSucceeded(paymentIntent);
-            }
-            else if (stripeEvent.Type == EventTypes.ChargeRefunded)
-            {
-                if (stripeEvent.Data.Object is not Charge charge)
-                {
-                    return BadRequest("Charge not found");
-                }
-                paySrv.HandleChargeRefunded(charge);
-            }
-            else
-            {
-                Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
-            }
-
-            return Ok();
-        }
-        catch (StripeException e)
-        {
-            return BadRequest(e);
-        }
     }
 
     public IActionResult Info()

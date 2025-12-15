@@ -30,7 +30,7 @@
 
 @section foot {
     <script>
-        $(document).on("click", "input[name='Slot']:not(:checked)", function (e) {
+        $(document).on("click", "input[name='Slot']", function (e) {
             e.preventDefault()
 
             const $input = $(this)

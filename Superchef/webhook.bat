@@ -1,1 +1,2 @@
-stripe listen --forward-to http://localhost:5245/Order/Webhook
+cls
+stripe listen --forward-to http://localhost:5245/api/webhook

@@ -1,3 +1,5 @@
+@model Order
+
 @{
     var stepData = new StepContainerDM
     {
@@ -7,9 +9,9 @@
 
     var summary = new SummaryContainerDM
     {
-        TotalPrice = 25.50m,
-        TotalItems = 3,
-        ExitLink = "/Order/Slot",
+        TotalPrice = ViewBag.TotalPrice,
+        TotalItems = ViewBag.TotalItems,
+        ExitLink = $"/Order/Slot/{Model.Id}",
         SubmitText = "Pay",
     };
 }
@@ -27,11 +29,11 @@
     <div data-column-container="3">
         <div>Name</div>
         <div>:</div>
-        <div>John Doe</div>
+        <div>@Model.Name</div>
 
         <div>Contact Number</div>
         <div>:</div>
-        <div>012-3456789</div>
+        <div>@Model.PhoneNumber</div>
     </div>
 </div>
 
@@ -41,15 +43,16 @@
     <div data-column-container="3">
         <div>Date</div>
         <div>:</div>
-        <div>31 Oct (Mon)</div>
+        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "dd MMM yyyy (ddd)")</div>
 
         <div>Time</div>
         <div>:</div>
-        <div>10:00 AM - 10:30 AM</div>
+        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "h:mm tt") -
+            @FormatService.ToDateTimeFormat(Model.Slot.EndTime, "h:mm tt")</div>
 
         <div>Venue</div>
         <div>:</div>
-        <div>Redbrick</div>
+        <div>@Model.Store.Venue.Name</div>
     </div>
 </div>
 
@@ -59,31 +62,22 @@
     </div>
 
     <div class="container" data-no="padding margin" data-flex="column gap">
-        @{
-            var mockItem1 = new OrderItemCardDM
+        @foreach (var item in Model.OrderItems)
+        {
+            var card = new OrderItemCardDM
             {
-                Id = 1,
-                Name = "Nasi Lemak",
-                Variant = "Spicy",
-                Quantity = 1,
-                Subtotal = 12.00m,
+                Id = item.VariantId,
+                Name = item.Variant.Item.Name,
+                Variant = item.Variant.Name,
+                Quantity = item.Quantity,
+                Subtotal = item.Price * item.Quantity,
                 Link = null
             };
-            var mockItem2 = new OrderItemCardDM
-            {
-                Id = 2,
-                Name = "Teh Tarik",
-                Variant = "Less Sweet",
-                Quantity = 2,
-                Subtotal = 6.50m,
-                Link = null
-            };
+            <partial name="_OrderItemCard" model="@card" />
         }
-        <partial name="_OrderItemCard" model="@mockItem1" />
-        <partial name="_OrderItemCard" model="@mockItem2" />
     </div>
 </div>
 
-<form method="post" data-expired-timestamp="1764298333874" data-sticky-bottom>
+<form method="post" data-expired-timestamp="@ViewBag.ExpiredTimestamp" data-sticky-bottom>
     <partial name="_SummaryContainer" model="summary" />
 </form>

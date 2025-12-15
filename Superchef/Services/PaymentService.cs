@@ -13,15 +13,38 @@ public class PaymentService
         this.db = db;
     }
 
-    public void HandlePaymentIntentSucceeded(PaymentIntent paymentIntent)
+    public string? HandlePaymentIntentSucceeded(PaymentIntent paymentIntent)
     {
         // Retrieve OrderId from PaymentIntent metadata
-        if (!paymentIntent.Metadata.TryGetValue("OrderId", out var orderIdStr)) return;
+        if (!paymentIntent.Metadata.TryGetValue("OrderId", out var orderIdStr))
+        {
+            db.AuditLogs.Add(new AuditLog
+            {
+                AccountId = 1,
+                Entity = "error",
+                Action = $"Stripe Webhook Error: Missing OrderId metadata for PaymentIntent with ID {paymentIntent.Id}",
+            });
+            db.SaveChanges();
+            
+            return "OrderId metadata missing";
+        }
+        ;
 
         var order = db.Orders
             .Include(o => o.Payment)
             .FirstOrDefault(o => o.Id == orderIdStr);
-        if (order == null || order.Payment != null) return;
+        if (order == null || order.Payment != null)
+        {
+            db.AuditLogs.Add(new AuditLog
+            {
+                AccountId = 1,
+                Entity = "error",
+                Action = $"Stripe Webhook Error: Order with ID {orderIdStr} not found",
+            });
+            db.SaveChanges();
+            
+            return "Order not found";
+        }
 
         var method = "";
         var cardBrand = "";
@@ -76,6 +99,8 @@ public class PaymentService
         order.Status = "Confirmed";
         order.ExpiresAt = null;
         db.SaveChanges();
+
+        return null;
     }
 
     public void HandleChargeRefunded(Charge charge)

@@ -11,7 +11,7 @@ namespace Superchef.Models;
 
 public class LoginVM
 {
-    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailLogin", "Auth", ErrorMessage = "{0} is not registered.")]
     public string Email { get; set; }
@@ -26,7 +26,7 @@ public class RegisterVM
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
 
-    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
     public string Email { get; set; }
@@ -48,7 +48,7 @@ public class RegisterVM
 
 public class ForgotPasswordVM
 {
-    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailLogin", "Auth", ErrorMessage = "{0} is not registered.")]
     public string Email { get; set; }
@@ -73,12 +73,12 @@ public class ResetPasswordVM
 
 public class ChangeEmailVM
 {
-    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
     public string Email { get; set; }
 
-    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Compare("Email", ErrorMessage = "Emails do not match.")]
     [DisplayName("Confirm Email")]
@@ -231,7 +231,7 @@ public class AddVendorVM
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
 
-    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
     public string Email { get; set; }
@@ -260,7 +260,7 @@ public class AddAdminVM
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
 
-    [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
     public string Email { get; set; }

@@ -74,7 +74,7 @@ public class Account
     public string Name { get; set; }
     [MaxLength(12)]
     public string? PhoneNumber { get; set; }
-    [MaxLength(100)]
+    [MaxLength(255)]
     public string Email { get; set; }
     [MaxLength(100)]
     public string PasswordHash { get; set; }
@@ -426,7 +426,6 @@ public class AuditLog
 {
     public int Id { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
-    [MaxLength(100)]
     public string Action { get; set; }
     [MaxLength(20)]
     public string? Entity { get; set; }
