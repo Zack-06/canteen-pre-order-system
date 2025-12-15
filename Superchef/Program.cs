@@ -63,6 +63,9 @@ builder.Services.AddHttpContextAccessor();
 // Add cookie protection
 builder.Services.AddDataProtection();
 
+// Add session
+builder.Services.AddSession();
+
 // Add services
 builder.Services.AddSingleton<ImageService>();
 
@@ -77,6 +80,7 @@ StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 var app = builder.Build();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.UseSession();
 
 app.UseStatusCodePagesWithReExecute("/Error/{0}"); // hit error controller if error occurs
 

@@ -1,23 +1,28 @@
+@model List<Store>
+
+@{
+    var returnUrl = ViewBag?.ReturnUrl as string;
+}
+
 <div class="container" data-no="padding color">
     <div class="container" data-no="padding color" data-flex="gap between">
         <div class="title" data-no="margin">My Store</div>
-        <a href="" data-button="info">Add Store</a>
+        <a href="@Url.Action("Add", "Store")" data-button="info">Add Store</a>
     </div>
-
 
     <partial name="_NoResults" model="@("You have no store")" />
 
     <div class="container listing-container" data-no="padding color" data-result-container>
-        @for (int i = 0; i < 10; i++)
+        @foreach (var store in Model)
         {
             var card = new StoreCardDM
             {
-                Link = "/",
-                Image = "",
-                Name = "store",
-                Rating = 4.9m,
-                ItemCount = i,
-                DeleteLink = "/",
+                Link = $"/Store/Select/{store.Id}{(returnUrl != null ? $"?ReturnUrl={returnUrl}" : "")}",
+                Image = $"/uploads/store/{store.Image}",
+                Name = store.Name,
+                Rating = store.Items.SelectMany(i => i.Reviews).Average(r => (decimal?)r.Rating) ?? 0m,
+                ItemCount = store.Items.Count,
+                DeleteLink = $"/Store/Delete/{store.Id}",
                 DeleteMsg = "Are you sure you want to delete this store?"
             };
             <partial name="_StoreCard" model="@card" />

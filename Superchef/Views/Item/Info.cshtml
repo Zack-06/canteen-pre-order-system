@@ -756,7 +756,7 @@
 @{
     var storeDetails = new StoreDetailsContainerDM
     {
-        Image = Model.Item.Store.Image,
+        Image = $"/uploads/store/{Model.Item.Store.Image}",
         Name = Model.Item.Store.Name,
         Slug = Model.Item.Store.Slug,
         Rating = db.Reviews.Where(r => r.Item.StoreId == Model.Item.StoreId).Select(r => (decimal?)r.Rating).Average() ?? 0m,

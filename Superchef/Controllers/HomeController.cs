@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,6 +14,18 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        if (User.Identity?.IsAuthenticated == true)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                return RedirectToAction("Admin", "Home");
+            }
+            else if (User.IsInRole("Vendor"))
+            {
+                return RedirectToAction("Vendor", "Home");
+            }
+        }
+
         var vm = new HomePageVM();
 
         // Trending Items: Top 10 items based on quantity sold in the last 7 days
@@ -83,11 +96,23 @@ public class HomeController : Controller
         return View(vm);
     }
 
-    public IActionResult Vendor()
+    [Authorize(Roles = "Vendor")]
+    public IActionResult Vendor(string? ReturnUrl)
     {
-        return View();
+        HttpContext.Session.Remove("StoreId");
+
+        var stores = db.Stores
+            .Include(s => s.Items)
+                .ThenInclude(r => r.Reviews)
+            .Where(s => s.AccountId == HttpContext.GetAccount()!.Id)
+            .ToList();
+
+        ViewBag.ReturnUrl = ReturnUrl;
+
+        return View(stores);
     }
 
+    [Authorize(Roles = "Admin")]
     public IActionResult Admin(AdminHomePageVM vm)
     {
         vm.TotalSales = 0;

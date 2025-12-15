@@ -1,3 +1,4 @@
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @model OrderCustomerVM
 
 @{
@@ -9,16 +10,16 @@
 
     var summary = new SummaryContainerDM
     {
-        TotalPrice = 100m,
-        TotalItems = 10,
-        ExitLink = "/Order/Cancel",
+        TotalPrice = ViewBag.TotalPrice ?? 0m,
+        TotalItems = ViewBag.TotalItems ?? 0,
+        ExitLink = $"/Order/Cancel/{Model.Id}",
         ExitText = "Cancel"
     };
 }
 
 <partial name="_StepContainer" model="data" />
 
-<form method="post" data-expired-timestamp="1764291789847">
+<form method="post" data-expired-timestamp="@ViewBag.ExpiredTimestamp">
     <div class="container" data-limit-container>
         <h1 class="title">Customer Details</h1>
 

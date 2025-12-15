@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -10,11 +11,13 @@ public class StoreController : Controller
 {
     private readonly DB db;
     private readonly IConfiguration cf;
+    private readonly ImageService imgSrv;
 
-    public StoreController(DB db, IConfiguration configuration)
+    public StoreController(DB db, IConfiguration configuration, ImageService imgSrv)
     {
         this.db = db;
         cf = configuration;
+        this.imgSrv = imgSrv;
     }
 
     [HttpGet]
@@ -38,6 +41,7 @@ public class StoreController : Controller
         return View(store);
     }
 
+    [Authorize(Roles = "Admin")]
     public IActionResult Manage(ManageStoreVM vm)
     {
         Dictionary<string, Expression<Func<Store, object>>> sortOptions = new()
@@ -73,6 +77,30 @@ public class StoreController : Controller
         return View(vm);
     }
 
+    [Authorize(Roles = "Vendor")]
+    public IActionResult Select(int id, string? ReturnUrl)
+    {
+        var store = db.Stores
+            .FirstOrDefault(
+                s => s.Id == id &&
+                s.AccountId == HttpContext.GetAccount()!.Id
+            );
+
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        HttpContext.Session.SetInt32("StoreId", store.Id);
+
+        if (ReturnUrl != null)
+        {
+            return Redirect(ReturnUrl);
+        }
+
+        return RedirectToAction("Edit", "Store");
+    }
+
     public IActionResult Add()
     {
         var vm = new AddStoreVM
@@ -83,22 +111,160 @@ public class StoreController : Controller
         return View(vm);
     }
 
-    public IActionResult Edit(int id)
+    [HttpPost]
+    public IActionResult Add(AddStoreVM vm)
     {
+        if (ModelState.IsValid)
+        {
+            // add store logic here
+        }
+
+        return View(vm);
+    }
+
+    public IActionResult Edit(int? id)
+    {
+        if (id == null)
+        {
+            var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
+            if (sessionStoreId == null)
+            {
+                TempData["Message"] = "Please choose a store first";
+                return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Edit") });
+            }
+
+            return RedirectToAction("Edit", new { id = sessionStoreId });
+        }
+
+        var store = db.Stores.FirstOrDefault(s =>
+            s.Id == id &&
+            s.AccountId == HttpContext.GetAccount()!.Id
+        );
+        if (store == null)
+        {
+            TempData["Message"] = "Store not found! Please choose a store";
+            return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Edit") });
+        }
+
         var vm = new EditStoreVM
         {
-            Id = id,
-            StripeAccountId = "abc",
-            Name = "abc",
-            Slug = "abc",
-            Description = "abc",
-            SlotMaxOrders = 1,
-            Venue = 1,
+            Id = store.Id,
+            VendorId = store.AccountId,
+            StripeAccountId = store.StripeAccountId,
+            Name = store.Name,
+            Slug = store.Slug,
+            Description = store.Description,
+            SlotMaxOrders = store.SlotMaxOrders,
+            Venue = store.VenueId,
 
             AvailableVenues = db.Venues.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
         };
 
-        ViewBag.ImageUrl = "abc";
+        ViewBag.ImageUrl = $"/uploads/store/{store.Image}";
+        ViewBag.BannerImageUrl = store.Banner != null ? $"/uploads/banner/{store.Banner}" : null;
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult Edit(EditStoreVM vm)
+    {
+        var store = db.Stores.FirstOrDefault(s =>
+            s.Id == vm.Id &&
+            s.AccountId == HttpContext.GetAccount()!.Id
+        );
+        if (store == null)
+        {
+            TempData["Message"] = "Store not found! Please choose a store";
+            return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Edit") });
+        }
+
+        if (ModelState.IsValid("Slug") && !IsSlugUnique(vm.Slug, vm.Id))
+        {
+            ModelState.AddModelError("Slug", "Slug has been taken.");
+        }
+
+        if (ModelState.IsValid("Venue") && !CheckVenue(vm.Venue))
+        {
+            ModelState.AddModelError("Venue", "Venue not a valid venue.");
+        }
+
+        if (vm.Image != null)
+        {
+            var e = imgSrv.ValidateImage(vm.Image, 5);
+            if (e != "") ModelState.AddModelError("Image", e);
+        }
+
+        if (vm.BannerImage != null && !vm.BannerRemoveImage)
+        {
+            var e = imgSrv.ValidateImage(vm.BannerImage, 10);
+            if (e != "") ModelState.AddModelError("BannerImage", e);
+        }
+
+        if (ModelState.IsValid && vm.Image != null)
+        {
+            try
+            {
+                var newFile = imgSrv.SaveImage(vm.Image, "store", 700, 700, vm.ImageX, vm.ImageY, vm.ImageScale);
+
+                // remove image
+                if (store.Image != null) imgSrv.DeleteImage(store.Image, "store");
+                store.Image = newFile;
+                db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("Image", ex.Message);
+            }
+        }
+
+        if (ModelState.IsValid)
+        {
+            if (vm.BannerRemoveImage)
+            {
+                // remove image
+                if (store.Banner != null)
+                {
+                    imgSrv.DeleteImage(store.Banner, "banner");
+                    store.Banner = null;
+                    db.SaveChanges();
+                }
+            }
+            else if (vm.BannerImage != null)
+            {
+                try
+                {
+                    var newFile = imgSrv.SaveImage(vm.BannerImage, "banner", 2025, 675, vm.BannerImageX, vm.BannerImageY, vm.BannerImageScale);
+
+                    // remove image
+                    if (store.Banner != null) imgSrv.DeleteImage(store.Banner, "banner");
+                    store.Banner = newFile;
+                    db.SaveChanges();
+                }
+                catch (Exception ex)
+                {
+                    ModelState.AddModelError("BannerImage", ex.Message);
+                }
+            }
+        }
+
+        if (ModelState.IsValid)
+        {
+            store.Name = vm.Name;
+            store.Slug = vm.Slug;
+            store.Description = vm.Description;
+            store.SlotMaxOrders = vm.SlotMaxOrders;
+            store.VenueId = vm.Venue;
+            db.SaveChanges();
+
+            TempData["Message"] = "Store updated successfully";
+            return RedirectToAction("Edit", new { id = vm.Id });
+        }
+
+        vm.AvailableVenues = db.Venues.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList();
+
+        ViewBag.ImageUrl = $"/uploads/store/{store.Image}";
+        ViewBag.BannerImageUrl = store.Banner != null ? $"/uploads/banner/{store.Banner}" : null;
 
         return View(vm);
     }
@@ -164,7 +330,8 @@ public class StoreController : Controller
         if (vm.Type == "Custom" || (ViewBag.InitSlot != null && ViewBag.InitSlot == true))
         {
             vm.Slots = db.Slots.Where(s => s.StoreId == vm.StoreId && DateOnly.FromDateTime(s.StartTime) == vm.Date).Select(s => TimeOnly.FromDateTime(s.StartTime)).ToList();
-        } else
+        }
+        else
         {
             // select
             if (store != null)
@@ -227,12 +394,16 @@ public class StoreController : Controller
         return Redirect(url);
     }
 
-    public async Task<string> Callback(string code, string state, string error)
+    [Authorize(Roles = "Vendor")]
+    public async Task<IActionResult> Callback(string code, string state, string error)
     {
+        var storeId = int.Parse(state);
+
         if (!string.IsNullOrEmpty(error))
         {
             // User cancelled or there was an error
-            return error;
+            TempData["Message"] = $"Stripe connect failed!";
+            return RedirectToAction("Edit", "Store", new { Id = storeId });
         }
 
         var options = new OAuthTokenCreateOptions
@@ -247,44 +418,87 @@ public class StoreController : Controller
         // Stripe account ID of the vendor
         string stripeAccountId = response.StripeUserId;
 
-        string storeId = state;
+        var store = db.Stores.FirstOrDefault(s =>
+            s.Id == storeId &&
+            s.AccountId == HttpContext.GetAccount()!.Id
+        );
+        if (store == null)
+        {
+            TempData["Message"] = "Stripe connect failed! Store not found";
+            return RedirectToAction("Edit", "Store", new { Id = storeId });
+        }
 
-        return stripeAccountId + "," + storeId;
+        store.StripeAccountId = stripeAccountId;
+        db.SaveChanges();
 
-        // return RedirectToAction("StripeLinkedSuccess");
+        TempData["Message"] = "Stripe connect success!";
+        return RedirectToAction("Edit", "Store", new { Id = storeId });
     }
 
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult GetStripeAccountEmail(int id)
     {
         var store = db.Stores.FirstOrDefault(s => s.Id == id);
         if (store == null)
         {
-            // return NotFound("Store not found");
+            return NotFound("Store not found");
         }
 
-        // string? stripeAccountId = store.StripeAccountId;
-        // if (string.IsNullOrEmpty(stripeAccountId))
-        // {
-        //     return NotFound("Stripe account not found");
-        // }
-
-        // test
-        string? stripeAccountId = "acct_1SXR4c0YIOryk7Uo";
+        string? stripeAccountId = store.StripeAccountId;
+        if (string.IsNullOrEmpty(stripeAccountId))
+        {
+            return NotFound("Stripe account not found");
+        }
 
         var accountService = new AccountService();
-        var account = accountService.Get(stripeAccountId);
+        Stripe.Account account;
+        try
+        {
+            account = accountService.Get(stripeAccountId);
+        }
+        catch (StripeException ex)
+        {
+            return BadRequest($"Stripe error: {ex.Message}");
+        }
 
         return Ok(account.Email);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Vendor")]
+    public IActionResult Delete(int id)
+    {
+        if (!Request.IsAjax()) return NotFound();
+
+        var store = db.Stores.FirstOrDefault(s => 
+            s.Id == id && 
+            s.AccountId == HttpContext.GetAccount()!.Id
+        );
+        if (store == null) return NotFound("Store not found");
+
+        store.IsDeleted = true;
+        db.SaveChanges();
+
+        // delete store logic here
+        // todo
+
+        TempData["Message"] = "Store deleted successfully";
+        return Ok();
     }
 
     // ==========Remote==========
     public bool IsSlugUnique(string slug, int? id)
     {
-        return true;
+        if (id == null)
+        {
+            return !db.Stores.Any(s => s.Slug == slug);
+        }
+
+        return !db.Stores.Any(s => s.Slug == slug && s.Id != id);
     }
 
-    public bool CheckVenue(int venue, int? id)
+    public bool CheckVenue(int venue)
     {
-        return true;
+        return db.Venues.Any(v => v.Id == venue);
     }
 }

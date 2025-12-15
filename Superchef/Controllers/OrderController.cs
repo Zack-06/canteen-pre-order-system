@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
@@ -6,6 +7,7 @@ using Stripe.Checkout;
 
 namespace Superchef.Controllers;
 
+[Authorize]
 public class OrderController : Controller
 {
     private readonly DB db;
@@ -19,23 +21,85 @@ public class OrderController : Controller
         this.cf = cf;
     }
 
-    [HttpGet]
     public IActionResult Customer(string id)
     {
+        var order = db.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.AccountId == HttpContext.GetAccount()!.Id &&
+                o.Status == "Pending"
+            );
+        if (order == null)
+        {
+            return NotFound();
+        }
+
         var vm = new OrderCustomerVM
         {
-            Id = id
+            Id = id,
+            Name = order.Name,
+            ContactNumber = order.PhoneNumber
         };
+
+        ViewBag.TotalPrice = order.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m;
+        ViewBag.TotalItems = order.OrderItems.Sum(i => (int?)i.Quantity) ?? 0;
+
+        if (order.ExpiresAt != null)
+        {
+            ViewBag.ExpiredTimestamp = ViewBag.ExpiredTimestamp = new DateTimeOffset(order.ExpiresAt.Value).ToUnixTimeMilliseconds();
+        }
+
+        return View(vm);
+    }
+
+    [HttpPost]
+    public IActionResult Customer(OrderCustomerVM vm)
+    {
+        var order = db.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefault(o =>
+                o.Id == vm.Id &&
+                o.AccountId == HttpContext.GetAccount()!.Id &&
+                o.Status == "Pending"
+            );
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid)
+        {
+            order.Name = vm.Name;
+            order.PhoneNumber = vm.ContactNumber;
+            db.Orders.Update(order);
+            db.SaveChanges();
+
+            return RedirectToAction("Slot", new { id = order.Id });
+        }
+
+        ViewBag.TotalPrice = order.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m;
+        ViewBag.TotalItems = order.OrderItems.Sum(i => (int?)i.Quantity) ?? 0;
+
+        if (order.ExpiresAt != null)
+        {
+            ViewBag.ExpiredTimestamp = ViewBag.ExpiredTimestamp = new DateTimeOffset(order.ExpiresAt.Value).ToUnixTimeMilliseconds();
+        }
 
         return View(vm);
     }
 
     public IActionResult Slot(OrderSlotVM vm)
     {
-        var order = db.Orders.Include(s => s.Slot).FirstOrDefault(o => o.Id == vm.Id);
+        var order = db.Orders
+            .Include(s => s.Slot)
+            .FirstOrDefault(o => o.Id == vm.Id &&
+            o.AccountId == HttpContext.GetAccount()!.Id &&
+            o.Status == "Pending"
+        );
         if (order == null)
         {
-            // return NotFound("Order not found");
+            return NotFound();
         }
 
         vm.AvailableDates = [
@@ -59,25 +123,22 @@ public class OrderController : Controller
             }
         }
 
-        if (order != null)
-        {
-            vm.EnabledSlots = db.Slots.Where(s => s.StoreId == order.StoreId && DateOnly.FromDateTime(s.StartTime) == vm.Date).Select(s => TimeOnly.FromDateTime(s.StartTime)).ToList();
-            
-            var slot = order.Slot;
-            if (slot != null && DateOnly.FromDateTime(slot.StartTime) == vm.Date)
-            {
-                vm.Slot = TimeOnly.FromDateTime(order.Slot.StartTime);
-            }
-        }
-        else
-        {
-            vm.EnabledSlots = vm.AvailableSlots;
-            vm.Slot = null;
-        }
+        vm.EnabledSlots = db.Slots
+            .Where(s => 
+                s.StoreId == order.StoreId && 
+                DateOnly.FromDateTime(s.StartTime) == vm.Date
+            )
+            .Select(s => TimeOnly.FromDateTime(s.StartTime))
+            .ToList();
 
         if (Request.IsAjax())
         {
             return PartialView("_Slot", vm);
+        }
+
+        if (order.ExpiresAt != null)
+        {
+            ViewBag.ExpiredTimestamp = ViewBag.ExpiredTimestamp = new DateTimeOffset(order.ExpiresAt.Value).ToUnixTimeMilliseconds();
         }
 
         // select pickup time slot

@@ -1,4 +1,5 @@
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using System.Text.RegularExpressions;
 
@@ -15,6 +16,8 @@ public class ImageService
 
     public string ValidateImage(IFormFile f, int maxSize)
     {
+        if (f == null || f.Length == 0) return "No image uploaded.";
+
         var reType = new Regex(@"^image\/(jpeg|png)$", RegexOptions.IgnoreCase);
         var reName = new Regex(@"^.+\.(jpeg|jpg|png)$", RegexOptions.IgnoreCase);
 
@@ -39,7 +42,7 @@ public class ImageService
         var path = Path.Combine(en.WebRootPath, "uploads", folder, file);
 
         using var stream = f.OpenReadStream();
-        using var img = Image.Load(stream);
+        using var img = Image.Load<Rgba32>(stream);
 
         // Special crop
         try
@@ -51,6 +54,7 @@ public class ImageService
             throw new Exception(ex.Message);
         }
 
+        img.Mutate(x => x.BackgroundColor(Color.White)); // Flatten transparency to white before saving
         img.Save(path);
 
         return file;
@@ -94,11 +98,7 @@ public class ImageService
             resizedHeight = (int)Math.Round(resizedWidth * currentRatio);
         }
 
-        image.Mutate(x => x.Resize(new ResizeOptions
-        {
-            Size = new Size(resizedWidth, resizedHeight),
-            Mode = ResizeMode.Stretch
-        }));
+        image.Mutate(x => x.Resize(resizedWidth, resizedHeight));
 
         // Convert percentage offsets to pixels relative to resized image
         double posX = positionXPercent / scale / 100.0 * resizedWidth;
@@ -111,9 +111,13 @@ public class ImageService
         int cropW = (int)Math.Round(outputWidth);
         int cropH = (int)Math.Round(outputHeight);
 
-        // Safety check
-        if (cropX < 0 || cropY < 0 || cropX + cropW > resizedWidth || cropY + cropH > resizedHeight)
-            throw new Exception("The position is out of the image");
+        // Clamp crop
+        cropX = Math.Clamp(cropX, 0, resizedWidth - cropW); // Math.Clamp(value, min, max)
+        cropY = Math.Clamp(cropY, 0, resizedHeight - cropH);
+
+        // Final check
+        cropW = Math.Min(cropW, resizedWidth);
+        cropH = Math.Min(cropH, resizedHeight);
 
         image.Mutate(x => x.Crop(new Rectangle(cropX, cropY, cropW, cropH)));
     }

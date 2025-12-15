@@ -383,12 +383,13 @@ public class AddStoreVM
 public class EditStoreVM
 {
     public int Id { get; set; }
+    public int VendorId { get; set; }
     public string? StripeAccountId { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
     [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
     [RegularExpression("^[a-z0-9-]+$", ErrorMessage = "{0} can only contain lowercase letters, numbers, and hyphens.")]
-    [Remote("IsSlugUnique", "Store", ErrorMessage = "{0} has been taken.")]
+    [Remote("IsSlugUnique", "Store", AdditionalFields = "Id", ErrorMessage = "{0} has been taken.")]
     public string Slug { get; set; }
     [StringLength(1000, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Description { get; set; }

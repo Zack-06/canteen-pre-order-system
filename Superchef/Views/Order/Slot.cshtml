@@ -11,7 +11,7 @@
     {
         TotalPrice = 100m,
         TotalItems = 10,
-        ExitLink = "/Order/Customer"
+        ExitLink = $"/Order/Customer/{Model.Id}"
     };
 }
 
@@ -23,6 +23,6 @@
     </div>
 </form>
 
-<form method="post" data-expired-timestamp="1764073738459" data-sticky-bottom>
+<form method="post" data-expired-timestamp="@ViewBag.ExpiredTimestamp" data-sticky-bottom>
     <partial name="_SummaryContainer" model="summary" />
 </form>
