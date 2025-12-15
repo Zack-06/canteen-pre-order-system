@@ -1,4 +1,5 @@
 using System.Globalization;
+using Microsoft.EntityFrameworkCore;
 using Stripe;
 
 namespace Superchef.Services;
@@ -14,11 +15,13 @@ public class PaymentService
 
     public void HandlePaymentIntentSucceeded(PaymentIntent paymentIntent)
     {
-        // 1. Retrieve OrderId from PaymentIntent metadata
+        // Retrieve OrderId from PaymentIntent metadata
         if (!paymentIntent.Metadata.TryGetValue("OrderId", out var orderIdStr)) return;
 
-        var order = db.Orders.FirstOrDefault(o => o.Id == orderIdStr);
-        if (order == null) return;
+        var order = db.Orders
+            .Include(o => o.Payment)
+            .FirstOrDefault(o => o.Id == orderIdStr);
+        if (order == null || order.Payment != null) return;
 
         var method = "";
         var cardBrand = "";
@@ -36,7 +39,7 @@ public class PaymentService
             fpxBank = paymentMethod.Fpx?.Bank;
         }
 
-        // 2. Get payment method and details
+        // Get payment method and details
         string methodStr = "";
         string? details = null;
         if (method == "fpx")
@@ -58,7 +61,7 @@ public class PaymentService
             methodStr = "Unknown";
         }
 
-        // 3. Create Payment record
+        // Create Payment record
         var payment = new Payment
         {
             OrderId = order.Id,
@@ -67,6 +70,12 @@ public class PaymentService
             PaymentMethod = methodStr,
             Details = details,
         };
+        db.Payments.Add(payment);
+
+        // Update order status
+        order.Status = "Confirmed";
+        order.ExpiresAt = null;
+        db.SaveChanges();
     }
 
     public void HandleChargeRefunded(Charge charge)
@@ -80,13 +89,17 @@ public class PaymentService
 
     public void HandlePayout(Order order)
     {
+        order = db.Orders
+            .Include(o => o.Payment)
+            .FirstOrDefault(o => o.Id == order.Id)!;
+
         if (order.Payment == null) return;
 
-        // 1. Send money to vendor via Stripe Transfer
+        // Send money to vendor via Stripe Transfer
         var store = db.Stores.FirstOrDefault(v => v.Id == order.StoreId);
         if (store != null && !string.IsNullOrEmpty(store.StripeAccountId))
         {
-            // 2. Calculate vendor payout (if you take a platform commission)
+            // Calculate vendor payout (if you take a platform commission)
             decimal vendorAmount = order.Payment.Amount;
             decimal commissionPercent = 0.1m; // e.g., 1% platform fee
             decimal commissionAmount = Math.Round(order.Payment.Amount * commissionPercent, 2);
@@ -103,7 +116,7 @@ public class PaymentService
 
             var transfer = transferService.Create(transferOptions);
 
-            // 3. Update transfer status
+            // Update transfer status
             order.Payment.IsPayoutFinished = true;
             db.SaveChanges();
         }
@@ -111,7 +124,7 @@ public class PaymentService
 
     public void TriggerRefund(string paymentIntentId)
     {
-        // 1. List charges for the PaymentIntent
+        // List charges for the PaymentIntent
         var chargeService = new ChargeService();
         var charges = chargeService.List(new()
         {
@@ -122,17 +135,23 @@ public class PaymentService
         var charge = charges.Data.FirstOrDefault();
         if (charge == null)
         {
-            throw new Exception("Charge not found");
+            db.AuditLogs.Add(new AuditLog
+            {
+                AccountId = 1,
+                Entity = "error",
+                Action = $"Refund failed! Charge not found for PaymentIntent {paymentIntentId}",
+            });
+            return;
         }
 
-        // 2. Refund the charge
+        // Refund the charge
         var refundService = new RefundService();
         refundService.Create(new()
         {
             Charge = charge.Id,
         });
 
-        // 3. Update payment status
+        // Update payment status
         var payment = db.Payments.FirstOrDefault(p => p.StripePaymentIntentId == paymentIntentId);
         if (payment == null) return;
 

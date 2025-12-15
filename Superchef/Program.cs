@@ -3,7 +3,7 @@ global using Superchef.Services;
 global using Superchef.Helpers;
 global using Superchef.Hubs;
 global using X.PagedList.Extensions;
-// using Superchef.BackgroundWorkers;
+using Superchef.BackgroundWorkers;
 using Superchef.Middlewares;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
@@ -75,6 +75,10 @@ builder.Services.AddScoped<SecurityService>();
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<PaymentService>();
 
+// Add background worker
+builder.Services.AddHostedService<GenerateSlotBackgroundWorker>();
+builder.Services.AddHostedService<ExpiryCleanupBackgroundWorker>();
+
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 var app = builder.Build();
@@ -91,7 +95,7 @@ app.UseMiddleware<AuthSessionMiddleware>();
 // Add hubs
 app.MapHub<VerificationHub>("/VerificationHub");
 app.MapHub<AccountHub>("/AccountHub");
-// app.MapHub<FnbOrderHub>("/FnbOrderHub");
+app.MapHub<OrderHub>("/OrderHub");
 
 app.MapDefaultControllerRoute();
 app.Run();

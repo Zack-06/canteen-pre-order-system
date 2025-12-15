@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
 using Stripe.Checkout;
@@ -13,12 +15,14 @@ public class OrderController : Controller
     private readonly DB db;
     private readonly PaymentService paySrv;
     private readonly IConfiguration cf;
+    private readonly IHubContext<OrderHub> orderHubContext;
 
-    public OrderController(DB db, PaymentService paySrv, IConfiguration cf)
+    public OrderController(DB db, PaymentService paySrv, IConfiguration cf, IHubContext<OrderHub> orderHubContext)
     {
         this.db = db;
         this.paySrv = paySrv;
         this.cf = cf;
+        this.orderHubContext = orderHubContext;
     }
 
     public IActionResult Customer(string id)
@@ -92,76 +96,183 @@ public class OrderController : Controller
     public IActionResult Slot(OrderSlotVM vm)
     {
         var order = db.Orders
-            .Include(s => s.Slot)
+            .Include(o => o.Slot)
+            .Include(o => o.OrderItems)
             .FirstOrDefault(o => o.Id == vm.Id &&
-            o.AccountId == HttpContext.GetAccount()!.Id &&
-            o.Status == "Pending"
-        );
+                o.AccountId == HttpContext.GetAccount()!.Id &&
+                o.Status == "Pending"
+            );
         if (order == null)
         {
             return NotFound();
         }
 
+        if (string.IsNullOrEmpty(order.PhoneNumber))
+        {
+            return RedirectToAction("Customer", new { id = order.Id });
+        }
+
+        var tmpNow = DateTime.Now;
+        var startOrderTime = tmpNow.AddMinutes(8 + 30);
         vm.AvailableDates = [
-            DateOnly.FromDateTime(DateTime.Now),
-            DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
-            DateOnly.FromDateTime(DateTime.Now.AddDays(2))
+            DateOnly.FromDateTime(tmpNow),
+            DateOnly.FromDateTime(tmpNow.AddDays(1)),
+            DateOnly.FromDateTime(tmpNow.AddDays(2))
         ];
 
         if (vm.Date == null || !vm.AvailableDates.Contains(vm.Date.Value))
         {
-            vm.Date = vm.AvailableDates.First();
+            vm.Date = DateOnly.FromDateTime(order.Slot.StartTime);
         }
 
-        vm.AvailableSlots = [];
         foreach (var avSlot in db.SlotTemplates.Where(s => s.DayOfWeek == (int)vm.Date.Value.DayOfWeek))
         {
             var slot = new DateTime(vm.Date.Value.Year, vm.Date.Value.Month, vm.Date.Value.Day, avSlot.StartTime.Hour, avSlot.StartTime.Minute, 0);
-            if (slot > DateTime.Now)
+            if (slot > tmpNow.AddMinutes(8 + 30))
             {
-                vm.AvailableSlots.Add(TimeOnly.FromDateTime(slot));
+                vm.AvailableSlots.Add(avSlot.StartTime);
             }
         }
 
         vm.EnabledSlots = db.Slots
-            .Where(s => 
-                s.StoreId == order.StoreId && 
-                DateOnly.FromDateTime(s.StartTime) == vm.Date
-            )
-            .Select(s => TimeOnly.FromDateTime(s.StartTime))
-            .ToList();
+             .Where(s =>
+                 s.StoreId == order.StoreId &&
+                 DateOnly.FromDateTime(s.StartTime) == vm.Date &&
+                 s.MaxOrders > s.Orders.Count
+             )
+             .Select(s => TimeOnly.FromDateTime(s.StartTime))
+             .ToList();
+
+        vm.Slot = null;
+        if (vm.Date == DateOnly.FromDateTime(order.Slot.StartTime))
+        {
+            vm.Slot = TimeOnly.FromDateTime(order.Slot.StartTime);
+        }
 
         if (Request.IsAjax())
         {
             return PartialView("_Slot", vm);
         }
 
+        ViewBag.TotalPrice = order.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m;
+        ViewBag.TotalItems = order.OrderItems.Sum(i => (int?)i.Quantity) ?? 0;
+
         if (order.ExpiresAt != null)
         {
             ViewBag.ExpiredTimestamp = ViewBag.ExpiredTimestamp = new DateTimeOffset(order.ExpiresAt.Value).ToUnixTimeMilliseconds();
         }
 
-        // select pickup time slot
         return View(vm);
     }
 
-    public IActionResult Confirmation()
+    [HttpPost]
+    public async Task<IActionResult> SelectSlot(OrderSlotVM vm)
     {
-        // show order confirmation, click "pay"
-        // after that only set to "confirmed"
+        var order = db.Orders
+            .Include(o => o.OrderItems)
+            .FirstOrDefault(o => o.Id == vm.Id &&
+                o.AccountId == HttpContext.GetAccount()!.Id &&
+                o.Status == "Pending"
+            );
+        if (order == null)
+        {
+            return NotFound("Order not found");
+        }
 
-        // pending, confirmed, preparing, completed, cancelled
-        return View();
+        var tmpNow = DateTime.Now;
+        vm.AvailableDates = [
+            DateOnly.FromDateTime(tmpNow),
+            DateOnly.FromDateTime(tmpNow.AddDays(1)),
+            DateOnly.FromDateTime(tmpNow.AddDays(2))
+        ];
+
+        if (vm.Date == null || !vm.AvailableDates.Contains(vm.Date.Value))
+        {
+            return BadRequest("Date invalid");
+        }
+
+        if (vm.Slot == null)
+        {
+            return BadRequest("Slot invalid");
+        }
+
+        var startOrderTime = tmpNow.AddMinutes(8 + 30);
+        var endOrderDate = tmpNow.AddDays(2);
+
+        // Get latest slot start time for that day
+        var templates = db.SlotTemplates
+            .Where(s => s.DayOfWeek == (int)endOrderDate.DayOfWeek)
+            .Select(s => s.StartTime)
+            .ToList();
+
+        var endOrderTimeSpan = templates.Count != 0 ? templates.Max() : TimeOnly.MinValue;
+
+        var endOrderDateTime = new DateTime(
+            endOrderDate.Year, endOrderDate.Month, endOrderDate.Day,
+            endOrderTimeSpan.Hour, endOrderTimeSpan.Minute, 0
+        );
+
+        var availableSlots = db.Slots
+            .Where(s =>
+                s.StoreId == order.StoreId &&
+                s.MaxOrders > s.Orders.Count &&
+                s.StartTime >= startOrderTime &&
+                s.StartTime <= endOrderDateTime
+            )
+            .ToList();
+
+        foreach (var slot in availableSlots)
+        {
+            if (DateOnly.FromDateTime(slot.StartTime) == vm.Date && TimeOnly.FromDateTime(slot.StartTime) == vm.Slot)
+            {
+                var previousSlotId = order.SlotId;
+                order.SlotId = slot.Id;
+                db.SaveChanges();
+
+                var currentSlot = db.Slots.Include(s => s.Orders).FirstOrDefault(s => s.Id == slot.Id)!;
+                var previousSlot = db.Slots.Include(s => s.Orders).FirstOrDefault(s => s.Id == previousSlotId)!;
+
+                await orderHubContext.Clients.All.SendAsync(
+                    "SlotActive", 
+                    DateOnly.FromDateTime(currentSlot.StartTime),
+                    TimeOnly.FromDateTime(currentSlot.StartTime).ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture),
+                    currentSlot.MaxOrders > currentSlot.Orders.Count
+                );
+                await orderHubContext.Clients.All.SendAsync(
+                    "SlotActive", 
+                    DateOnly.FromDateTime(previousSlot.StartTime),
+                    TimeOnly.FromDateTime(previousSlot.StartTime).ToString("h:mm tt", System.Globalization.CultureInfo.InvariantCulture),
+                    previousSlot.MaxOrders > previousSlot.Orders.Count
+                );
+
+                return Ok();
+            }
+        }
+
+        return BadRequest("Slot not available");
     }
 
-    [HttpPost]
-    public IActionResult Confirmation(string orderId)
+    public IActionResult Confirmation(string id)
     {
+        var order = db.Orders
+            .Include(o => o.Slot)
+            .FirstOrDefault(o => o.Id == id);
+        if (order == null)
+        {
+            return NotFound();
+        }
+
+        if (order.PhoneNumber == null)
+        {
+            return RedirectToAction("Customer", new { id = order.Id });
+        }
+
+        if (Request.Method == "GET")
+        {
+            return View();
+        }
+
         var baseUrl = Request.GetBaseUrl();
-
-        var order = db.Orders.FirstOrDefault(o => o.Id == orderId);
-        if (order == null) return BadRequest("Order not found");
-
         var options = new SessionCreateOptions
         {
             SuccessUrl = baseUrl + "/Order/Success",

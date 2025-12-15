@@ -1821,7 +1821,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 
 /* Slot Card */
-.slot-card.disabled {
+.slot-card.disabled:not(:has(input:checked)) {
 	opacity: 0.5;
 	pointer-events: none;
 	background-color: var(--bg-card) !important;
@@ -2109,6 +2109,9 @@ a[href].order-item-card:hover {
 #summary-container div:has(#submit-button) {
 	display: flex;
 	gap: 1.25rem;
+}
+#summary-container div #submit-button {
+    width: 9.5rem;
 }
 @media (max-width: 400px) {
 	#summary-container {

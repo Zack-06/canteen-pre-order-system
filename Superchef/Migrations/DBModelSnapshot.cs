@@ -143,18 +143,17 @@ namespace Superchef.Migrations
 
                     b.Property<string>("Action")
                         .IsRequired()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Entity")
-                        .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<int>("EntityId")
+                    b.Property<int?>("EntityId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
@@ -359,7 +358,7 @@ namespace Superchef.Migrations
                         .HasMaxLength(12)
                         .HasColumnType("nvarchar(12)");
 
-                    b.Property<int?>("SlotId")
+                    b.Property<int>("SlotId")
                         .HasColumnType("int");
 
                     b.Property<string>("Status")
@@ -836,7 +835,9 @@ namespace Superchef.Migrations
 
                     b.HasOne("Superchef.Models.Slot", "Slot")
                         .WithMany("Orders")
-                        .HasForeignKey("SlotId");
+                        .HasForeignKey("SlotId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Superchef.Models.Store", "Store")
                         .WithMany("Orders")

@@ -2,6 +2,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Models;
@@ -225,6 +226,20 @@ public class Item
             return "Active";
         }
     }
+    public static Expression<Func<Item, bool>> ShowToCustomer
+    {
+        get
+        {
+            return i =>
+                i.IsActive &&
+                !i.IsDeleted &&
+                !i.Store.IsDeleted &&
+                i.Variants.Any(v =>
+                    v.IsActive &&
+                    !v.IsDeleted
+                );
+        }
+    }
 
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public Category Category { get; set; }
@@ -270,6 +285,19 @@ public class Variant
 
             return "Active";
         }
+    }
+    public static Expression<Func<Variant, bool>> ShowToCustomer
+    {
+        get
+        {
+            return v =>
+                v.IsActive &&
+                !v.IsDeleted &&
+                v.Item.IsActive &&
+                !v.Item.IsDeleted &&
+                !v.Item.Store.IsDeleted;
+        }
+
     }
 
     public Item Item { get; set; }
@@ -346,11 +374,11 @@ public class Order
     public string Status { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public DateTime? ExpiresAt { get; set; }
-    public int? SlotId { get; set; }
+    public int SlotId { get; set; }
     public int AccountId { get; set; }
     public int StoreId { get; set; }
 
-    public Slot? Slot { get; set; }
+    public Slot Slot { get; set; }
     [DeleteBehavior(DeleteBehavior.Restrict)]
     public Account Account { get; set; }
     [DeleteBehavior(DeleteBehavior.Restrict)]
@@ -398,40 +426,27 @@ public class AuditLog
 {
     public int Id { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
-    [MaxLength(20)]
+    [MaxLength(100)]
     public string Action { get; set; }
     [MaxLength(20)]
-    public string Entity { get; set; }
-    public int EntityId { get; set; }
+    public string? Entity { get; set; }
+    public int? EntityId { get; set; }
     public int AccountId { get; set; }
     [NotMapped]
     public string Details
     {
         get
         {
-            // customer / vendor
             if (Action == "ban") return $"Banned {Entity} with ID {EntityId}";
-
-            // customer / vendor
             if (Action == "unban") return $"Unbanned {Entity} with ID {EntityId}";
-
-            // customer / vendor
             if (Action == "revoke") return $"Restored {Entity} with ID {EntityId}";
-
-            // customer / vendor / admin
             if (Action == "timeout") return $"Removed timeout for {Entity} with ID {EntityId}";
-
-            // customer / vendor / admin
             if (Action == "logout") return $"Logged out {Entity} with ID {EntityId} from all devices";
-
-            // vendor / admin / category / venue
             if (Action == "create") return $"Created {Entity} with ID {EntityId}";
-
-            // vendor / admin / category / venue
             if (Action == "delete") return $"Deleted {Entity} with ID {EntityId}";
-
-            // category / venue
             if (Action == "update") return $"Updated {Entity} with ID {EntityId}";
+            if (Action == "generate-slot") return $"Auto generated new slots";
+            if (Entity == "error") return Action;
 
             return "Unknown action";
         }
@@ -445,11 +460,14 @@ public class AuditLog
             if (Action == "unban") return "🔓";
             if (Action == "revoke") return "♻️";
             if (Action == "timeout") return "⏳";
-            if (Action == "logout") return "🚪";
-            if (Action == "create") return "➕";
-            if (Action == "delete") return "🗑️";
+            if (Action == "logout") return "👋🏻";
+            if (Action == "create") return "✅";
+            if (Action == "delete") return "❌";
             if (Action == "update") return "✏️";
-            return "💀";
+            if (Action == "generate-slot") return "🔄";
+            if (Entity == "error") return "⚠️";
+            
+            return "🤔";
         }
     }
 

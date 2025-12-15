@@ -32,7 +32,7 @@
             var card = new CategoryCardDM
             {
                 Link = $"/Search?Categories={category.Id}",
-                Image = category.Image,
+                Image = $"/uploads/category/{category.Image}",
                 Name = category.Name,
             };
             <partial name="_CategoryCard" model="@card" />
@@ -40,7 +40,7 @@
     </div>
 </div>
 
-@if (ViewBag.Authenticated == true)
+@if (ViewBag.Authenticated == true && Model.OrderAgainItems.Count > 0)
 {
     <div class="container">
         <div class="title">Order Again</div>

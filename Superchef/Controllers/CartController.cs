@@ -181,6 +181,35 @@ public class CartController : Controller
             return BadRequest("Checkout failed! Please check your cart");
         }
 
+        var startOrderTime = DateTime.Now;
+        var endOrderDate = startOrderTime.AddDays(2);
+
+        // Get latest slot start time for that day
+        var templates = db.SlotTemplates
+            .Where(s => s.DayOfWeek == (int)endOrderDate.DayOfWeek)
+            .Select(s => s.StartTime)
+            .ToList();
+
+        var endOrderTimeSpan = templates.Count != 0 ? templates.Max() : TimeOnly.MinValue;
+
+        var endOrderDateTime = new DateTime(
+            endOrderDate.Year, endOrderDate.Month, endOrderDate.Day,
+            endOrderTimeSpan.Hour, endOrderTimeSpan.Minute, 0
+        );
+
+        var availableSlots = db.Slots
+            .Where(s =>
+                s.StoreId == store.Id &&
+                s.MaxOrders > s.Orders.Count &&
+                s.StartTime >= startOrderTime.AddMinutes(8 + 30) &&
+                s.StartTime <= endOrderDateTime
+            )
+            .ToList();
+        if (availableSlots.Count == 0)
+        {
+            return BadRequest("No available slots for this store at the moment");
+        }
+
         var acc = HttpContext.GetAccount();
 
         // Create Order
@@ -191,7 +220,8 @@ public class CartController : Controller
             Status = "Pending",
             ExpiresAt = DateTime.Now.AddMinutes(7),
             AccountId = acc.Id,
-            StoreId = store.Id
+            StoreId = store.Id,
+            SlotId = availableSlots.First().Id
         };
 
         // Add Order Items

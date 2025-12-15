@@ -29,31 +29,30 @@ public class HomeController : Controller
         var vm = new HomePageVM();
 
         // Trending Items: Top 10 items based on quantity sold in the last 7 days
-        var trendingItems = db.OrderItems
-            .Where(ExpressionService.AllowCalculateOrderItemQuantityExpr)
-            .Where(oi =>
-                oi.Order.Status == "Completed" &&
-                oi.Order.CreatedAt >= DateTime.Now.AddDays(-7)
-            )
-            .GroupBy(oi => oi.Variant.Item)
-            .Select(g => new
-            {
-                Item = g.Key,
-                TotalQuantity = g.Sum(oi => oi.Quantity)
-            })
-            .OrderByDescending(x => x.TotalQuantity)
-            .Take(10)
-            .Select(x => x.Item.Id)
-            .ToList();
         vm.TrendingItems = db.Items
             .Include(i => i.Variants)
                 .ThenInclude(v => v.OrderItems)
             .Include(i => i.Reviews)
-            .Where(i => trendingItems.Contains(i.Id))
+            .Where(ExpressionService.ShowItemToCustomerExpr)
+            .Select(i => new
+            {
+                Item = i,
+                TotalQuantity = i.Variants
+                    .SelectMany(v => v.OrderItems)
+                    .Where(oi =>
+                        oi.Order.Status == "Completed" &&
+                        oi.Order.CreatedAt >= DateTime.Now.AddDays(-7)
+                    )
+                    .Sum(oi => (int?)oi.Quantity)
+                    ?? 0
+            })
+            .OrderByDescending(x => x.TotalQuantity)
+            .Take(10)
+            .Select(x => x.Item)
             .ToList();
 
         // Categories: Get all categories
-        vm.Categories = db.Categories.Where(c => c.Id != 1).ToList();
+        vm.Categories = db.Categories.Where(c => c.Name != "Others").ToList();
 
         // Order Again Items: Last 10 items ordered by the user
         if (User.Identity?.IsAuthenticated == true)

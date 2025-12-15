@@ -9,8 +9,8 @@
 
     var summary = new SummaryContainerDM
     {
-        TotalPrice = 100m,
-        TotalItems = 10,
+        TotalPrice = ViewBag.TotalPrice,
+        TotalItems = ViewBag.TotalItems,
         ExitLink = $"/Order/Customer/{Model.Id}"
     };
 }
@@ -23,6 +23,43 @@
     </div>
 </form>
 
-<form method="post" data-expired-timestamp="@ViewBag.ExpiredTimestamp" data-sticky-bottom>
+<form method="get" action="@Url.Action("Confirmation", new { id = Model.Id })"
+    data-expired-timestamp="@ViewBag.ExpiredTimestamp" data-sticky-bottom>
     <partial name="_SummaryContainer" model="summary" />
 </form>
+
+@section foot {
+    <script>
+        $(document).on("click", "input[name='Slot']:not(:checked)", function (e) {
+            e.preventDefault()
+
+            const $input = $(this)
+
+            $.ajax({
+                url: '@Url.Action("SelectSlot", new { id = Model.Id })',
+                type: 'POST',
+                data: { Date: $("input[name='Date']:checked").val(), Slot: $input.val() },
+                success: function (data) {
+                    $input.prop("checked", true)
+                },
+                error: defaultOnFailure
+            })
+        })
+
+        const orderConnection = new signalR.HubConnectionBuilder().withUrl("/OrderHub").build()
+        orderConnection.on("SlotActive", (date, time, isActive) => {
+            if (date == $("input[name='Date']:checked").val()) {
+                const input = $(`input[name='Slot'][value='${time}']`)
+                if (input.length == 0) return
+
+                const label = input.closest("label")
+                if (isActive) {
+                    label.removeClass("disabled")
+                } else {
+                    label.addClass("disabled")
+                }
+            }
+        })
+        orderConnection.start()
+    </script>
+}
