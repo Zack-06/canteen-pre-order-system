@@ -520,13 +520,13 @@ public class EditItemVM
 
 public class ManageVariantVM
 {
-    public int ItemId { get; set; }
+    public int Id { get; set; }
     public string? Dir { get; set; }
     public string? Sort { get; set; }
     public int Page { get; set; } = 1;
     public string? Search { get; set; }
     public string? SearchOption { get; set; }
-    public List<string> Statuses { get; set; } = [];
+    public string? Status { get; set; }
     [DisplayName("Min Price")]
     public decimal? MinPrice { get; set; }
     [DisplayName("Max Price")]
@@ -539,8 +539,9 @@ public class ManageVariantVM
 
 public class AddVariantVM
 {
-    public int ItemId { get; set; }
+    public int Id { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [Remote("IsNameUniqueWhenCreate", "Variant", AdditionalFields = "Id", ErrorMessage = "{0} has been taken in this item.")]
     public string Name { get; set; }
     [Range(2.00, 200.00, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "{0} must be a number with no more than 2 decimal places.")]
@@ -558,8 +559,10 @@ public class AddVariantVM
 public class EditVariantVM
 {
     public int Id { get; set; }
+    public int ItemId { get; set; }
     public DateTime CreatedAt { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
+    [Remote("IsNameUniqueWhenEdit", "Variant", AdditionalFields = "Id,ItemId", ErrorMessage = "{0} has been taken in this item.")]
     public string Name { get; set; }
     [Range(2.00, 200.00, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     [RegularExpression(@"\d+(\.\d{1,2})?", ErrorMessage = "{0} must be a number with no more than 2 decimal places.")]

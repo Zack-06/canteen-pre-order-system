@@ -237,7 +237,7 @@ public class ItemController : Controller
             { "Name", a => a.Name },
             { "Slug", a => a.Slug },
             { "Status", a => a.IsActive ? "Active" : "Inactive" },
-            { "Variants Count", a => a.Variants.Count },
+            { "Variants Count", a => a.Variants.Count(v => !v.IsDeleted) },
             { "Category", a => a.Category.Name },
             { "Creation Date", a => a.CreatedAt }
         };
@@ -267,7 +267,11 @@ public class ItemController : Controller
             vm.Status = vm.AvailableStatuses.First();
         }
 
-        var results = db.Items.Where(i => i.StoreId == store.Id && !i.IsDeleted).AsQueryable();
+        var results = db.Items
+            .Include(i => i.Category)
+            .Include(i => i.Variants.Where(v => !v.IsDeleted))
+            .Where(i => i.StoreId == store.Id && !i.IsDeleted)
+            .AsQueryable();
 
         // Search
         if (!string.IsNullOrWhiteSpace(vm.Search))
@@ -308,12 +312,12 @@ public class ItemController : Controller
 
         if (vm.MinVariantsCount != null)
         {
-            results = results.Where(i => i.Variants.Count() >= vm.MinVariantsCount);
+            results = results.Where(i => i.Variants.Count(v => !v.IsDeleted) >= vm.MinVariantsCount);
         }
 
         if (vm.MaxVariantsCount != null)
         {
-            results = results.Where(i => i.Variants.Count() <= vm.MaxVariantsCount);
+            results = results.Where(i => i.Variants.Count(v => !v.IsDeleted) <= vm.MaxVariantsCount);
         }
 
         // Sort
@@ -468,7 +472,6 @@ public class ItemController : Controller
             Description = item.Description,
             Category = item.CategoryId,
             Keywords = item.Keywords.Select(k => k.Word).ToList(),
-            Image = null,
             Active = item.IsActive,
 
             AvailableCategories = db.Categories.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
@@ -484,7 +487,7 @@ public class ItemController : Controller
     public IActionResult Edit(EditItemVM vm)
     {
         var item = db.Items
-            .Include(i => i.Variants)
+            .Include(i => i.Variants.Where(v => !v.IsDeleted))
             .Include(i => i.Store)
             .Include(i => i.Keywords)
             .FirstOrDefault(i =>
@@ -529,7 +532,7 @@ public class ItemController : Controller
             {
                 ModelState.SetModelValue("Active", new ValueProviderResult("false"));
                 ModelState.AddModelError("Active", "Item activation failed. The store has not published initial slots yet.");
-            } else if (item.Variants.Count == 0)
+            } else if (!item.Variants.Any(v => !v.IsDeleted))
             {
                 ModelState.SetModelValue("Active", new ValueProviderResult("false"));
                 ModelState.AddModelError("Active", "Item activation failed. The item has no variants.");
