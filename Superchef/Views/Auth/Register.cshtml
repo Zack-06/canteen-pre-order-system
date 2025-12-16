@@ -1,9 +1,16 @@
 @model RegisterVM
+@inject IConfiguration cf
+
+@{
+    var siteKey = cf["RecaptchaSettings:SiteKey"];
+}
 
 <div class="container container-center" data-limit-container>
     <div class="title">Welcome to Superchef</div>
 
-    <form method="post">
+    <form method="post" onsubmit="onSubmit(event)">
+        <input type="hidden" id="recaptcha-token-input" asp-for="RepatchaToken" />
+
         <div class="form-group">
             <label asp-for="Name"></label>
             <div class="form-input">
@@ -39,6 +46,11 @@
         </div>
 
         <div class="form-group">
+            <div id="captcha-element"></div>
+            <span asp-validation-for="RepatchaToken"></span>
+        </div>
+
+        <div class="form-group">
             <button type="submit" data-button>Register</button>
         </div>
 
@@ -48,3 +60,19 @@
         </div>
     </form>
 </div>
+
+@section foot {
+    <script>
+        var onloadCallback = function () {
+            grecaptcha.render("captcha-element", {
+                "sitekey": "@siteKey"
+            })
+        }
+
+        function onSubmit(event) {
+            var token = grecaptcha.getResponse()
+            $("#recaptcha-token-input").val(token)
+        }
+    </script>
+    <script src="https://www.google.com/recaptcha/api.js?onload=onloadCallback&render=explicit" async defer></script>
+}

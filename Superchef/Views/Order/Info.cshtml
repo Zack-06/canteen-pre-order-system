@@ -105,7 +105,7 @@
                 Variant = item.Variant.Name,
                 Quantity = item.Quantity,
                 Subtotal = item.Price * item.Quantity,
-                Link = item.Variant.Item.IsActive ? $"/Item/Info/{item.Variant.Item.Slug}" : null
+                Link = ExpressionService.ShowToCustomer(item.Variant.Item) ? $"/Item/Info/{item.Variant.Item.Slug}" : null
             };
             <partial name="_OrderItemCard" model="@card" />
         }

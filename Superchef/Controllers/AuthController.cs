@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace Superchef.Controllers;
 
@@ -163,6 +164,15 @@ public class AuthController : Controller
 
         if (ModelState.IsValid)
         {
+            bool success = await verSrv.VerifyRecaptcha(vm.RepatchaToken);
+            if (!success)
+            {
+                ModelState.AddModelError("RepatchaToken", "Recaptcha verification failed. Please try again.");
+            }
+        }
+
+        if (ModelState.IsValid)
+        {
             // Add New Account
             Account account = new()
             {
@@ -195,6 +205,7 @@ public class AuthController : Controller
 
             return Redirect(ReturnUrl);
         }
+
         return View(vm);
     }
 

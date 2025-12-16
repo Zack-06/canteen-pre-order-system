@@ -20,7 +20,9 @@
 
     @if (Model.Status == "Pending" || Model.Status == "Confirmed")
     {
-        <a href="/Order/Cancel/@Model.Id" data-button="danger" class="middle-button">Cancel</a>
+        <a class="middle-button" data-button="danger" data-ajax="true" data-ajax-url="/Order/Cancel/@Model.Id"
+            data-ajax-method="post" data-ajax-confirm="Are you sure you want to cancel this order?"
+            data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage">Cancel</a>
     }
 
     @if (Model.Status == "Pending")
@@ -29,6 +31,7 @@
     }
     else
     {
-        <a href="/Order/Reorder/@Model.Id" data-button="accent" class="end-button">Reorder</a>
+        <a data-ajax="true" data-ajax-method="POST" data-ajax-success="reorderSuccess" data-ajax-failure="defaultOnFailure"
+            href="/Order/Reorder/@Model.Id" data-button="accent" class="end-button">Reorder</a>
     }
 </div>

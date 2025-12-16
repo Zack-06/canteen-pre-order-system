@@ -1,3 +1,5 @@
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Services;
@@ -5,11 +7,13 @@ namespace Superchef.Services;
 public class VerificationService
 {
     private readonly DB db;
+    private readonly IConfiguration cf;
     private readonly EmailService es;
 
-    public VerificationService(DB db, EmailService es)
+    public VerificationService(DB db, IConfiguration cf, EmailService es)
     {
         this.db = db;
+        this.cf = cf;
         this.es = es;
     }
 
@@ -59,5 +63,36 @@ public class VerificationService
     public Verification? GetVerificationRequest(string? token, string action)
     {
         return db.Verifications.Include(v => v.Account).FirstOrDefault(u => u.Token == token && u.Action == action && u.ExpiresAt > DateTime.Now);
+    }
+
+    async public Task<bool> VerifyRecaptcha(string recaptchaToken)
+    {
+        var secretKey = cf["RecaptchaSettings:SecretKey"]!;
+        var verificationUrl = cf["RecaptchaSettings:VerificationUrl"]!;
+
+        try
+        {
+            using var client = new HttpClient();
+
+            var content = new FormUrlEncodedContent(
+            [
+                new KeyValuePair<string, string>("secret", secretKey),
+                new KeyValuePair<string, string>("response", recaptchaToken)
+            ]);
+
+            var response = await client.PostAsync(verificationUrl, content);
+
+            var json = await response.Content.ReadAsStringAsync();
+            var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            bool success = root.GetProperty("success").GetBoolean();
+
+            return success;
+        }
+        catch
+        {
+            return false;
+        }
     }
 }

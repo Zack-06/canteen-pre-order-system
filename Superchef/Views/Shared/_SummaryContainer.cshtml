@@ -13,9 +13,10 @@
             {
                 <a data-expired-disable data-button="danger" data-ajax="true" data-ajax-url="@Model.ExitLink"
                     data-ajax-method="post" data-ajax-confirm="Are you sure you want to cancel this order?"
-                    data-ajax-success="window.location.href='/Account/History'">Cancel</a>
+                    data-ajax-failure="defaultOnFailure" data-ajax-success="window.location.href='/Account/History'">Cancel</a>
             }
-            else {
+            else
+            {
                 <a data-expired-disable data-button="info" href="@Model.ExitLink">@(Model.ExitText ?? "Back")</a>
             }
         }

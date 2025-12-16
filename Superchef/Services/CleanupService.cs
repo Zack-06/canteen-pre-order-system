@@ -33,7 +33,7 @@ public class CleanupService
         foreach (var order in
             db.Orders
                 .Where(b =>
-                    (b.Status == "Confirmed" || b.Status == "Ready") &&
+                    (b.Status == "Confirmed" || b.Status == "To Pickup") &&
                     b.Slot.EndTime < DateTime.Now
                 )
                 .ToList()

@@ -857,6 +857,17 @@
             $(".image-container>img").attr("src", $(this).attr("src"))
         })
 
+        function updateVariantStockCount(variantId) {
+            $.ajax({
+                url: '/Item/VariantStockCount',
+                type: 'GET',
+                data: { id: variantId },
+                success: function (data) {
+                    $("#stock-count").text(data.stock)
+                }
+            })
+        }
+
         $(document).on("change", "input[name='Variant']", function () {
             // Update image
             const variantImage = $(`#gallery-container img[data-variant-id='${$(this).val()}']`)
@@ -866,16 +877,14 @@
                 $(".image-container>img").attr("src", variantImage.attr("src"))
             }
 
-            // Update stock count
-            $.ajax({
-                url: '/Item/VariantStockCount',
-                type: 'GET',
-                data: { id: $(this).val() },
-                success: function (data) {
-                    $("#stock-count").text(data.stock)
-                }
-            })
+            updateVariantStockCount($(this).val())
         })
+
+        const orderConnection = new signalR.HubConnectionBuilder().withUrl("/OrderHub").build()
+        orderConnection.on("UpdateStock", function(variantId) {
+            updateVariantStockCount(variantId)
+        })
+        orderConnection.start()
 
         mediumZoom('.image-container>img', {
             scrollOffset: 0,

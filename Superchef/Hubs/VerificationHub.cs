@@ -56,4 +56,18 @@ public class VerificationHub : Hub
 
         await Clients.Caller.SendAsync("Initialized", verification.DeviceId);
     }
+
+    /*
+    // Send error message
+    await Clients.Caller.SendAsync("Error", "Verification not found");
+
+    // Send disconnect message for clients to disconnect
+    await Clients.Caller.SendAsync("Disconnect");
+
+    // Send initialized message for clients
+    await Clients.Caller.SendAsync("Initialized", deviceId);
+
+    // Broadcast verified deviceId
+    await Clients.All.SendAsync("Verified", deviceId);
+    */
 }

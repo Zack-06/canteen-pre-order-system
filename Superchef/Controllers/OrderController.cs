@@ -7,15 +7,17 @@ using Stripe.Checkout;
 
 namespace Superchef.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Customer")]
 public class OrderController : Controller
 {
     private readonly DB db;
+    private readonly SystemOrderService sysOrderSrv;
     private readonly IHubContext<OrderHub> orderHubContext;
 
-    public OrderController(DB db, IHubContext<OrderHub> orderHubContext)
+    public OrderController(DB db, SystemOrderService sysOrderSrv, IHubContext<OrderHub> orderHubContext)
     {
         this.db = db;
+        this.sysOrderSrv = sysOrderSrv;
         this.orderHubContext = orderHubContext;
     }
 
@@ -351,7 +353,7 @@ public class OrderController : Controller
             .Include(o => o.OrderItems)
                 .ThenInclude(oi => oi.Variant)
                     .ThenInclude(v => v.Item)
-            .FirstOrDefault(o => 
+            .FirstOrDefault(o =>
                 o.Id == id &&
                 o.AccountId == HttpContext.GetAccount()!.Id &&
                 o.Status != "Pending"
@@ -365,6 +367,7 @@ public class OrderController : Controller
         return View(order);
     }
 
+    [Authorize(Roles = "Vendor")]
     public IActionResult Manage(ManageOrderVM vm)
     {
         Dictionary<string, Expression<Func<Order, object>>> sortOptions = new()
@@ -402,9 +405,94 @@ public class OrderController : Controller
         return View(vm);
     }
 
+    [Authorize(Roles = "Vendor")]
     public IActionResult Edit(int id)
     {
         // edit order details (vendor)
         return View();
+    }
+
+    [HttpPost]
+    public IActionResult Reorder(string id)
+    {
+        var order = db.Orders
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Variant)
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.AccountId == HttpContext.GetAccount()!.Id &&
+                o.Status != "Pending"
+            );
+
+        if (order == null)
+        {
+            return NotFound("Order not found");
+        }
+
+        var acc = db.Accounts
+            .Include(a => a.Carts)
+            .FirstOrDefault(a => a.Id == order.AccountId);
+
+        var variantIds = order.OrderItems.Select(oi => oi.VariantId).ToList();
+        db.Carts.RemoveRange(db.Carts.Where(c =>
+            c.AccountId == order.AccountId &&
+            variantIds.Contains(c.VariantId)
+        ));
+
+        List<Cart> newItems = [];
+        foreach (var item in order.OrderItems)
+        {
+            if (!item.Variant.IsActive) continue;
+
+            newItems.Add(new Cart
+            {
+                AccountId = order.AccountId,
+                VariantId = item.VariantId,
+                Quantity = item.Quantity
+            });
+        }
+
+        db.Carts.AddRange(newItems);
+        db.SaveChanges();
+
+        if (newItems.Count == 0)
+        {
+            return BadRequest("Reorder failed due to all items in the order are no longer available.");
+        }
+
+        if (newItems.Count < order.OrderItems.Count)
+        {
+            TempData["Message"] = "Some items in the order are no longer available.";
+        }
+
+        return Ok(order.StoreId);
+    }
+
+    [Authorize(Roles = "Customer,Vendor")]
+    public async Task<IActionResult> Cancel(string id)
+    {
+        Order? order;
+        if (HttpContext.GetAccount()!.AccountType.Name == "Customer")
+        {
+            order = db.Orders
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.AccountId == HttpContext.GetAccount()!.Id &&
+                (o.Status == "Pending" || o.Status == "Confirmed")
+            );
+        } else
+        {
+            order = db.Orders
+                .FirstOrDefault(o =>
+                    o.Id == id &&
+                    o.Store.AccountId == HttpContext.GetAccount()!.Id &&
+                    o.Status == "Confirmed"
+                );
+        }
+
+        if (order == null) return NotFound("Order not found");
+
+        await sysOrderSrv.CancelOrder(order);
+        return Ok();
     }
 }

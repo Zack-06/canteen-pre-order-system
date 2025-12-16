@@ -1,3 +1,5 @@
+@model HistoryVM
+
 @section head {
     <style>
         .order-history-card {
@@ -142,72 +144,35 @@
 
 }
 
-<div class="container" data-limit-container>
+<form method="get" action="@Url.Action("History")" data-ajax="true" data-ajax-update="#ajax-result-container"
+    class="container" data-limit-container>
     <div class="title">Order History</div>
 
     <div class="container custom-tick-container center-items center-text" data-specified-width="big"
         data-no="padding color">
-        <label>
-            <input type="radio" name="status" checked>
-            <div>
-                <div class="text">All</div>
-            </div>
-        </label>
-        <label>
-            <input type="radio" name="status">
-            <div>
-                <div class="text">Pending</div>
-            </div>
-        </label>
-        <label>
-            <input type="radio" name="status">
-            <div>
-                <div class="text">Confirmed</div>
-            </div>
-        </label>
-        <label>
-            <input type="radio" name="status">
-            <div>
-                <div class="text">Preparing</div>
-            </div>
-        </label>
-        <label>
-            <input type="radio" name="status">
-            <div>
-                <div class="text">To Pickup</div>
-            </div>
-        </label>
-        <label>
-            <input type="radio" name="status">
-            <div>
-                <div class="text">Completed</div>
-            </div>
-        </label>
-        <label>
-            <input type="radio" name="status">
-            <div>
-                <div class="text">Cancelled</div>
-            </div>
-        </label>
-    </div>
-
-    <div class="container" data-no="padding color" data-flex="gap column center" data-result-container>
-        @for (int i = 0; i < 5; i++)
+        @foreach (var status in Model.Options)
         {
-            var card = new OrderHistoryCardDM
-            {
-                Id = "ajkfjwaelkfjlkwajflkwajflkjwalkfejwalkjfelkwajfelk",
-                Store = "Burger King",
-                CreatedAt = DateTime.Now,
-                PickupAt = DateTime.Now,
-                TotalItems = 100,
-                TotalPrice = 100.00m,
-                Status = "Confirmed",
-            };
-
-            <partial name="_HistoryCard" model="@card" />
+            <label>
+                <input data-auto-submit type="radio" name="Option" value="@status.Key" asp-for="Option">
+                <div>
+                    <div class="text">@status.Value</div>
+                </div>
+            </label>
         }
     </div>
 
+    <div id="ajax-result-container" class="container" data-no="padding color" data-flex="gap column center"
+        data-result-container>
+        <partial name="_History" model="@Model.Results" />
+    </div>
+
     <partial name="_NoResults" model="@("No history found")" />
-</div>
+</form>
+
+@section foot {
+    <script>
+        function reorderSuccess(data, status, xhr) {
+            window.location.href = `/Cart/Store/${data}`
+        }
+    </script>
+}

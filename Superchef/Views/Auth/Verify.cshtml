@@ -246,7 +246,7 @@
                     $.ajax({
                         url: "/Auth/ClaimSession",
                         method: "post",
-                        success: funtion() {
+                        success: function() {
                             window.location.href = "@ViewBag.ReturnUrl";
                         },
                         error: function(xhr, textStatus, errorThrown) {

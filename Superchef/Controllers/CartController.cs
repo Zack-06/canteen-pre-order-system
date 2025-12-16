@@ -1,16 +1,20 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Controllers;
 
-[Authorize]
+[Authorize(Roles = "Customer")]
 public class CartController : Controller
 {
     private readonly DB db;
-    public CartController(DB db)
+    private readonly IHubContext<OrderHub> orderHubContext;
+
+    public CartController(DB db, IHubContext<OrderHub> orderHubContext)
     {
         this.db = db;
+        this.orderHubContext = orderHubContext;
     }
 
     // display stores
@@ -126,7 +130,7 @@ public class CartController : Controller
         return Ok();
     }
 
-    public IActionResult Checkout(CartStoreVM vm)
+    public async Task<IActionResult> Checkout(CartStoreVM vm)
     {
         var store = db.Stores
             .Where(ExpressionService.ShowStoreToCustomerExpr)
@@ -244,6 +248,8 @@ public class CartController : Controller
 
         db.Orders.Add(order);
         db.SaveChanges();
+
+        await orderHubContext.Clients.All.SendAsync("UpdateStock", store.Id);
 
         Response.Headers.Append("X-Redirect-Url", Url.Action("Customer", "Order", new { id = order.Id }));
         return PartialView("_SummaryContainer", new SummaryContainerDM

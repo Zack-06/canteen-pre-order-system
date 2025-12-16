@@ -1839,7 +1839,7 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 }
 [data-column-container~="3"] {
 	display: grid;
-	grid-template-columns: min-content 0.75rem max-content 0.25rem 1fr;
+	grid-template-columns: auto 0.75rem max-content 0.25rem 1fr;
 	row-gap: 0.6rem;
 	align-items: baseline;
 	height: max-content;

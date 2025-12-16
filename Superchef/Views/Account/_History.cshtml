@@ -1,0 +1,16 @@
+@model List<Order>
+
+@foreach (var order in Model)
+{
+    var card = new OrderHistoryCardDM
+    {
+        Id = order.Id,
+        Store = order.Store.Name,
+        CreatedAt = order.CreatedAt,
+        PickupAt = order.Slot.StartTime,
+        TotalItems = order.OrderItems.Sum(i => (int?)i.Quantity) ?? 0,
+        TotalPrice = order.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m,
+        Status = order.Status
+    };
+    <partial name="_HistoryCard" model="@card" />
+}

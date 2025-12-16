@@ -220,11 +220,60 @@ public class AccountController : Controller
         TempData["Message"] = "Logged out all known devices successfully";
     }
 
-    public IActionResult History()
+    [Authorize(Roles = "Customer")]
+    public IActionResult History(HistoryVM vm)
     {
-        return View();
+        vm.Options = new()
+        {
+            ["all"] = "All",
+            ["pending"] = "Pending",
+            ["confirmed"] = "Confirmed",
+            ["preparing"] = "Preparing",
+            ["to-pickup"] = "To Pickup",
+            ["completed"] = "Completed",
+            ["cancelled"] = "Cancelled"
+        };
+
+        if (string.IsNullOrEmpty(vm.Option) || !vm.Options.ContainsKey(vm.Option))
+        {
+            vm.Option = vm.Options.First().Key;
+        }
+
+        // Get query
+        var orders = db.Orders
+            .Include(o => o.Slot)
+            .Include(o => o.Store)
+            .Include(o => o.OrderItems)
+            .Where(o => o.AccountId == HttpContext.GetAccount()!.Id)
+            .AsQueryable();
+
+        if (vm.Option != "all")
+        {
+            // Apply order filters
+            if (orders != null)
+            {
+                orders = orders.Where(o => o.Status == vm.Options[vm.Option]);
+            }
+        }
+
+        // Get results
+        vm.Results = [];
+        if (orders != null)
+        {
+            vm.Results = orders
+                .OrderByDescending(o => o.CreatedAt)
+                .ToList();
+        }
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_History", vm.Results);
+        }
+
+        return View(vm);
     }
 
+    [Authorize(Roles = "Customer")]
     public IActionResult Favourite()
     {
         var acc = HttpContext.GetAccount();

@@ -4,8 +4,6 @@ namespace Superchef.Helpers;
 
 public class ExpressionService
 {
-    
-
     public static Expression<Func<Store, bool>> ShowStoreToCustomerExpr
     {
         get

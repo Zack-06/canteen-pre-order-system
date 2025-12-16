@@ -65,10 +65,6 @@ public class WebhookController : ControllerBase
                 }
                 paySrv.HandleChargeRefunded(charge);
             }
-            else
-            {
-                Console.WriteLine("Unhandled event type: {0}", stripeEvent.Type);
-            }
 
             return Ok();
         }

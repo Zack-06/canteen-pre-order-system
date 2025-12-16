@@ -74,6 +74,7 @@ builder.Services.AddScoped<DeviceService>();
 builder.Services.AddScoped<SecurityService>();
 builder.Services.AddScoped<VerificationService>();
 builder.Services.AddScoped<PaymentService>();
+builder.Services.AddScoped<SystemOrderService>();
 
 // Add background worker
 builder.Services.AddHostedService<GenerateSlotBackgroundWorker>();

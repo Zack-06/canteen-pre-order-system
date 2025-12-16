@@ -7,13 +7,13 @@ public class SystemOrderService
 {
     private readonly DB db;
     private readonly PaymentService paySrv;
-    private readonly IHubContext<OrderHub> fnbOrderHubContext;
+    private readonly IHubContext<OrderHub> orderHubContext;
 
-    public SystemOrderService(DB db, PaymentService paySrv, IHubContext<OrderHub> fnbOrderHubContext)
+    public SystemOrderService(DB db, PaymentService paySrv, IHubContext<OrderHub> orderHubContext)
     {
         this.db = db;
         this.paySrv = paySrv;
-        this.fnbOrderHubContext = fnbOrderHubContext;
+        this.orderHubContext = orderHubContext;
     }
 
     private void ProcessOrderCancellation(Order order, List<int> reloads)
@@ -55,15 +55,12 @@ public class SystemOrderService
     {
         foreach (var id in reloads)
         {
-            await fnbOrderHubContext.Clients.All.SendAsync("UpdateStock", id);
+            await orderHubContext.Clients.All.SendAsync("UpdateStock", id);
         }
     }
 
-    public async Task CancelOrder(string id)
+    public async Task CancelOrder(Order order)
     {
-        var order = db.Orders.FirstOrDefault(o => o.Id == id);
-        if (order == null) return;
-
         List<int> reloads = [];
         ProcessOrderCancellation(order, reloads);
 

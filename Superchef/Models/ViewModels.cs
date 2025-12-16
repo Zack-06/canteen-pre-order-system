@@ -44,6 +44,8 @@ public class RegisterVM
     [DataType(DataType.Password)]
     [DisplayName("Confirm Password")]
     public string ConfirmPassword { get; set; }
+    [Required(ErrorMessage = "Please complete the reCAPTCHA verification.")]
+    public string RepatchaToken { get; set; }
 }
 
 public class ForgotPasswordVM
@@ -180,6 +182,13 @@ public class CartStoreVM
     public Store Store { get; set; }
     public List<Cart> CartItems { get; set; } = [];
     public List<int> SelectedItems { get; set; } = [];
+}
+
+public class HistoryVM
+{
+    public string? Option { get; set; }
+    public Dictionary<string, string> Options { get; set; } = [];
+    public List<Order> Results { get; set; } = [];
 }
 
 public class ManageCustomerVM
