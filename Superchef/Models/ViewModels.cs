@@ -445,13 +445,13 @@ public class ManageSlotVM
 
 public class ManageItemVM
 {
-    public int StoreId { get; set; }
+    public int? Id { get; set; }
     public string? Dir { get; set; }
     public string? Sort { get; set; }
     public int Page { get; set; } = 1;
     public string? Search { get; set; }
     public string? SearchOption { get; set; }
-    public List<string> Statuses { get; set; } = [];
+    public string? Status { get; set; }
     public List<int> Categories { get; set; } = [];
     [DisplayName("Min Variants Count")]
     public int? MinVariantsCount { get; set; }

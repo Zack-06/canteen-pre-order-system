@@ -1,4 +1,6 @@
 @model SearchVM
+@using Superchef.Services
+@inject GenerateLinkService GenerateLinkService
 
 <div class="container" data-no="color padding">
     <div class="result-text title normal">
@@ -45,15 +47,6 @@
 <partial name="_NoResults" model="null" />
 
 @Html.PagedListPager(Model.Results,
-    page => Url.Action("Index", new {
-        Query = Model.Query,
-        Type = Model.Type,
-        Venues = Model.Venues,
-        Price = Model.Price,
-        Rating = Model.Rating,
-        Sort = Model.Sort,
-        Categories = Model.Categories,
-        Page = page
-    }),
+    page => GenerateLinkService.GetPageLink("Index", "Search", page.ToString()),
     PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(), ManagePageService.GetAjaxOption())
 )

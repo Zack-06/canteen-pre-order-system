@@ -205,13 +205,37 @@ public class ItemController : Controller
         return Content(fav == null ? "added" : "removed");
     }
 
+    [Authorize(Roles = "Vendor")]
     public IActionResult Manage(ManageItemVM vm)
     {
+        if (vm.Id == null)
+        {
+            var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
+            if (sessionStoreId == null)
+            {
+                TempData["Message"] = "Please choose a store first";
+                return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Manage") });
+            }
+
+            return RedirectToAction("Manage", new { id = sessionStoreId });
+        }
+
+        var store = db.Stores.FirstOrDefault(s =>
+            s.Id == vm.Id &&
+            s.AccountId == HttpContext.GetAccount()!.Id &&
+            !s.IsDeleted
+        );
+        if (store == null)
+        {
+            return NotFound();
+        }
+
         Dictionary<string, Expression<Func<Item, object>>> sortOptions = new()
         {
             { "Id", a => a.Id },
             { "Name", a => a.Name },
             { "Slug", a => a.Slug },
+            { "Status", a => a.IsActive ? "Active" : "Inactive" },
             { "Variants Count", a => a.Variants.Count },
             { "Category", a => a.Category.Name },
             { "Creation Date", a => a.CreatedAt }
@@ -221,6 +245,7 @@ public class ItemController : Controller
 
         if (vm.Sort == null || !sortOptions.ContainsKey(vm.Sort) || (vm.Dir != "asc" && vm.Dir != "desc"))
         {
+            Console.WriteLine("Sorting");
             vm.Sort = sortOptions.Keys.First();
             vm.Dir = "asc";
         }
@@ -230,19 +255,85 @@ public class ItemController : Controller
             new() { Value = "slug", Text = "Search By Slug" },
             new() { Value = "id", Text = "Search By Id" }
         ];
-        vm.AvailableStatuses = ["Active", "Inactive"];
+        vm.AvailableStatuses = ["All", "Active", "Inactive"];
         vm.AvailableCategories = db.Categories.ToList();
 
         if (vm.SearchOption == null || !vm.AvailableSearchOptions.Any(o => o.Value == vm.SearchOption))
         {
             vm.SearchOption = vm.AvailableSearchOptions.First().Value;
         }
+        if (vm.Status == null || !vm.AvailableStatuses.Contains(vm.Status))
+        {
+            vm.Status = vm.AvailableStatuses.First();
+        }
 
-        ViewBag.StoreName = "abc";
+        var results = db.Items.Where(i => i.StoreId == store.Id && !i.IsDeleted).AsQueryable();
+
+        // Search
+        if (!string.IsNullOrWhiteSpace(vm.Search))
+        {
+            var search = vm.Search.Trim() ?? "";
+
+            switch (vm.SearchOption)
+            {
+                case "name":
+                    results = results.Where(i => i.Name.Contains(search));
+                    break;
+                case "slug":
+                    results = results.Where(i => i.Slug.Contains(search));
+                    break;
+                case "id":
+                    results = results.Where(i => i.Id.ToString().Contains(search));
+                    break;
+            }
+        }
+
+        // Filter
+        if (vm.Status != "All")
+        {
+            if (vm.Status == "Active")
+            {
+                results = results.Where(i => i.IsActive);
+            }
+            else if (vm.Status == "Inactive")
+            {
+                results = results.Where(i => !i.IsActive);
+            }
+        }
+
+        if (vm.Categories.Count > 0)
+        {
+            results = results.Where(i => vm.Categories.Contains(i.CategoryId));
+        }
+
+        if (vm.MinVariantsCount != null)
+        {
+            results = results.Where(i => i.Variants.Count() >= vm.MinVariantsCount);
+        }
+
+        if (vm.MaxVariantsCount != null)
+        {
+            results = results.Where(i => i.Variants.Count() <= vm.MaxVariantsCount);
+        }
+
+        // Sort
+        results = vm.Dir == "asc"
+            ? results.OrderBy(sortOptions[vm.Sort])
+            : results.OrderByDescending(sortOptions[vm.Sort]);
+
+        vm.Results = results.ToPagedList(vm.Page, 10);
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_Manage", vm);
+        }
+
+        ViewBag.StoreName = store.Name;
 
         return View(vm);
     }
 
+    [Authorize(Roles = "Vendor")]
     public IActionResult Add(int storeId)
     {
         var vm = new AddItemVM
@@ -258,6 +349,7 @@ public class ItemController : Controller
     }
 
     [HttpGet]
+    [Authorize(Roles = "Vendor")]
     public IActionResult Edit(int id)
     {
         var vm = new EditItemVM

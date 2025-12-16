@@ -5,13 +5,11 @@ namespace Superchef.Services;
 public class CleanupService
 {
     private readonly DB db;
-    private readonly SystemOrderService odrSrv;
     private readonly PaymentService paySrv;
 
-    public CleanupService(DB db, SystemOrderService odrSrv, PaymentService paySrv)
+    public CleanupService(DB db, PaymentService paySrv)
     {
         this.db = db;
-        this.odrSrv = odrSrv;
         this.paySrv = paySrv;
     }
 

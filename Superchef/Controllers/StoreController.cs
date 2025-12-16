@@ -114,7 +114,7 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Vendor,Admin")]
+    [Authorize(Roles = "Vendor")]
     public IActionResult Add(AddStoreVM vm)
     {
         if (ModelState.IsValid("Name") && !IsNameUnique(vm.Name, vm.Venue))
@@ -178,7 +178,7 @@ public class StoreController : Controller
         return View(vm);
     }
 
-    [Authorize(Roles = "Vendor,Admin")]
+    [Authorize(Roles = "Vendor")]
     public IActionResult Edit(int? id)
     {
         if (id == null)
@@ -224,7 +224,7 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Vendor,Admin")]
+    [Authorize(Roles = "Vendor")]
     public IActionResult Edit(EditStoreVM vm)
     {
         var store = db.Stores.FirstOrDefault(s =>
@@ -498,10 +498,13 @@ public class StoreController : Controller
         return RedirectToAction("Edit", "Store", new { Id = storeId });
     }
 
-    [Authorize(Roles = "Vendor,Admin")]
+    [Authorize(Roles = "Vendor")]
     public IActionResult GetStripeAccountEmail(int id)
     {
-        var store = db.Stores.FirstOrDefault(s => s.Id == id);
+        var store = db.Stores.FirstOrDefault(s => 
+            s.Id == id &&
+            s.AccountId == HttpContext.GetAccount()!.Id
+        );
         if (store == null)
         {
             return NotFound("Store not found");

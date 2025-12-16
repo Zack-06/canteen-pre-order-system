@@ -1,0 +1,59 @@
+@model ManageItemVM
+
+@using Superchef.Services
+@inject GenerateLinkService GenerateLinkService
+
+<div class="container" data-manage-container="table" data-responsive-container>
+    <table>
+        <thead>
+            <tr>
+                @foreach (var f in ViewBag.Fields)
+                {
+                    var url = GenerateLinkService.GetSortLink(
+                    action: "Manage",
+                    controller: "Item",
+                    field: f,
+                    currentSort: Model.Sort,
+                    currentDir: Model.Dir
+                    );
+
+                    <th class="@Model.Dir @(f == Model.Sort ? "selected" : "")">
+                        <a href="@url" data-ajax="true" data-ajax-update="#ajax-result-container">@f</a>
+                    </th>
+                }
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody data-result-container>
+            @foreach (var item in Model.Results)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@item.Name</td>
+                    <td>@item.Slug</td>
+                    <td>
+                        <div class="status-text-container active">@item.Status</div>
+                    </td>
+                    <td>@item.Variants.Count</td>
+                    <td>@item.Category.Name</td>
+                    <td>@FormatService.ToDateTimeFormat(item.CreatedAt, "dd MMM yyyy")</td>
+                    <td>
+                        <div class="button-group" data-flex="inline">
+                            <a href="/Item/Edit/1" data-button="accent">Edit</a>
+                            <a href="/Item/Edit/1" data-button="danger">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <partial name="_NoResults" model="null" />
+</div>
+
+@Html.PagedListPager(Model.Results,
+page => GenerateLinkService.GetPageLink("Index", "Search", page.ToString()),
+PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(),
+ManagePageService.GetAjaxOption())
+)
