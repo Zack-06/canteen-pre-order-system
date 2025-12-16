@@ -7,6 +7,21 @@ $("header #back-button").on("click", () => {
 	$("header").removeClass("search-active")
 })
 
+// ==========Error Scroll==========
+const $firstError = $(".field-validation-error").first()
+if ($firstError.length) {
+	const scrollPosition = $(window).scrollTop()
+	const elementOffset = $firstError.offset().top
+	const windowHeight = $(window).height()
+	const headerHeight = ($("header").outerHeight() || 0) + 60
+	const visibleAreaStart = scrollPosition + headerHeight
+	const visibleAreaEnd = scrollPosition + windowHeight
+
+	if (elementOffset < visibleAreaStart || elementOffset > visibleAreaEnd) {
+		$("html, body").animate({ scrollTop: elementOffset - headerHeight }, 500)
+	}
+}
+
 // ==========Container Responsive Setup==========
 function responsiveSetup() {
 	const $responsiveContainer = $("[data-responsive-container]")
@@ -516,12 +531,14 @@ function addKeyword() {
         </div>
     `)
 	$input.val("")
+	$input.trigger("change")
 	$input.focus()
 }
 
 $(document).on("click", ".keyword", removeKeyword)
 function removeKeyword() {
 	$(this).remove()
+	$("input[data-keyword]").trigger("change")
 }
 
 // ==========Formatting==========

@@ -83,8 +83,8 @@ public class SearchController : Controller
             var results = db.Stores
                 .Include(s => s.Items)
                     .ThenInclude(i => i.Reviews)
-                .Where(ExpressionService.ShowStoreToCustomerExpr)
                 .Where(s =>
+                    !s.IsDeleted &&
                     s.Name.ToLower().Contains(vm.Query.ToLower()) ||
                     s.Description.ToLower().Contains(vm.Query.ToLower())
                 )
@@ -153,8 +153,8 @@ public class SearchController : Controller
                 .Include(i => i.Reviews)
                 .Include(i => i.Variants)
                     .ThenInclude(v => v.OrderItems)
-                .Where(ExpressionService.ShowItemToCustomerExpr)
                 .Where(i =>
+                    i.IsActive &&
                     i.Name.ToLower().Contains(vm.Query.ToLower()) ||
                     i.Description.ToLower().Contains(vm.Query.ToLower())
                 )
@@ -215,7 +215,9 @@ public class SearchController : Controller
                     break;
                 default:
                     results = results
-                        .OrderByDescending(s => s.Name.ToLower() == vm.Query.ToLower())
+                        .OrderByDescending(s => s.Keywords.Count(k => k.Word.ToLower() == vm.Query.ToLower())) // count exact matches of keyword
+                        .ThenByDescending(s => s.Keywords.Count(k => k.Word.ToLower().Contains(vm.Query.ToLower()))) // count keyword contains
+                        .ThenByDescending(s => s.Name.ToLower() == vm.Query.ToLower())
                         .ThenByDescending(s => s.Name.ToLower().Contains(vm.Query.ToLower()))
                         .ThenByDescending(s => s.Description.ToLower() == vm.Query.ToLower())
                         .ThenByDescending(s => s.Description.ToLower().Contains(vm.Query.ToLower()))

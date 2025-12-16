@@ -211,7 +211,7 @@ public class Item
     public string Image { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public bool IsDeleted { get; set; } = false;
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; set; } = false;
     public int CategoryId { get; set; }
     public int StoreId { get; set; }
     [NotMapped]
@@ -224,20 +224,6 @@ public class Item
             if (IsActive == false) return "Inactive";
 
             return "Active";
-        }
-    }
-    public static Expression<Func<Item, bool>> ShowToCustomer
-    {
-        get
-        {
-            return i =>
-                i.IsActive &&
-                !i.IsDeleted &&
-                !i.Store.IsDeleted &&
-                i.Variants.Any(v =>
-                    v.IsActive &&
-                    !v.IsDeleted
-                );
         }
     }
 
@@ -271,7 +257,7 @@ public class Variant
     public decimal Price { get; set; }
     public int Stock { get; set; }
     public bool IsDeleted { get; set; } = false;
-    public bool IsActive { get; set; } = true;
+    public bool IsActive { get; set; } = false;
     public DateTime CreatedAt { get; set; } = DateTime.Now;
     public int ItemId { get; set; }
     [NotMapped]
@@ -285,19 +271,6 @@ public class Variant
 
             return "Active";
         }
-    }
-    public static Expression<Func<Variant, bool>> ShowToCustomer
-    {
-        get
-        {
-            return v =>
-                v.IsActive &&
-                !v.IsDeleted &&
-                v.Item.IsActive &&
-                !v.Item.IsDeleted &&
-                !v.Item.Store.IsDeleted;
-        }
-
     }
 
     public Item Item { get; set; }

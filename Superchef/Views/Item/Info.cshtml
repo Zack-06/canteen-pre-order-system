@@ -649,7 +649,7 @@
         <img src="/uploads/item/@Model.Item.Image" alt="Preview Image">
         <div id="gallery-container">
             <img src="/uploads/item/@Model.Item.Image" alt="Item Image" class="selected">
-            @foreach (var variants in Model.Item.Variants.Where(v => ExpressionService.ShowToCustomer(v)))
+            @foreach (var variants in Model.Item.Variants.Where(v => v.IsActive))
             {
                 <img src="/uploads/variant/@variants.Image" alt="Variant Image" data-variant-id="@variants.Id">
             }
@@ -710,8 +710,7 @@
             <div data-column-container="2">
                 <div>Variant</div>
                 <div class="custom-tick-container center-text-container">
-                    @foreach (var variant in Model.Item.Variants.Where(v =>
-                                        ExpressionService.ShowToCustomer(v)))
+                    @foreach (var variant in Model.Item.Variants.Where(v => v.IsActive))
                     {
                         <label>
                             <input type="radio" name="Variant" value="@variant.Id">
@@ -739,8 +738,8 @@
             <div class="container" data-no="padding color margin" data-flex="gap between">
                 <button data-button="accent">Add to Cart</button>
                 <a data-ajax="true" data-ajax-method="POST" data-ajax-failure="toggleFavouriteFailure"
-                    data-ajax-success="toggleFavouriteSuccess" 
-                    href="@Url.Action("ToggleFavourite", new { Id = Model.Item.Id })"
+                    data-ajax-success="toggleFavouriteSuccess"
+                    data-ajax-url="@Url.Action("ToggleFavourite", new { Id = Model.Item.Id })"
                     id="add-to-favourite-button" class="@(ViewBag.IsFavourite == true ? "favourite" : "")"></a>
             </div>
         </form>
@@ -881,7 +880,7 @@
         })
 
         const orderConnection = new signalR.HubConnectionBuilder().withUrl("/OrderHub").build()
-        orderConnection.on("UpdateStock", function(variantId) {
+        orderConnection.on("UpdateStock", function (variantId) {
             updateVariantStockCount(variantId)
         })
         orderConnection.start()

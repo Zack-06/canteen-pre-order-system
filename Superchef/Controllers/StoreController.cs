@@ -12,12 +12,14 @@ public class StoreController : Controller
     private readonly DB db;
     private readonly IConfiguration cf;
     private readonly ImageService imgSrv;
+    private readonly CleanupService clnSrv;
 
-    public StoreController(DB db, IConfiguration configuration, ImageService imgSrv)
+    public StoreController(DB db, IConfiguration cf, ImageService imgSrv, CleanupService clnSrv)
     {
         this.db = db;
-        cf = configuration;
+        this.cf = cf;
         this.imgSrv = imgSrv;
+        this.clnSrv = clnSrv;
     }
 
     [HttpGet]
@@ -31,8 +33,7 @@ public class StoreController : Controller
             .Include(s => s.Items)
                 .ThenInclude(v => v.Variants)
                     .ThenInclude(oi => oi.OrderItems)
-            .Where(ExpressionService.ShowStoreToCustomerExpr)
-            .FirstOrDefault(s => s.Slug == slug);
+            .FirstOrDefault(s => s.Slug == slug && !s.IsDeleted);
         if (store == null)
         {
             return NotFound();
@@ -81,9 +82,10 @@ public class StoreController : Controller
     public IActionResult Select(int id, string? ReturnUrl)
     {
         var store = db.Stores
-            .FirstOrDefault(
-                s => s.Id == id &&
-                s.AccountId == HttpContext.GetAccount()!.Id
+            .FirstOrDefault(s => 
+                s.Id == id &&
+                s.AccountId == HttpContext.GetAccount()!.Id &&
+                !s.IsDeleted
             );
 
         if (store == null)
@@ -195,7 +197,8 @@ public class StoreController : Controller
 
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == id &&
-            s.AccountId == HttpContext.GetAccount()!.Id
+            s.AccountId == HttpContext.GetAccount()!.Id &&
+            !s.IsDeleted
         );
         if (store == null)
         {
@@ -229,7 +232,8 @@ public class StoreController : Controller
     {
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == vm.Id &&
-            s.AccountId == HttpContext.GetAccount()!.Id
+            s.AccountId == HttpContext.GetAccount()!.Id &&
+            !s.IsDeleted
         );
         if (store == null)
         {
@@ -336,7 +340,9 @@ public class StoreController : Controller
     {
         var store = db.Stores
             .Include(s => s.SlotTemplates)
-            .FirstOrDefault(s => s.Id == vm.StoreId);
+            .FirstOrDefault(s => 
+                s.Id == vm.StoreId
+            );
 
         vm.AvailableTypes = ["Custom", "Recurring"];
         vm.AvailableDates = [
@@ -483,7 +489,8 @@ public class StoreController : Controller
 
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == storeId &&
-            s.AccountId == HttpContext.GetAccount()!.Id
+            s.AccountId == HttpContext.GetAccount()!.Id &&
+            !s.IsDeleted
         );
         if (store == null)
         {
@@ -503,7 +510,8 @@ public class StoreController : Controller
     {
         var store = db.Stores.FirstOrDefault(s => 
             s.Id == id &&
-            s.AccountId == HttpContext.GetAccount()!.Id
+            s.AccountId == HttpContext.GetAccount()!.Id &&
+            !s.IsDeleted
         );
         if (store == null)
         {
@@ -538,15 +546,15 @@ public class StoreController : Controller
 
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == id &&
-            s.AccountId == HttpContext.GetAccount()!.Id
+            s.AccountId == HttpContext.GetAccount()!.Id &&
+            !s.IsDeleted
         );
         if (store == null) return NotFound("Store not found");
 
-        store.IsDeleted = true;
-        db.SaveChanges();
+        var error = clnSrv.CanCleanUp(store);
+        if (error != null) return BadRequest(error);
 
-        // delete store logic here
-        // todo
+        clnSrv.CleanUp(store);
 
         TempData["Message"] = "Store deleted successfully";
         return Ok();

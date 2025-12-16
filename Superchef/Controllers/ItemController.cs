@@ -1,6 +1,8 @@
 using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +11,14 @@ namespace Superchef.Controllers;
 public class ItemController : Controller
 {
     private readonly DB db;
+    private readonly ImageService imgSrv;
+    private readonly CleanupService clnSrv;
 
-    public ItemController(DB db)
+    public ItemController(DB db, ImageService imgSrv, CleanupService clnSrv)
     {
         this.db = db;
+        this.imgSrv = imgSrv;
+        this.clnSrv = clnSrv;
     }
 
     [HttpGet]
@@ -25,8 +31,7 @@ public class ItemController : Controller
                 .ThenInclude(s => s.Venue)
             .Include(i => i.Reviews)
                 .ThenInclude(r => r.Account)
-            .Where(ExpressionService.ShowItemToCustomerExpr)
-            .FirstOrDefault(i => i.Slug == slug);
+            .FirstOrDefault(i => i.Slug == slug && i.IsActive);
         if (item == null)
         {
             return NotFound();
@@ -87,9 +92,7 @@ public class ItemController : Controller
 
     public IActionResult VariantStockCount(int id)
     {
-        var variant = db.Variants
-            .Where(ExpressionService.ShowVariantToCustomerExpr)
-            .FirstOrDefault(v => v.Id == id);
+        var variant = db.Variants.FirstOrDefault(v => v.Id == id &&v.IsActive);
 
         if (variant == null)
         {
@@ -111,9 +114,7 @@ public class ItemController : Controller
             return BadRequest("Please select a variant");
         }
 
-        var variant = db.Variants
-            .Where(ExpressionService.ShowVariantToCustomerExpr)
-            .FirstOrDefault(v => v.Id == vm.Variant);
+        var variant = db.Variants.FirstOrDefault(v => v.Id == vm.Variant && v.IsActive);
         if (variant == null)
         {
             return BadRequest("Variant does not exist");
@@ -245,7 +246,6 @@ public class ItemController : Controller
 
         if (vm.Sort == null || !sortOptions.ContainsKey(vm.Sort) || (vm.Dir != "asc" && vm.Dir != "desc"))
         {
-            Console.WriteLine("Sorting");
             vm.Sort = sortOptions.Keys.First();
             vm.Dir = "asc";
         }
@@ -334,41 +334,148 @@ public class ItemController : Controller
     }
 
     [Authorize(Roles = "Vendor")]
-    public IActionResult Add(int storeId)
+    public IActionResult Add(int id)
     {
+        var store = db.Stores
+            .FirstOrDefault(s =>
+                s.Id == id &&
+                s.AccountId == HttpContext.GetAccount()!.Id &&
+                !s.IsDeleted
+            );
+        if (store == null)
+        {
+            return NotFound();
+        }
+
         var vm = new AddItemVM
         {
-            StoreId = storeId,
-
+            Id = store.Id,
             AvailableCategories = db.Categories.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
         };
 
-        ViewBag.StoreName = "abc";
+        ViewBag.StoreName = store.Name;
 
         return View(vm);
     }
 
-    [HttpGet]
+    [HttpPost]
+    [Authorize(Roles = "Vendor")]
+    public IActionResult Add(AddItemVM vm)
+    {
+        var store = db.Stores
+            .FirstOrDefault(s =>
+                s.Id == vm.Id &&
+                !s.IsDeleted
+            );
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid("Slug") && !IsSlugUnique(vm.Slug))
+        {
+            ModelState.AddModelError("Slug", "Slug has been taken.");
+        }
+
+        if (ModelState.IsValid("Category") && !CheckCategory(vm.Category))
+        {
+            ModelState.AddModelError("Category", "Category is invalid.");
+        }
+
+        if (ModelState.IsValid("Keywords") && !CheckKeywords(vm.Keywords))
+        {
+            ModelState.AddModelError("Keywords", "Some keywords are invalid.");
+        }
+
+        if (vm.Image != null)
+        {
+            var e = imgSrv.ValidateImage(vm.Image, 3);
+            if (e != "") ModelState.AddModelError("Image", e);
+        }
+
+        string? newImageFile = null;
+        if (ModelState.IsValid && vm.Image != null)
+        {
+            try
+            {
+                newImageFile = imgSrv.SaveImage(vm.Image, "item", 500, 500, vm.ImageX, vm.ImageY, vm.ImageScale);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("Image", ex.Message);
+            }
+        }
+
+        if (ModelState.IsValid && newImageFile != null)
+        {
+            var item = new Item
+            {
+                Name = vm.Name,
+                Slug = vm.Slug,
+                Description = vm.Description,
+                CategoryId = vm.Category,
+                Image = newImageFile,
+                StoreId = vm.Id
+            };
+
+            foreach (var word in vm.Keywords)
+            {
+                var keyword = db.Keywords.FirstOrDefault(k => k.Word == word);
+                if (keyword == null)
+                {
+                    keyword = new Keyword { Word = word };
+                    db.Keywords.Add(keyword);
+                }
+
+                keyword.Items.Add(item);
+            }
+
+            db.Items.Add(item);
+            db.SaveChanges();
+
+            TempData["Message"] = "Item created successfully";
+            return RedirectToAction("Edit", new { id = item.Id });
+        }
+
+        vm.AvailableCategories = db.Categories.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList();
+
+        ViewBag.StoreName = store.Name;
+
+        return View(vm);
+    }
+
     [Authorize(Roles = "Vendor")]
     public IActionResult Edit(int id)
     {
+        var item = db.Items
+            .Include(i => i.Keywords)
+            .FirstOrDefault(i =>
+                i.Id == id &&
+                !i.IsDeleted &&
+                i.Store.AccountId == HttpContext.GetAccount()!.Id
+            );
+        if (item == null)
+        {
+            return NotFound();
+        }
+
         var vm = new EditItemVM
         {
             Id = id,
             CreatedAt = DateTime.Now,
-            Name = "abc",
-            Slug = "abc",
-            Description = "abc",
-            Category = 1,
-            Keywords = ["abcde"],
+            Name = item.Name,
+            Slug = item.Slug,
+            Description = item.Description,
+            Category = item.CategoryId,
+            Keywords = item.Keywords.Select(k => k.Word).ToList(),
             Image = null,
-            Active = false,
+            Active = item.IsActive,
 
             AvailableCategories = db.Categories.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList()
         };
 
-        ViewBag.StoreName = "abc";
-        ViewBag.ImageUrl = "abc";
+        ViewBag.ImageUrl = item.Image;
+        ViewBag.StoreId = item.StoreId;
 
         return View(vm);
     }
@@ -376,20 +483,185 @@ public class ItemController : Controller
     [HttpPost]
     public IActionResult Edit(EditItemVM vm)
     {
-        Console.WriteLine("KEYWORDS");
-        Console.WriteLine(string.Join(",", vm.Keywords));
+        var item = db.Items
+            .Include(i => i.Variants)
+            .Include(i => i.Store)
+            .Include(i => i.Keywords)
+            .FirstOrDefault(i =>
+                i.Id == vm.Id &&
+                !i.IsDeleted &&
+                i.Store.AccountId == HttpContext.GetAccount()!.Id
+            );
+        if (item == null)
+        {
+            return NotFound();
+        }
+
+        if (ModelState.IsValid("Slug") && !IsSlugUnique(vm.Slug, vm.Id))
+        {
+            ModelState.AddModelError("Slug", "Slug has been taken.");
+        }
+
+        if (ModelState.IsValid("Category") && !CheckCategory(vm.Category))
+        {
+            ModelState.AddModelError("Category", "Category is invalid.");
+        }
+
+        if (ModelState.IsValid("Keywords") && !CheckKeywords(vm.Keywords))
+        {
+            ModelState.AddModelError("Keywords", "Some keywords are invalid.");
+        }
+
+        if (vm.Image != null)
+        {
+            var e = imgSrv.ValidateImage(vm.Image, 3);
+            if (e != "") ModelState.AddModelError("Image", e);
+        }
+
+        if (ModelState.IsValid("Active") && vm.Active)
+        {
+            if (item.Store.StripeAccountId == null)
+            {
+                ModelState.SetModelValue("Active", new ValueProviderResult("false"));
+                ModelState.AddModelError("Active", "Item activation failed. The store has not connected a Stripe account yet.");
+            }
+            else if (!item.Store.HasPublishedFirstSlots)
+            {
+                ModelState.SetModelValue("Active", new ValueProviderResult("false"));
+                ModelState.AddModelError("Active", "Item activation failed. The store has not published initial slots yet.");
+            } else if (item.Variants.Count == 0)
+            {
+                ModelState.SetModelValue("Active", new ValueProviderResult("false"));
+                ModelState.AddModelError("Active", "Item activation failed. The item has no variants.");
+            }
+        }
+
+        if (ModelState.IsValid && vm.Image != null)
+        {
+            try
+            {
+                var newFile = imgSrv.SaveImage(vm.Image, "item", 500, 500, vm.ImageX, vm.ImageY, vm.ImageScale);
+
+                // remove image
+                if (item.Image != null) imgSrv.DeleteImage(item.Image, "item");
+                item.Image = newFile;
+                db.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("Image", ex.Message);
+            }
+        }
+
+        if (ModelState.IsValid)
+        {
+            item.Name = vm.Name.Trim();
+            item.Slug = vm.Slug;
+            item.Description = vm.Description.Trim();
+            item.CategoryId = vm.Category;
+            item.IsActive = vm.Active;
+
+            item.Keywords.Clear();
+            foreach (var word in vm.Keywords)
+            {
+                var keyword = db.Keywords.FirstOrDefault(k => k.Word == word);
+                if (keyword == null)
+                {
+                    keyword = new Keyword { Word = word };
+                    db.Keywords.Add(keyword);
+                }
+
+                keyword.Items.Add(item);
+            }
+            db.SaveChanges();
+
+            clnSrv.CleanUpKeyword();
+
+            if (item.IsActive == false)
+            {
+                foreach (var variant in item.Variants)
+                {
+                    variant.IsActive = false;
+                }
+                db.SaveChanges();
+            }
+
+            TempData["Message"] = "Item updated successfully";
+            return RedirectToAction("Edit", new { id = item.Id });
+        }
+
+        ViewBag.ImageUrl = item.Image;
+        ViewBag.StoreId = item.StoreId;
+
+        vm.AvailableCategories = db.Categories.Select(f => new SelectListItem { Value = f.Id.ToString(), Text = f.Name }).ToList();
 
         return View(vm);
     }
 
-    // ==========REMOTE==========
-    public bool CheckCategory(int category, int? id)
+    [HttpPost]
+    public IActionResult Delete(int id)
     {
-        return true;
+        if (!Request.IsAjax()) return NotFound();
+
+        var item = db.Items.FirstOrDefault(i => 
+            i.Id == id &&
+            !i.IsDeleted &&
+            i.Store.AccountId == HttpContext.GetAccount()!.Id
+        );
+        if (item == null) return NotFound();
+
+        var error = clnSrv.CanCleanUp(item);
+        if (error != null) return BadRequest(error);
+
+        clnSrv.CleanUp(item);
+        return Ok();
     }
 
-    public bool IsSlugUnique(string slug, int? id)
+    // ==========REMOTE==========
+    public bool CheckCategory(int category)
     {
+        return db.Categories.Any(c => c.Id == category);
+    }
+
+    public bool IsSlugUnique(string slug, int? id = null)
+    {
+        if (id == null)
+        {
+            return !db.Items.Any(i => i.Slug == slug && !i.IsDeleted);
+        }
+
+        return !db.Items.Any(i => i.Slug == slug && i.Id != id && !i.IsDeleted);
+    }
+
+    public bool CheckKeywords(List<string> keywords)
+    {
+        if (keywords.Count == 0)
+        {
+            return true;
+        }
+
+        var existingKeywords = new List<string>();
+
+        foreach (var keyword in keywords)
+        {
+            if (keyword.Length < 3 || keyword.Length > 30)
+            {
+                return false;
+            }
+
+            if (!Regex.IsMatch(keyword.ToLower(), @"^[a-z0-9-]+$"))
+            {
+                return false;
+            }
+
+            if (existingKeywords.Contains(keyword.ToLower()))
+            {
+                return false;
+            }
+
+            existingKeywords.Add(keyword.ToLower());
+        }
+
         return true;
     }
 }

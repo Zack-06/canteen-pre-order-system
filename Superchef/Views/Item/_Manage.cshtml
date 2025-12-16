@@ -18,7 +18,7 @@
                     );
 
                     <th class="@Model.Dir @(f == Model.Sort ? "selected" : "")">
-                        <a href="@url" data-ajax="true" data-ajax-update="#ajax-result-container">@f</a>
+                        <a data-ajax="true" data-ajax-url="@url" data-ajax-update="#ajax-result-container">@f</a>
                     </th>
                 }
                 <th>Action</th>
@@ -33,7 +33,8 @@
                     <td>@item.Name</td>
                     <td>@item.Slug</td>
                     <td>
-                        <div class="status-text-container active">@item.Status</div>
+                        <div class="status-text-container @FormatService.ToStatusClassFormat(item.Status)">@item.Status
+                        </div>
                     </td>
                     <td>@item.Variants.Count</td>
                     <td>@item.Category.Name</td>
@@ -41,7 +42,10 @@
                     <td>
                         <div class="button-group" data-flex="inline">
                             <a href="/Item/Edit/1" data-button="accent">Edit</a>
-                            <a href="/Item/Edit/1" data-button="danger">Delete</a>
+                            <a data-ajax="true" data-ajax-url="@Url.Action("Delete", new { Id = item.Id })"
+                                data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+                                data-ajax-confirm="Are you sure you want to delete this item?"
+                                data-button="danger">Delete</a>
                         </div>
                     </td>
                 </tr>

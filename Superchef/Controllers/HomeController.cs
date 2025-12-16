@@ -33,7 +33,7 @@ public class HomeController : Controller
             .Include(i => i.Variants)
                 .ThenInclude(v => v.OrderItems)
             .Include(i => i.Reviews)
-            .Where(ExpressionService.ShowItemToCustomerExpr)
+            .Where(i => i.IsActive)
             .Select(i => new
             {
                 Item = i,
@@ -59,8 +59,8 @@ public class HomeController : Controller
         {
             var accountId = User.Identity.Name;
             var orderAgainItems = db.OrderItems
-                .Where(ExpressionService.AllowCalculateOrderItemQuantityExpr)
                 .Where(oi =>
+                    oi.Variant.Item.IsActive &&
                     oi.Order.Status == "Completed" &&
                     oi.Order.AccountId.ToString() == accountId
                 )
@@ -87,7 +87,7 @@ public class HomeController : Controller
             .Include(i => i.Variants)
                 .ThenInclude(v => v.OrderItems)
             .Include(i => i.Reviews)
-            .Where(ExpressionService.ShowItemToCustomerExpr)
+            .Where(i => i.IsActive)
             .OrderBy(r => Guid.NewGuid())
             .Take(30)
             .ToList();
@@ -103,7 +103,10 @@ public class HomeController : Controller
         var stores = db.Stores
             .Include(s => s.Items)
                 .ThenInclude(r => r.Reviews)
-            .Where(s => s.AccountId == HttpContext.GetAccount()!.Id)
+            .Where(s => 
+                s.AccountId == HttpContext.GetAccount()!.Id &&
+                !s.IsDeleted
+            )
             .ToList();
 
         ViewBag.ReturnUrl = ReturnUrl;

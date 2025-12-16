@@ -84,7 +84,7 @@
     <div class="title">Items</div>
 
     <div class="container listing-container" data-no="padding color" data-result-container>
-        @foreach (var item in Model.Items.Where(i => ExpressionService.ShowToCustomer(i)))
+        @foreach (var item in Model.Items.Where(i => i.IsActive))
         {
             var card = new ItemCardDM
             {

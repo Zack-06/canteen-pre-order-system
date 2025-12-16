@@ -38,7 +38,7 @@
     <input asp-for="Id" hidden />
     <input asp-for="CreatedAt" hidden>
 
-    <div class="title">Item Details - @ViewBag.StoreName</div>
+    <div class="title">Item Details</div>
     <div data-column-container="3">
         <div>Id</div>
         <div>:</div>
@@ -132,7 +132,7 @@
         <div>:</div>
         <div class="form-group">
             <label class="switch">
-                <input asp-for="Active">
+                <input id="active-item-input" asp-for="Active">
                 <div class="slider"></div>
             </label>
             <span asp-validation-for="Active"></span>
@@ -145,8 +145,8 @@
 <div class="container" data-limit-container>
     <div class="title">Action</div>
     <div class="button-group" data-flex="inline column">
-        <a data-button="danger" data-ajax="true" data-ajax-url="@Url.Action("LogoutAllDevices", new { id = Model.Id })"
-            data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+        <a data-button="danger" data-ajax="true" data-ajax-url="@Url.Action("Delete", new { id = Model.Id })"
+            data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="window.location.href = '/Manage/@ViewBag.StoreId'"
             data-ajax-confirm="Are you sure you want to delete this item?">Delete Item</a>
         <a data-button="info" href="/Variant/Manage/@Model.Id">Manage Variants</a>
     </div>
@@ -214,6 +214,12 @@
 
             $("#reset-image-button").prop("disabled", true)
             $("#change-image-checkbox").prop("checked", false).trigger("change")
+        })
+
+        $("#active-item-input").on("change", function () {
+            if (!$(this).prop("checked")) {
+                showToast("Please note that all variants of this item will be set to inactive")
+            }
         })
     </script>
 }

@@ -472,7 +472,7 @@ public class ManageItemVM
 
 public class AddItemVM
 {
-    public int StoreId { get; set; }
+    public int Id { get; set; }
     [StringLength(50, ErrorMessage = "{1} must not exceed {0} characters.")]
     public string Name { get; set; }
     [StringLength(50, MinimumLength = 3, ErrorMessage = "{0} must be between {2} and {1} characters.")]
@@ -489,7 +489,6 @@ public class AddItemVM
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
     public IFormFile Image { get; set; }
-    public bool Active { get; set; }
 
     public List<SelectListItem> AvailableCategories { get; set; } = [];
 }
@@ -554,7 +553,6 @@ public class AddVariantVM
     public double ImageX { get; set; } = 0;
     public double ImageY { get; set; } = 0;
     public IFormFile Image { get; set; }
-    public bool Active { get; set; }
 }
 
 public class EditVariantVM

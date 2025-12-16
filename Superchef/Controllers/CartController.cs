@@ -30,7 +30,10 @@ public class CartController : Controller
         var stores = db.Stores
             .Include(s => s.Items)
                 .ThenInclude(i => i.Reviews)
-            .Where(s => storeIds.Contains(s.Id))
+            .Where(s =>
+                storeIds.Contains(s.Id) &&
+                !s.IsDeleted
+            )
             .ToList();
 
         var itemsCount = new Dictionary<int, int>();
@@ -56,8 +59,7 @@ public class CartController : Controller
             .Include(s => s.Items)
                 .ThenInclude(i => i.Reviews)
             .Include(s => s.Venue)
-            .Where(ExpressionService.ShowStoreToCustomerExpr)
-            .FirstOrDefault(s => s.Id == id);
+            .FirstOrDefault(s => s.Id == id && !s.IsDeleted);
         if (store == null)
         {
             return NotFound();
@@ -66,8 +68,11 @@ public class CartController : Controller
         var cartItems = db.Carts
             .Include(c => c.Variant)
             .Include(c => c.Variant.Item)
-            .Where(c => c.AccountId == HttpContext.GetAccount()!.Id && c.Variant.Item.StoreId == store.Id)
-            .Where(ExpressionService.ShowCartToCustomerExpr)
+            .Where(c =>
+                c.AccountId == HttpContext.GetAccount()!.Id &&
+                c.Variant.Item.StoreId == store.Id &&
+                c.Variant.IsActive
+            )
             .OrderBy(c => c.Variant.Item.Id)
             .ToList();
 
@@ -132,9 +137,7 @@ public class CartController : Controller
 
     public async Task<IActionResult> Checkout(CartStoreVM vm)
     {
-        var store = db.Stores
-            .Where(ExpressionService.ShowStoreToCustomerExpr)
-            .FirstOrDefault(s => s.Id == vm.Id);
+        var store = db.Stores.FirstOrDefault(s => s.Id == vm.Id && !s.IsDeleted);
         if (store == null)
         {
             return NotFound();
@@ -145,9 +148,9 @@ public class CartController : Controller
             .Where(c =>
                 c.AccountId == HttpContext.GetAccount()!.Id &&
                 c.Variant.Item.StoreId == store.Id &&
+                c.Variant.IsActive &&
                 vm.SelectedItems.Contains(c.VariantId)
             )
-            .Where(ExpressionService.ShowCartToCustomerExpr)
             .ToList();
 
         bool isValid = true;

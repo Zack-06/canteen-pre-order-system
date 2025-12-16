@@ -141,7 +141,7 @@
                 <div class="custom-select">
                     <select asp-for="SearchOption" asp-items="Model.AvailableSearchOptions"></select>
                 </div>
-                <a href="/Item/Add" data-button="info">Add Item</a>
+                <a href="/Item/Add/@Model.Id" data-button="info">Add Item</a>
                 <button type="button" id="filter-button">
                     Filter
                     <img src="/img/filter.png">
