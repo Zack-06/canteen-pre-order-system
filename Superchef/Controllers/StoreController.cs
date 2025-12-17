@@ -45,15 +45,21 @@ public class StoreController : Controller
     [Authorize(Roles = "Admin")]
     public IActionResult Manage(ManageStoreVM vm)
     {
+        var vendor = db.Accounts.FirstOrDefault(a => a.Id == vm.Id && !a.IsDeleted && a.AccountType.Name == "Vendor");
+        if (vendor == null)
+        {
+            return NotFound();
+        }
+
         Dictionary<string, Expression<Func<Store, object>>> sortOptions = new()
         {
             { "Id", a => a.Id },
             { "Name", a => a.Name },
             { "Slug", a => a.Slug },
-            { "Items Count", a => a.Items.Count }
+            { "Items Count", a => a.Items.Count },
+            { "Venue", a => a.Venue.Name }
         };
         ViewBag.Fields = sortOptions.Keys.ToList();
-
 
         if (vm.Sort == null || !sortOptions.ContainsKey(vm.Sort) || (vm.Dir != "asc" && vm.Dir != "desc"))
         {
@@ -73,7 +79,60 @@ public class StoreController : Controller
             vm.SearchOption = vm.AvailableSearchOptions.First().Value;
         }
 
-        ViewBag.VendorName = "abc";
+        var results = db.Stores
+            .Include(s => s.Venue)
+            .Include(s => s.Items)
+            .Where(s => s.AccountId == vendor.Id && !s.IsDeleted)
+            .AsQueryable();
+
+        // Search
+        if (!string.IsNullOrWhiteSpace(vm.Search))
+        {
+            var search = vm.Search.Trim() ?? "";
+
+            switch (vm.SearchOption)
+            {
+                case "name":
+                    results = results.Where(s => s.Name.Contains(search));
+                    break;
+                case "slug":
+                    results = results.Where(s => s.Slug.Contains(search));
+                    break;
+                case "id":
+                    results = results.Where(s => s.Id.ToString().Contains(search));
+                    break;
+            }
+        }
+
+        // Filter
+        if (vm.Venues.Count > 0)
+        {
+            results = results.Where(s => vm.Venues.Contains(s.VenueId));
+        }
+
+        if (vm.MinItemsCount != null)
+        {
+            results = results.Where(s => s.Items.Count(i => !i.IsDeleted) >= vm.MinItemsCount);
+        }
+
+        if (vm.MaxItemsCount != null)
+        {
+            results = results.Where(s => s.Items.Count(i => !i.IsDeleted) <= vm.MaxItemsCount);
+        }
+
+        // Sort
+        results = vm.Dir == "asc"
+            ? results.OrderBy(sortOptions[vm.Sort])
+            : results.OrderByDescending(sortOptions[vm.Sort]);
+
+        vm.Results = results.ToPagedList(vm.Page, 10);
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_Manage", vm);
+        }
+
+        ViewBag.VendorName = vendor.Name;
 
         return View(vm);
     }
@@ -443,7 +502,7 @@ public class StoreController : Controller
             return RedirectToAction("Scan", new { id = sessionStoreId });
         }
 
-        var store = db.Stores.FirstOrDefault(s => 
+        var store = db.Stores.FirstOrDefault(s =>
             s.Id == id &&
             !s.IsDeleted &&
             s.AccountId == HttpContext.GetAccount()!.Id
@@ -459,7 +518,7 @@ public class StoreController : Controller
     [Authorize(Roles = "Vendor")]
     public IActionResult ScanChallenge(int id, string orderId)
     {
-        var store = db.Stores.FirstOrDefault(s => 
+        var store = db.Stores.FirstOrDefault(s =>
             s.Id == id &&
             !s.IsDeleted &&
             s.AccountId == HttpContext.GetAccount()!.Id
@@ -474,7 +533,7 @@ public class StoreController : Controller
             return BadRequest("Invalid Order Id");
         }
 
-        var order = db.Orders.FirstOrDefault(o => 
+        var order = db.Orders.FirstOrDefault(o =>
             o.Id == orderId &&
             o.Status != "Preparing"
         );

@@ -351,7 +351,7 @@ public class EditCategoryVM
 
 public class ManageStoreVM
 {
-    public int VendorId { get; set; }
+    public int Id { get; set; }
     public string? Dir { get; set; }
     public string? Sort { get; set; }
     public int Page { get; set; } = 1;
