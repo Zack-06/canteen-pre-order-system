@@ -6,11 +6,13 @@ public class CleanupService
 {
     private readonly DB db;
     private readonly PaymentService paySrv;
+    private readonly ImageService imgSrv;
 
-    public CleanupService(DB db, PaymentService paySrv)
+    public CleanupService(DB db, PaymentService paySrv, ImageService imgSrv)
     {
         this.db = db;
         this.paySrv = paySrv;
+        this.imgSrv = imgSrv;
     }
 
     public async Task OrderExpiryCleanup()
@@ -38,7 +40,7 @@ public class CleanupService
         )
         {
             order.Status = "Completed";
-            paySrv.HandlePayout(order);
+            paySrv.TriggerPayout(order);
         }
         db.SaveChanges();
 
@@ -55,6 +57,12 @@ public class CleanupService
     {
         variant.IsDeleted = true;
         variant.IsActive = false;
+
+        if (!string.IsNullOrEmpty(variant.Image))
+        {
+            imgSrv.DeleteImage(variant.Image, "variant");
+            variant.Image = "";
+        }
 
         db.Carts.RemoveRange(db.Carts.Where(c => c.VariantId == variant.Id));
         db.SaveChanges();
@@ -84,6 +92,12 @@ public class CleanupService
 
         item.IsDeleted = true;
         item.IsActive = false;
+
+        if (!string.IsNullOrEmpty(item.Image))
+        {
+            imgSrv.DeleteImage(item.Image, "item");
+            item.Image = "";
+        }
 
         foreach (var varaint in item.Variants.Where(v => !v.IsDeleted))
         {
@@ -130,11 +144,18 @@ public class CleanupService
             .Include(c => c.Items)
             .FirstOrDefault(c => c.Id == category.Id)!;
 
+        if (!string.IsNullOrEmpty(category.Image))
+        {
+            imgSrv.DeleteImage(category.Image, "category");
+            category.Image = "";
+        }
+
         foreach (var item in category.Items)
         {
             item.CategoryId = 1;
         }
 
+        db.Categories.Remove(category);
         db.SaveChanges();
     }
 
@@ -145,6 +166,17 @@ public class CleanupService
             .FirstOrDefault(s => s.Id == store.Id)!;
 
         store.IsDeleted = true;
+
+        if (!string.IsNullOrEmpty(store.Image))
+        {
+            imgSrv.DeleteImage(store.Image, "store");
+            store.Image = "";
+        }
+        if (!string.IsNullOrEmpty(store.Banner))
+        {
+            imgSrv.DeleteImage(store.Banner, "banner");
+            store.Banner = "";
+        }
 
         foreach (var item in store.Items)
         {
@@ -181,6 +213,7 @@ public class CleanupService
             item.VenueId = 1;
         }
 
+        db.Venues.Remove(venue);
         db.SaveChanges();
     }
 

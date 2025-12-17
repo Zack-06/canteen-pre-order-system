@@ -1,0 +1,63 @@
+@model ManageVenueVM
+
+@using Superchef.Services
+@inject GenerateLinkService GenerateLinkService
+
+<div class="container" data-manage-container="table" data-responsive-container>
+    <table>
+        <thead>
+            <tr>
+                @foreach (var f in ViewBag.Fields)
+                {
+                    var url = GenerateLinkService.GetSortLink(
+                    action: "Manage",
+                    controller: "Venue",
+                    field: f,
+                    currentSort: Model.Sort,
+                    currentDir: Model.Dir
+                    );
+
+                    <th class="@Model.Dir @(f == Model.Sort ? "selected" : "")">
+                        <a data-ajax="true" data-ajax-url="@url" data-ajax-update="#ajax-result-container">@f</a>
+                    </th>
+                }
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody data-result-container>
+            @foreach (var venue in Model.Results)
+            {
+                <tr>
+                    <td>@venue.Id</td>
+                    <td>@venue.Name</td>
+                    <td>@venue.Stores.Count(s => !s.IsDeleted)</td>
+                    <td>
+                        <div class="button-group" data-flex="inline">
+                            @if (venue.Id == 1)
+                            {
+                                <div>Locked</div>
+                            }
+                            else
+                            {
+                                <a href="/Venue/Edit/@venue.Id" data-button="accent">Edit</a>
+                                <a data-ajax="true" data-ajax-url="@Url.Action("Delete", new { Id = venue.Id })"
+                                    data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+                                    data-ajax-confirm="Are you sure you want to delete this venue?"
+                                    data-button="danger">Delete</a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <partial name="_NoResults" model="null" />
+</div>
+
+@Html.PagedListPager(Model.Results,
+page => GenerateLinkService.GetPageLink("Manage", "Venue", page.ToString()),
+PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(),
+ManagePageService.GetAjaxOption())
+)

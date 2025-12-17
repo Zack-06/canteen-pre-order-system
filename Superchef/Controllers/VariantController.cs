@@ -324,6 +324,8 @@ public class VariantController : Controller
         if (error != null) return BadRequest(error);
 
         clnSrv.CleanUp(variant);
+
+        TempData["Message"] = "Variant deleted successfully";
         return Ok();
     }
 

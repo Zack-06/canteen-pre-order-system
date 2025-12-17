@@ -25,10 +25,9 @@ public class PaymentService
                 Action = $"Stripe Webhook Error: Missing OrderId metadata for PaymentIntent with ID {paymentIntent.Id}",
             });
             db.SaveChanges();
-            
+
             return "OrderId metadata missing";
         }
-        ;
 
         var order = db.Orders
             .Include(o => o.Payment)
@@ -42,7 +41,7 @@ public class PaymentService
                 Action = $"Stripe Webhook Error: Order with ID {orderIdStr} not found",
             });
             db.SaveChanges();
-            
+
             return "Order not found";
         }
 
@@ -103,37 +102,45 @@ public class PaymentService
         return null;
     }
 
-    public void HandleChargeRefunded(Charge charge)
+    public string? HandleChargeRefunded(Charge charge)
     {
         var payment = db.Payments.FirstOrDefault(p => p.StripePaymentIntentId == charge.PaymentIntentId);
-        if (payment == null) return;
+        if (payment == null)
+        {
+            db.AuditLogs.Add(new AuditLog
+            {
+                AccountId = 1,
+                Entity = "error",
+                Action = $"Refund failed! Payment not found for Charge {charge.Id}",
+            });
+            db.SaveChanges();
+
+            return "Payment not found";
+        }
 
         payment.IsRefunded = true;
         db.SaveChanges();
+
+        return null;
     }
 
-    public void HandlePayout(Order order)
+    public void TriggerPayout(Order order)
     {
         order = db.Orders
             .Include(o => o.Payment)
             .FirstOrDefault(o => o.Id == order.Id)!;
 
         if (order.Payment == null) return;
+        if (order.Payment.IsPayoutFinished) return;
 
         // Send money to vendor via Stripe Transfer
         var store = db.Stores.FirstOrDefault(v => v.Id == order.StoreId);
         if (store != null && !string.IsNullOrEmpty(store.StripeAccountId))
         {
-            // Calculate vendor payout (if you take a platform commission)
-            decimal vendorAmount = order.Payment.Amount;
-            decimal commissionPercent = 0.1m; // e.g., 1% platform fee
-            decimal commissionAmount = Math.Round(order.Payment.Amount * commissionPercent, 2);
-            vendorAmount -= commissionAmount;
-
             var transferService = new TransferService();
             var transferOptions = new TransferCreateOptions
             {
-                Amount = (long)(vendorAmount * 100), // in cents
+                Amount = (long)(order.Payment.Amount * 100), // in cents
                 Currency = "myr",
                 Destination = store.StripeAccountId,
                 TransferGroup = order.Payment.StripePaymentIntentId
@@ -142,6 +149,7 @@ public class PaymentService
             var transfer = transferService.Create(transferOptions);
 
             // Update transfer status
+            order.Payment.PayoutTransferId = transfer.Id;
             order.Payment.IsPayoutFinished = true;
             db.SaveChanges();
         }
@@ -166,21 +174,26 @@ public class PaymentService
                 Entity = "error",
                 Action = $"Refund failed! Charge not found for PaymentIntent {paymentIntentId}",
             });
+            db.SaveChanges();
+
             return;
         }
 
         // Refund the charge
         var refundService = new RefundService();
-        refundService.Create(new()
+        try
         {
-            Charge = charge.Id,
-        });
-
-        // Update payment status
-        var payment = db.Payments.FirstOrDefault(p => p.StripePaymentIntentId == paymentIntentId);
-        if (payment == null) return;
-
-        payment.IsRefunded = true;
-        db.SaveChanges();
+            var refund = refundService.Create(new() { Charge = charge.Id });
+        }
+        catch (StripeException ex)
+        {
+            db.AuditLogs.Add(new AuditLog
+            {
+                AccountId = 1,
+                Entity = "error",
+                Action = $"Refund failed for PaymentIntent {paymentIntentId}: {ex.Message}"
+            });
+            db.SaveChanges();
+        }
     }
 }

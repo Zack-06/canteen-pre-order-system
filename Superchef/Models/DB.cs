@@ -384,6 +384,8 @@ public class Payment
     public decimal Amount { get; set; }
     [MaxLength(100)]
     public string StripePaymentIntentId { get; set; }
+    [MaxLength(100)]
+    public string? PayoutTransferId { get; set; }
     public bool IsPayoutFinished { get; set; } = false;
     public bool IsRefunded { get; set; } = false;
     [MaxLength(20)]
@@ -438,7 +440,7 @@ public class AuditLog
             if (Action == "update") return "✏️";
             if (Action == "generate-slot") return "🔄";
             if (Entity == "error") return "⚠️";
-            
+
             return "🤔";
         }
     }

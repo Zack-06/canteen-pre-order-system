@@ -55,7 +55,7 @@
 </div>
 
 @Html.PagedListPager(Model.Results,
-page => GenerateLinkService.GetPageLink("Index", "Search", page.ToString()),
+page => GenerateLinkService.GetPageLink("Manage", "Variant", page.ToString()),
 PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(),
 ManagePageService.GetAjaxOption())
 )

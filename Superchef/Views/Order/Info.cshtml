@@ -86,6 +86,21 @@
             <div>Paid At</div>
             <div>:</div>
             <div>@FormatService.ToDateTimeFormat(Model.Payment.CreatedAt, "dd MMM yyyy - h:mm tt")</div>
+
+            @{
+                string? statusText = null;
+                if (Model.Status == "Cancelled")
+                {
+                    statusText = Model.Payment.IsRefunded ? "Refunded" : "Pending Refund";
+                }
+            }
+
+            @if (statusText != null)
+            {
+                <div>Status</div>
+                <div>:</div>
+                <div>@statusText</div>
+            }
         </div>
     </div>
 }

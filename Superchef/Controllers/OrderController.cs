@@ -11,12 +11,14 @@ public class OrderController : Controller
 {
     private readonly DB db;
     private readonly SystemOrderService sysOrderSrv;
+    private readonly PaymentService paySrv;
     private readonly IHubContext<OrderHub> orderHubContext;
 
-    public OrderController(DB db, SystemOrderService sysOrderSrv, IHubContext<OrderHub> orderHubContext)
+    public OrderController(DB db, SystemOrderService sysOrderSrv, PaymentService paySrv, IHubContext<OrderHub> orderHubContext)
     {
         this.db = db;
         this.sysOrderSrv = sysOrderSrv;
+        this.paySrv = paySrv;
         this.orderHubContext = orderHubContext;
     }
 
@@ -661,6 +663,8 @@ public class OrderController : Controller
 
         order.Status = "Completed";
         db.SaveChanges();
+
+        paySrv.TriggerPayout(order);
 
         // todo: notify customer
 

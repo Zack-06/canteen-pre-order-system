@@ -63,7 +63,9 @@ public class WebhookController : ControllerBase
                     
                     return BadRequest("Charge not found");
                 }
-                paySrv.HandleChargeRefunded(charge);
+                
+                string? error = paySrv.HandleChargeRefunded(charge);
+                if (error != null) return BadRequest(error);
             }
 
             return Ok();

@@ -110,6 +110,13 @@
                 <div>:</div>
                 <div>@statusText</div>
             }
+
+            @if (Model.Payment.PayoutTransferId != null)
+            {
+                <div>Payout Transfer ID</div>
+                <div>:</div>
+                <div>@Model.Payment.PayoutTransferId</div>
+            }
         </div>
     </div>
 }

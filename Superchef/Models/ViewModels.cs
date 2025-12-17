@@ -293,7 +293,7 @@ public class ManageVenueVM
 
 public class AddVenueVM
 {
-    [Remote("CheckNameExists", "Venue", ErrorMessage = "{0} already exists")]
+    [Remote("IsNameUnique", "Venue", ErrorMessage = "{0} already exists")]
     [MaxLength(50)]
     public string Name { get; set; }
 }
@@ -301,7 +301,7 @@ public class AddVenueVM
 public class EditVenueVM
 {
     public int Id { get; set; }
-    [Remote("CheckNameExists", "Venue", AdditionalFields = "Id", ErrorMessage = "{0} already exists")]
+    [Remote("IsNameUnique", "Venue", AdditionalFields = "Id", ErrorMessage = "{0} already exists")]
     [MaxLength(50)]
     public string Name { get; set; }
 }
@@ -325,6 +325,7 @@ public class ManageCategoryVM
 public class AddCategoryVM
 {
     [MaxLength(50)]
+    [Remote("IsNameUnique", "Category", ErrorMessage = "{0} already exists")]
     public string Name { get; set; }
     [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;
@@ -337,6 +338,7 @@ public class EditCategoryVM
 {
     public int Id { get; set; }
     [MaxLength(50)]
+    [Remote("IsNameUnique", "Category", AdditionalFields = "Id", ErrorMessage = "{0} already exists")]
     public string Name { get; set; }
     [Range(0.1, 2.0, ErrorMessage = "{0} must be between {1:F2} and {2:F2}")]
     public double ImageScale { get; set; } = 1;

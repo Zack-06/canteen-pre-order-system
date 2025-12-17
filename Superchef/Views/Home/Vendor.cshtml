@@ -21,7 +21,7 @@
                 Image = $"/uploads/store/{store.Image}",
                 Name = store.Name,
                 Rating = store.Items.SelectMany(i => i.Reviews).Average(r => (decimal?)r.Rating) ?? 0m,
-                ItemCount = store.Items.Count,
+                ItemCount = store.Items.Count(i => !i.IsDeleted),
                 DeleteLink = $"/Store/Delete/{store.Id}",
                 DeleteMsg = "Are you sure you want to delete this store?"
             };

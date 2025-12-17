@@ -629,6 +629,8 @@ public class ItemController : Controller
         if (error != null) return BadRequest(error);
 
         clnSrv.CleanUp(item);
+
+        TempData["Message"] = "Item deleted successfully";
         return Ok();
     }
 
