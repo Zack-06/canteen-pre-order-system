@@ -230,7 +230,7 @@ public class CleanupService
         db.Devices.RemoveRange(db.Devices.Where(d => d.AccountId == account.Id));
         db.Verifications.RemoveRange(db.Verifications.Where(v => v.AccountId == account.Id));
 
-        if (account.AccountType.Name == "Customer")
+        if (account.AccountType.Name == "Customer" || account.AccountType.Name == "Vendor")
         {
             db.Carts.RemoveRange(db.Carts.Where(c => c.AccountId == account.Id));
             db.Favourites.RemoveRange(db.Favourites.Where(f => f.AccountId == account.Id));

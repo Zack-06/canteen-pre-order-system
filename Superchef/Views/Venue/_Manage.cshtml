@@ -58,6 +58,6 @@
 
 @Html.PagedListPager(Model.Results,
 page => GenerateLinkService.GetPageLink("Manage", "Venue", page.ToString()),
-PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(),
-ManagePageService.GetAjaxOption())
+PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageHelper.GetPagedOption(),
+ManagePageHelper.GetAjaxOption())
 )

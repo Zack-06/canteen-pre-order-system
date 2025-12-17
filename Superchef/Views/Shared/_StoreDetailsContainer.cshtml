@@ -1,7 +1,7 @@
 @model StoreDetailsContainerDM
 
 @{
-    string ratingText = FormatService.ToRatingFormat(Model.Rating);
+    string ratingText = FormatHelper.ToRatingFormat(Model.Rating);
     string reviewText;
 
     if (Model.TotalReviews <= 0)
@@ -10,7 +10,7 @@
     }
     else
     {
-        reviewText = $"{FormatService.ToCompactNumber(Model.TotalReviews, 1)} review{(Model.TotalReviews > 1 ? "s" : "")}";
+        reviewText = $"{FormatHelper.ToCompactNumber(Model.TotalReviews, 1)} review{(Model.TotalReviews > 1 ? "s" : "")}";
     }
 }
 
@@ -24,7 +24,7 @@
         <span>@reviewText</span>
     </div>
     <div class="venue">@Model.Venue</div>
-    <div class="joined-at">@FormatService.GetRelativeTime(Model.JoinedAt)</div>
+    <div class="joined-at">@FormatHelper.GetRelativeTime(Model.JoinedAt)</div>
 
     @if (Model.ViewStoreButton)
     {

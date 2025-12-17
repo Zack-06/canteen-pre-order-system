@@ -14,7 +14,7 @@ public class CustomerController : Controller
             { "Id", a => a.Id },
             { "Name", a => a.Name },
             { "Email", a => a.Email },
-            { "Status", a => a.IsBanned ? "Banned" : a.DeletionAt != null ? "ToDelete" : a.LockoutEnd != null ? "Timeout" : "Active" },
+            { "Status", a => a.IsBanned ? "Banned" : a.DeletionAt != null ? "To Delete" : a.LockoutEnd != null ? "Timeout" : "Active" },
             { "Creation Date", a => a.CreatedAt }
         };
         ViewBag.Fields = sortOptions.Keys.ToList();
@@ -31,7 +31,7 @@ public class CustomerController : Controller
             new() { Value = "email", Text = "Search By Email" },
             new() { Value = "id", Text = "Search By Id" }
         ];
-        vm.AvailableStatuses = ["Active", "ToDelete", "Timeout", "Banned"];
+        vm.AvailableStatuses = ["Active", "To Delete", "Timeout", "Banned"];
 
         if (vm.SearchOption == null || !vm.AvailableSearchOptions.Any(o => o.Value == vm.SearchOption))
         {

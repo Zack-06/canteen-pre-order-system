@@ -12,8 +12,8 @@
                 <input type="radio" name="Date" value="@date.ToString("yyyy-MM-dd")" @(Model.Date?.ToString("yyyy-MM-dd") ==
                                                                                                  date.ToString("yyyy-MM-dd") ? "checked" : "") data-auto-submit>
                 <div>
-                    <div class="text">@FormatService.ToDateTimeFormat(dateTime, "ddd")</div>
-                    <div class="description">@FormatService.ToDateTimeFormat(dateTime, "MMM dd")</div>
+                    <div class="text">@FormatHelper.ToDateTimeFormat(dateTime, "ddd")</div>
+                    <div class="description">@FormatHelper.ToDateTimeFormat(dateTime, "MMM dd")</div>
                 </div>
             </label>
         }
@@ -42,7 +42,7 @@ else
         {
             var card = new SlotCardDM
             {
-                Text = @FormatService.ToDateTimeFormat(DateTime.Today.Add(slot.ToTimeSpan()), "hh:mm tt"),
+                Text = FormatHelper.ToDateTimeFormat(DateTime.Today.Add(slot.ToTimeSpan()), "hh:mm tt"),
                 Value = slot,
                 IsChecked = Model.Slots.Contains(slot),
                 IsManage = true

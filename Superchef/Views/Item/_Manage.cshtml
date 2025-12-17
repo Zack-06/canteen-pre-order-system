@@ -33,12 +33,12 @@
                     <td>@item.Name</td>
                     <td>@item.Slug</td>
                     <td>
-                        <div class="status-text-container @FormatService.ToStatusClassFormat(item.Status)">@item.Status
+                        <div class="status-text-container @FormatHelper.ToStatusClassFormat(item.Status)">@item.Status
                         </div>
                     </td>
                     <td>@item.Variants.Count(v => !v.IsDeleted)</td>
                     <td>@item.Category.Name</td>
-                    <td>@FormatService.ToDateTimeFormat(item.CreatedAt, "dd MMM yyyy")</td>
+                    <td>@FormatHelper.ToDateTimeFormat(item.CreatedAt, "dd MMM yyyy")</td>
                     <td>
                         <div class="button-group" data-flex="inline">
                             <a href="/Item/Edit/@item.Id" data-button="accent">Edit</a>
@@ -58,6 +58,6 @@
 
 @Html.PagedListPager(Model.Results,
 page => GenerateLinkService.GetPageLink("Manage", "Item", page.ToString()),
-PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(),
-ManagePageService.GetAjaxOption())
+PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageHelper.GetPagedOption(),
+ManagePageHelper.GetAjaxOption())
 )

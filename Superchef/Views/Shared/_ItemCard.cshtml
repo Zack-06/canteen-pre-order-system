@@ -6,10 +6,10 @@
 
     <div class="info">
         <div class="name">@Model.Name</div>
-        <div class="price">@FormatService.ToRMFormat(Model.Price, false)</div>
+        <div class="price">@FormatHelper.ToRMFormat(Model.Price, false)</div>
         <div class="rating">
             <img src="/img/star.png" alt="Star">
-            @FormatService.ToRatingFormat(Model.Rating)
+            @FormatHelper.ToRatingFormat(Model.Rating)
         </div>
         <div class="sold">@Model.Sold</div>
     </div>

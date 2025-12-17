@@ -46,7 +46,7 @@ public class AuthController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        if (ModelState.IsValid("Email") && !CheckEmailExist(vm.Email))
+        if (ModelState.IsValid("Email") && !CheckEmailLogin(vm.Email))
         {
             ModelState.AddModelError("Email", "Email is not registered.");
         }
@@ -156,7 +156,7 @@ public class AuthController : Controller
             return RedirectToAction("Index", "Home");
         }
 
-        if (ModelState.IsValid("Email") && CheckEmailExist(vm.Email))
+        if (ModelState.IsValid("Email") && !CheckEmailRegister(vm.Email))
         {
             ModelState.AddModelError("Email", "Email already registered.");
         }
@@ -322,7 +322,7 @@ public class AuthController : Controller
     [HttpPost]
     public IActionResult ForgotPassword(ForgotPasswordVM vm)
     {
-        if (ModelState.IsValid("Email") && !CheckEmailExist(vm.Email))
+        if (ModelState.IsValid("Email") && !CheckEmailRegister(vm.Email))
         {
             ModelState.AddModelError("Email", "Email is not registered.");
         }
@@ -422,7 +422,7 @@ public class AuthController : Controller
             {
                 ModelState.AddModelError("Email", "Cannot change to the same email.");
             }
-            else if (CheckEmailExist(vm.Email))
+            else if (!CheckEmailRegister(vm.Email))
             {
                 ModelState.AddModelError("Email", "Email already registered.");
             }
@@ -547,18 +547,13 @@ public class AuthController : Controller
     }
 
     // ==========REMOTE==========
-    public bool CheckEmailExist(string email)
+    public bool CheckEmailLogin(string email)
     {
         return db.Accounts.Any(a => a.Email == email && !a.IsDeleted);
     }
 
-    public bool CheckEmailLogin(string email)
-    {
-        return CheckEmailExist(email);
-    }
-
     public bool CheckEmailRegister(string email)
     {
-        return !CheckEmailExist(email);
+        return !db.Accounts.Any(a => a.Email == email && !a.IsDeleted);
     }
 }

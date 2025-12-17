@@ -31,12 +31,12 @@
                 <tr>
                     <td>@variant.Id</td>
                     <td>@variant.Name</td>
-                    <td>@FormatService.ToRMFormat(variant.Price)</td>
+                    <td>@FormatHelper.ToRMFormat(variant.Price)</td>
                     <td>
-                        <div class="status-text-container @FormatService.ToStatusClassFormat(variant.Status)">@variant.Status</div>
+                        <div class="status-text-container @FormatHelper.ToStatusClassFormat(variant.Status)">@variant.Status</div>
                     </td>
                     <td>@variant.Stock</td>
-                    <td>@FormatService.ToDateTimeFormat(variant.CreatedAt, "dd MMM yyyy")</td>
+                    <td>@FormatHelper.ToDateTimeFormat(variant.CreatedAt, "dd MMM yyyy")</td>
                     <td>
                         <div class="button-group" data-flex="inline">
                             <a href="/Variant/Edit/@variant.Id" data-button="accent">Edit</a>
@@ -56,6 +56,6 @@
 
 @Html.PagedListPager(Model.Results,
 page => GenerateLinkService.GetPageLink("Manage", "Variant", page.ToString()),
-PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(),
-ManagePageService.GetAjaxOption())
+PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageHelper.GetPagedOption(),
+ManagePageHelper.GetAjaxOption())
 )

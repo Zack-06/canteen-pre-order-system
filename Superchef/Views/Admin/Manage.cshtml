@@ -39,7 +39,8 @@
     </style>
 }
 
-<form class="container" data-no="color padding">
+<form data-ajax="true" data-ajax-update="#ajax-result-container" data-ajax-complete="closeOverlay('filter-overlay')"
+    class="container" data-no="color padding">
     <input type="hidden" name="Page" value="1" data-clear-form-ignore>
     
     <div id="filter-overlay" class="overlay sidebar-overlay">
@@ -51,11 +52,25 @@
 
             <div class="body">
                 <div class="form-group">
+                    <label>Status</label>
+                    <div class="custom-tick-container center-text-container small-text rounded-border">
+                        @foreach (var status in Model.AvailableStatuses)
+                        {
+                            <label>
+                                <input type="radio" value="@status" asp-for="Status">
+                                <div>
+                                    <div class="text">@status</div>
+                                </div>
+                            </label>
+                        }
+                    </div>
+                </div>
+
+                <div class="form-group">
                     <label asp-for="CreationFrom"></label>
                     <div class="form-input">
                         <input asp-for="CreationFrom" />
                     </div>
-                    <span asp-validation-for="CreationFrom"></span>
                 </div>
 
                 <div class="form-group">
@@ -63,7 +78,6 @@
                     <div class="form-input">
                         <input asp-for="CreationTo" />
                     </div>
-                    <span asp-validation-for="CreationTo"></span>
                 </div>
             </div>
 
@@ -87,11 +101,7 @@
                     </button>
                 </div>
                 <div class="custom-select">
-                    <select>
-                        <option value="1" selected>Search By Name</option>
-                        <option value="2">Search By Email</option>
-                        <option value="3">Search By Id</option>
-                    </select>
+                    <select asp-for="SearchOption" asp-items="Model.AvailableSearchOptions"></select>
                 </div>
                 <a href="/Admin/Add" data-button="info">Add Admin</a>
                 <button type="button" id="filter-button">
@@ -103,81 +113,6 @@
     </div>
 
     <div id="ajax-result-container">
-        <div class="container" data-manage-container="table" data-responsive-container>
-            <table>
-                <thead>
-                    <tr>
-                        <th class="asc selected">
-                            <a data-ajax-url="/Customer/Manage?Dir=desc&amp;Sort=Id&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Id</a>
-                        </th>
-                        <th class="asc ">
-                            <a data-ajax-url="/Customer/Manage?Dir=asc&amp;Sort=Name&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Name</a>
-                        </th>
-                        <th class="asc ">
-                            <a data-ajax-url="/Customer/Manage?Dir=asc&amp;Sort=Email&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Email</a>
-                        </th>
-                        <th class="asc ">
-                            <a data-ajax-url="/Customer/Manage?Dir=asc&amp;Sort=Creation%20Date&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Creation Date</a>
-                        </th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody data-result-container>
-                    <tr>
-                        <td>1</td>
-                        <td>abcafewaf</td>
-                        <td>malaysiasuperme@gmail.com</td>
-                        <td>17 Sep 2025</td>
-                        <td>
-                            <div class="button-group" data-flex="inline">
-                                <a href="/Admin/Edit/1" data-button="accent">Edit</a>
-                                <a href="/Admin/Edit/1" data-button="danger">Delete</a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>8</td>
-                        <td>123🙂😦✅</td>
-                        <td>liewwenjing34882@gmail.com</td>
-                        <td>26 Sep 2025</td>
-                        <td>
-                            <div class="button-group" data-flex="inline">
-                                <a href="/Admin/Edit/8" data-button="accent">Edit</a>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <partial name="_NoResults" model="null" />
-        </div>
-
-
-        <div class="pagination-container">
-            <ul class="pagination">
-                <li class="PagedList-skipToFirst disabled"><a>
-                        <div class="paging-symbol first"></div>
-                    </a></li>
-                <li class="PagedList-skipToPrevious disabled"><a rel="prev">
-                        <div class="paging-symbol prev"></div>
-                    </a></li>
-                <li class="active"><span>1</span></li>
-                <li class=""><span>201</span></li>
-                <li class=""><span>2</span></li>
-                <li class=""><span>2</span></li>
-                <li class=""><span>2</span></li>
-                <li class="PagedList-skipToNext disabled"><a rel="next">
-                        <div class="paging-symbol next"></div>
-                    </a></li>
-                <li class="PagedList-skipToLast disabled"><a>
-                        <div class="paging-symbol last"></div>
-                    </a></li>
-            </ul>
-        </div>
+        <partial name="_Manage" model="Model" />
     </div>
 </form>

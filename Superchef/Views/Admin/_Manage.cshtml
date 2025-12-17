@@ -1,0 +1,63 @@
+@model ManageAdminVM
+
+@using Superchef.Services
+@inject GenerateLinkService GenerateLinkService
+
+<div class="container" data-manage-container="table" data-responsive-container>
+    <table>
+        <thead>
+            <tr>
+                @foreach (var f in ViewBag.Fields)
+                {
+                    var url = GenerateLinkService.GetSortLink(
+                    action: "Manage",
+                    controller: "Admin",
+                    field: f,
+                    currentSort: Model.Sort,
+                    currentDir: Model.Dir
+                    );
+
+                    <th class="@Model.Dir @(f == Model.Sort ? "selected" : "")">
+                        <a data-ajax="true" data-ajax-url="@url" data-ajax-update="#ajax-result-container">@f</a>
+                    </th>
+                }
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody data-result-container>
+            @foreach (var admin in Model.Results)
+            {
+                <tr>
+                    <td>@admin.Id</td>
+                    <td>@admin.Name</td>
+                    <td>@admin.Email</td>
+                    <td>
+                        <div class="status-text-container @FormatHelper.ToStatusClassFormat(admin.Status)">@admin.Status</div>
+                    </td>
+                    <td>@FormatHelper.ToDateTimeFormat(admin.CreatedAt, "dd MMM yyyy")</td>
+                    <td>
+                        <div class="button-group" data-flex="inline">
+                            <a href="/Admin/Edit/@admin.Id" data-button="accent">Edit</a>
+                            @if (admin.Email != "superchef.system@gmail.com")
+                            {
+                                <a data-ajax="true" data-ajax-url="@Url.Action("Delete", new { Id = admin.Id })"
+                                    data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+                                    data-ajax-confirm="Are you sure you want to delete this admin account?"
+                                    data-button="danger">Delete</a>
+                            }
+                        </div>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <partial name="_NoResults" model="null" />
+</div>
+
+@Html.PagedListPager(Model.Results,
+page => GenerateLinkService.GetPageLink("Manage", "Admin", page.ToString()),
+PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageHelper.GetPagedOption(),
+ManagePageHelper.GetAjaxOption())
+)

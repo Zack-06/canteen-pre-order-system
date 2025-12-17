@@ -33,10 +33,10 @@
                     <td>@order.Name</td>
                     <td>@order.AccountId</td>
                     <td>
-                        <div class="status-text-container @FormatService.ToStatusClassFormat(order.Status)">@order.Status</div>
+                        <div class="status-text-container @FormatHelper.ToStatusClassFormat(order.Status)">@order.Status</div>
                     </td>
-                    <td>@FormatService.ToDateTimeFormat(order.Slot.StartTime, "dd MMM yyyy hh:mm tt")</td>
-                    <td>@FormatService.ToDateTimeFormat(order.CreatedAt, "dd MMM yyyy hh:mm tt")</td>
+                    <td>@FormatHelper.ToDateTimeFormat(order.Slot.StartTime, "dd MMM yyyy hh:mm tt")</td>
+                    <td>@FormatHelper.ToDateTimeFormat(order.CreatedAt, "dd MMM yyyy hh:mm tt")</td>
                     <td>
                         <div class="button-group" data-flex="inline">
                             <a href="/Order/Edit/@order.Id" data-button="accent">Edit</a>
@@ -52,6 +52,6 @@
 
 @Html.PagedListPager(Model.Results,
 page => GenerateLinkService.GetPageLink("Manage", "Order", page.ToString()),
-PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageService.GetPagedOption(),
-ManagePageService.GetAjaxOption())
+PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageHelper.GetPagedOption(),
+ManagePageHelper.GetAjaxOption())
 )

@@ -43,12 +43,12 @@
     <div data-column-container="3">
         <div>Date</div>
         <div>:</div>
-        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "dd MMM yyyy (ddd)")</div>
+        <div>@FormatHelper.ToDateTimeFormat(Model.Slot.StartTime, "dd MMM yyyy (ddd)")</div>
 
         <div>Time</div>
         <div>:</div>
-        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "h:mm tt") -
-            @FormatService.ToDateTimeFormat(Model.Slot.EndTime, "h:mm tt")</div>
+        <div>@FormatHelper.ToDateTimeFormat(Model.Slot.StartTime, "h:mm tt") -
+            @FormatHelper.ToDateTimeFormat(Model.Slot.EndTime, "h:mm tt")</div>
 
         <div>Venue</div>
         <div>:</div>

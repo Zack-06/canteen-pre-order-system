@@ -101,7 +101,7 @@ public class ItemController : Controller
 
         return Json(new
         {
-            stock = FormatService.ToStockCountFormat(variant.Stock)
+            stock = FormatHelper.ToStockCountFormat(variant.Stock)
         });
     }
 

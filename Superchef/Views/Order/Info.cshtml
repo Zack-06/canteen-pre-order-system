@@ -12,15 +12,15 @@
 
             <div>Date</div>
             <div>:</div>
-            <div>@FormatService.ToDateTimeFormat(Model.CreatedAt, "dd MMM yyyy (ddd)")</div>
+            <div>@FormatHelper.ToDateTimeFormat(Model.CreatedAt, "dd MMM yyyy (ddd)")</div>
 
             <div>Time</div>
             <div>:</div>
-            <div>@FormatService.ToDateTimeFormat(Model.CreatedAt, "h:mm tt")</div>
+            <div>@FormatHelper.ToDateTimeFormat(Model.CreatedAt, "h:mm tt")</div>
 
             <div>Total Price</div>
             <div>:</div>
-            <div>@FormatService.ToRMFormat(Model.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m)</div>
+            <div>@FormatHelper.ToRMFormat(Model.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m)</div>
 
             <div>Status</div>
             <div>:</div>
@@ -35,12 +35,12 @@
     <div data-column-container="3">
         <div>Date</div>
         <div>:</div>
-        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "dd MMM yyyy (ddd)")</div>
+        <div>@FormatHelper.ToDateTimeFormat(Model.Slot.StartTime, "dd MMM yyyy (ddd)")</div>
 
         <div>Time</div>
         <div>:</div>
-        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "h:mm tt") -
-            @FormatService.ToDateTimeFormat(Model.Slot.EndTime, "h:mm tt")</div>
+        <div>@FormatHelper.ToDateTimeFormat(Model.Slot.StartTime, "h:mm tt") -
+            @FormatHelper.ToDateTimeFormat(Model.Slot.EndTime, "h:mm tt")</div>
 
         <div>Store</div>
         <div>:</div>
@@ -85,7 +85,7 @@
 
             <div>Paid At</div>
             <div>:</div>
-            <div>@FormatService.ToDateTimeFormat(Model.Payment.CreatedAt, "dd MMM yyyy - h:mm tt")</div>
+            <div>@FormatHelper.ToDateTimeFormat(Model.Payment.CreatedAt, "dd MMM yyyy - h:mm tt")</div>
 
             @{
                 string? statusText = null;

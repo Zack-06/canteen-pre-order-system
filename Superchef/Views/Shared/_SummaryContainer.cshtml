@@ -2,7 +2,7 @@
 
 <div id="summary-container" class="container" data-full data-no="color">
     <div class="summary-info">
-        <div class="price">@FormatService.ToRMFormat(Model.TotalPrice)</div>
+        <div class="price">@FormatHelper.ToRMFormat(Model.TotalPrice)</div>
         <span>-</span>
         <div class="items" data-count="@Model.TotalItems">@Model.TotalItems</div>
     </div>

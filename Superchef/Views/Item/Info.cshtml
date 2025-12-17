@@ -661,7 +661,7 @@
             @if (Model.TotalReviews > 0)
             {
                 <div class="rating-container">
-                    <span>@FormatService.ToRatingFormat(ratingValue)</span>
+                    <span>@FormatHelper.ToRatingFormat(ratingValue)</span>
                     <div class="rating-stars-container">
                         <div class="empty-star">
                             <div class="star-setter">
@@ -697,10 +697,10 @@
             <span>@Model.TotalSold Sold</span>
         </div>
         <div class="price">
-            <span>@FormatService.ToRMFormat(minPrice, false)</span>
+            <span>@FormatHelper.ToRMFormat(minPrice, false)</span>
             @if (maxPrice != minPrice)
             {
-                <span>@FormatService.ToRMFormat(maxPrice, false)</span>
+                <span>@FormatHelper.ToRMFormat(maxPrice, false)</span>
             }
         </div>
 
@@ -776,7 +776,7 @@
     <div class="title">Reviews</div>
     <div id="rating-header">
         <div class="rating-container">
-            <span>@FormatService.ToRatingFormat(ratingValue)</span>
+            <span>@FormatHelper.ToRatingFormat(ratingValue)</span>
             <div class="rating-stars-container">
                 <div class="empty-star">
                     <div class="star-setter">

@@ -1533,7 +1533,8 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child > * {
 	--status-text-container-bg: var(--status-success-bg);
 	--status-text-container-color: var(--status-success-text);
 }
-.status-text-container.deleted,
+.status-text-container.inactive,
+.status-text-container.to-delete,
 .status-text-container.canceled {
 	--status-text-container-bg: var(--status-error-bg);
 	--status-text-container-color: var(--status-error-text);
@@ -1543,7 +1544,8 @@ main.mobile [data-manage-container="table"] tbody tr td:last-child > * {
 	--status-text-container-bg: var(--status-disabled-bg);
 	--status-text-container-color: var(--status-disabled-text);
 }
-.status-text-container.to-pickup {
+.status-text-container.to-pickup,
+.status-text-container.timeout {
 	--status-text-container-bg: var(--status-warning-bg);
 	--status-text-container-color: var(--status-warning-text);
 }

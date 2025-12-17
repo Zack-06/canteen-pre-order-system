@@ -29,14 +29,14 @@ public class VerificationService
         }
 
         // Generate token
-        var token = GeneratorService.RandomString(50);
+        var token = GeneratorHelper.RandomString(50);
         while (db.Verifications.Any(u => u.Token == token))
         {
-            token = GeneratorService.RandomString(50);
+            token = GeneratorHelper.RandomString(50);
         }
 
         // Generate OTP
-        var otp = GeneratorService.RandomString(6, "0123456789");
+        var otp = GeneratorHelper.RandomString(6, "0123456789");
 
         // Add new verification
         Verification verification = new()

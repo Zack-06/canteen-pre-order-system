@@ -2,16 +2,16 @@
 
 <div class="order-history-card">
     <div class="id">@Model.Id</div>
-    <div class="status-text-container @FormatService.ToStatusClassFormat(Model.Status)">@Model.Status</div>
+    <div class="status-text-container @FormatHelper.ToStatusClassFormat(Model.Status)">@Model.Status</div>
     <div class="store">@Model.Store</div>
-    <div class="created-at">@FormatService.ToDateTimeFormat(Model.CreatedAt)</div>
+    <div class="created-at">@FormatHelper.ToDateTimeFormat(Model.CreatedAt)</div>
 
     @if (Model.PickupAt != null)
     {
-        <div class="pickup-at">@FormatService.ToDateTimeFormat(Model.PickupAt.Value)</div>
+        <div class="pickup-at">@FormatHelper.ToDateTimeFormat(Model.PickupAt.Value)</div>
     }
     <div class="total-items">@Model.TotalItems</div>
-    <div class="price">@FormatService.ToRMFormat(Model.TotalPrice, false)</div>
+    <div class="price">@FormatHelper.ToRMFormat(Model.TotalPrice, false)</div>
 
     @if (Model.Status != "Pending")
     {

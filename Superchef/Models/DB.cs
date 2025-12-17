@@ -95,7 +95,7 @@ public class Account
         {
             if (IsBanned) return "Banned";
 
-            if (DeletionAt != null) return "ToDelete";
+            if (DeletionAt != null) return "To Delete";
 
             if (IsDeleted) return "Deleted";
 

@@ -242,7 +242,7 @@ public class AddVendorVM
 
     [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
-    [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
+    [Remote("CheckEmailRegister", "Vendor", ErrorMessage = "{0} already registered.")]
     public string Email { get; set; }
 }
 
@@ -253,6 +253,7 @@ public class ManageAdminVM
     public int Page { get; set; } = 1;
     public string? Search { get; set; }
     public string? SearchOption { get; set; }
+    public string? Status { get; set; }
     [DisplayName("Creation Date From")]
     [DataType(DataType.Date)]
     public DateTime? CreationFrom { get; set; }
@@ -261,6 +262,7 @@ public class ManageAdminVM
     public DateTime? CreationTo { get; set; }
 
     public List<SelectListItem> AvailableSearchOptions { get; set; } = [];
+    public List<string> AvailableStatuses { get; set; } = [];
     public IPagedList<Account> Results { get; set; }
 }
 
@@ -271,7 +273,7 @@ public class AddAdminVM
 
     [StringLength(255, ErrorMessage = "{1} must not exceed {0} characters.")]
     [EmailAddress(ErrorMessage = "Invalid email address.")]
-    [Remote("CheckEmailRegister", "Auth", ErrorMessage = "{0} already registered.")]
+    [Remote("CheckEmailRegister", "Admin", ErrorMessage = "{0} already registered.")]
     public string Email { get; set; }
 }
 

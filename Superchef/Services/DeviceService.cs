@@ -156,10 +156,10 @@ public class DeviceService
     public string createSession(int deviceId, bool isShort)
     {
         // Generate session token
-        var sessionToken = GeneratorService.RandomString(50);
+        var sessionToken = GeneratorHelper.RandomString(50);
         while (db.Sessions.Any(u => u.Token == sessionToken))
         {
-            sessionToken = GeneratorService.RandomString(50);
+            sessionToken = GeneratorHelper.RandomString(50);
         }
 
         // Create session
