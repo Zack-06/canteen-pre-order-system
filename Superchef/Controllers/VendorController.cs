@@ -189,7 +189,7 @@ public class VendorController : Controller
 
         if (account.IsBanned)
         {
-            return BadRequest("This vendor is already banned.");
+            return BadRequest("This vendor is already banned");
         }
 
         account.IsBanned = true;
@@ -218,7 +218,7 @@ public class VendorController : Controller
 
         if (!account.IsBanned)
         {
-            return BadRequest("This vendor isn't banned.");
+            return BadRequest("This vendor isn't banned");
         }
 
         account.IsBanned = false;
@@ -239,7 +239,7 @@ public class VendorController : Controller
 
         if (account.DeletionAt == null)
         {
-            return BadRequest("This vendor isn't scheduled for deletion.");
+            return BadRequest("This vendor isn't scheduled for deletion");
         }
 
         account.DeletionAt = null;
@@ -260,7 +260,7 @@ public class VendorController : Controller
 
         if (account.LockoutEnd == null)
         {
-            return BadRequest("This vendor doesn't have timeout.");
+            return BadRequest("This vendor doesn't have timeout");
         }
 
         account.LockoutEnd = null;

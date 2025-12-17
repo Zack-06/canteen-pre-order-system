@@ -199,7 +199,7 @@ public class AdminController : Controller
 
         if (account.LockoutEnd == null)
         {
-            return BadRequest("This admin doesn't have timeout.");
+            return BadRequest("This admin doesn't have timeout");
         }
 
         account.LockoutEnd = null;
