@@ -293,6 +293,7 @@ public class VariantController : Controller
             variant.Name = vm.Name.Trim();
             variant.Price = vm.Price;
             variant.Stock = vm.StockCount;
+            variant.IsActive = vm.Active;
             db.SaveChanges();
 
             TempData["Message"] = "Variant updated successfully";

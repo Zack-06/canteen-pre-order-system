@@ -1,7 +1,7 @@
 @model OrderItemCardDM
 
 <a @(Model.Link != null ? $"href={Model.Link}" : "") class="order-item-card">
-    <img src="/uploads/item/@Model.Image" alt="Item Image">
+    <img src="/uploads/variant/@Model.Image" alt="Item Image">
 
     <div style="grid-area: id1">Id</div>
     <div style="grid-area: id2">:</div>

@@ -1,4 +1,3 @@
-@using Microsoft.SqlServer.Server
 @model Order
 
 <div class="container" data-limit-container>
@@ -91,7 +90,6 @@
     </div>
 }
 
-
 <div class="container" data-limit-container>
     <div class="title">Ordered Items</div>
 
@@ -105,6 +103,7 @@
                 Variant = item.Variant.Name,
                 Quantity = item.Quantity,
                 Subtotal = item.Price * item.Quantity,
+                Image = item.Variant.Image,
                 Link = item.Variant.Item.IsActive ? $"/Item/Info/{item.Variant.Item.Slug}" : null
             };
             <partial name="_OrderItemCard" model="@card" />

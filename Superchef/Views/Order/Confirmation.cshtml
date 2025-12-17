@@ -71,6 +71,7 @@
                 Variant = item.Variant.Name,
                 Quantity = item.Quantity,
                 Subtotal = item.Price * item.Quantity,
+                Image = item.Variant.Image,
                 Link = null
             };
             <partial name="_OrderItemCard" model="@card" />

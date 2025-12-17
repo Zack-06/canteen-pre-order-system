@@ -82,7 +82,7 @@ public class StoreController : Controller
     public IActionResult Select(int id, string? ReturnUrl)
     {
         var store = db.Stores
-            .FirstOrDefault(s => 
+            .FirstOrDefault(s =>
                 s.Id == id &&
                 s.AccountId == HttpContext.GetAccount()!.Id &&
                 !s.IsDeleted
@@ -340,7 +340,7 @@ public class StoreController : Controller
     {
         var store = db.Stores
             .Include(s => s.SlotTemplates)
-            .FirstOrDefault(s => 
+            .FirstOrDefault(s =>
                 s.Id == vm.StoreId
             );
 
@@ -428,28 +428,67 @@ public class StoreController : Controller
         return View();
     }
 
-    public IActionResult Scan(int id)
+    [Authorize(Roles = "Vendor")]
+    public IActionResult Scan(int? id)
     {
+        if (id == null)
+        {
+            var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
+            if (sessionStoreId == null)
+            {
+                TempData["Message"] = "Please choose a store first";
+                return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Scan") });
+            }
+
+            return RedirectToAction("Scan", new { id = sessionStoreId });
+        }
+
+        var store = db.Stores.FirstOrDefault(s => 
+            s.Id == id &&
+            !s.IsDeleted &&
+            s.AccountId == HttpContext.GetAccount()!.Id
+        );
+        if (store == null)
+        {
+            return NotFound();
+        }
+
         return View(id);
     }
 
-    public IActionResult ScanChallenge(int? id, string? orderId)
+    [Authorize(Roles = "Vendor")]
+    public IActionResult ScanChallenge(int id, string orderId)
     {
-        if (id == null || orderId == null)
+        var store = db.Stores.FirstOrDefault(s => 
+            s.Id == id &&
+            !s.IsDeleted &&
+            s.AccountId == HttpContext.GetAccount()!.Id
+        );
+        if (store == null)
         {
-            return BadRequest();
+            return NotFound("Store not found");
         }
 
-        // return Ok(new
-        // {
-        //     status = "error",
-        //     errorMessage = "Invalid order ID"
-        // });
-
-        return Ok(new
+        if (string.IsNullOrEmpty(orderId))
         {
-            status = "success",
-        });
+            return BadRequest("Invalid Order Id");
+        }
+
+        var order = db.Orders.FirstOrDefault(o => 
+            o.Id == orderId &&
+            o.Status != "Preparing"
+        );
+        if (order == null)
+        {
+            return BadRequest("Order not found");
+        }
+
+        if (order.StoreId != store.Id)
+        {
+            return Unauthorized("Order is not from this store");
+        }
+
+        return Ok();
     }
 
     public IActionResult ConnectStripe(int id)
@@ -508,7 +547,7 @@ public class StoreController : Controller
     [Authorize(Roles = "Vendor")]
     public IActionResult GetStripeAccountEmail(int id)
     {
-        var store = db.Stores.FirstOrDefault(s => 
+        var store = db.Stores.FirstOrDefault(s =>
             s.Id == id &&
             s.AccountId == HttpContext.GetAccount()!.Id &&
             !s.IsDeleted

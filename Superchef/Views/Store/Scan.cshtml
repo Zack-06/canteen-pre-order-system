@@ -38,7 +38,9 @@
 @section foot {
     <script src="/js/jsQr.min.js"></script>
     <script>
-        const tryDuration = 700
+        const tryDuration = 100
+        const showDuration = 2000
+        var repeatLoop = true
         var video = document.createElement("video");
         var canvasElement = $("canvas")[0];
         var canvas = canvasElement.getContext("2d");
@@ -78,8 +80,6 @@
                     inversionAttempts: "dontInvert",
                 });
 
-
-
                 if (code) {
                     drawLine(code.location.topLeftCorner, code.location.topRightCorner, "#FF3B58");
                     drawLine(code.location.topRightCorner, code.location.bottomRightCorner, "#FF3B58");
@@ -89,11 +89,16 @@
                     if (triedId[code.data] == null) {
                         triedId[code.data] = {
                             error: null,
-                            startTime: null
+                            startTime: null,
+                            showTime: null
                         }
                     }
 
                     if (triedId[code.data].error) {
+                        for (const key in triedId) {
+                            triedId[key].showTime = null
+                        }
+                        triedId[code.data].showTime = Date.now()
                         outputMessage.innerText = triedId[code.data].error
                     } else {
                         if (triedId[code.data].startTime == null) {
@@ -102,29 +107,44 @@
                             outputMessage.innerText = "Verifing..."
 
                             try {
-                                const request = await fetch(`/Store/ScanChallenge?id=@Model&orderId=${code.data}`)
-                                const data = await request.json()
-
-                                if (data.status === "success") {
-                                    outputMessage.innerText = "Success"
-                                    redirectToPage(`/Order/Edit/${code.data}`)
-                                } else if (data.status === "error") {
-                                    triedId[code.data].error = `Error: ${data.errorMessage}`
-                                    outputMessage.innerText = triedId[code.data].error
-                                }
-                            } catch (e) {
-                                console.error(e)
-                            }
+                                await $.ajax(`/Store/ScanChallenge/@Model?orderId=${code.data}`, {
+                                    success: function (data) {
+                                        repeatLoop = false
+                                        outputMessage.innerText = "Success"
+                                        redirectToPage(`/Order/Edit/${code.data}`)
+                                    },
+                                    error: function (xhr, status, error) {
+                                        for (const key in triedId) {
+                                            triedId[key].showTime = null
+                                        }
+                                        triedId[code.data].error = `Error: ${xhr.responseText}`
+                                        triedId[code.data].showTime = Date.now()
+                                        outputMessage.innerText = triedId[code.data].error
+                                    }
+                                })
+                            } catch (e) { }
                         }
                     }
                 } else {
+                    var showText = "No QR code detected"
                     for (const key in triedId) {
                         triedId[key].startTime = null
+
+                        if (triedId[key].showTime != null) {
+                            if (Date.now() - triedId[key].showTime > showDuration) {
+                                triedId[key].showTime = null
+                            } else {
+                                showText = triedId[key].error
+                            }
+                        }
                     }
-                    outputMessage.innerText = "No QR code detected"
+                    outputMessage.innerText = showText
                 }
             }
-            requestAnimationFrame(tick);
+
+            if (repeatLoop) {
+                requestAnimationFrame(tick);
+            }
         }
     </script>
 }

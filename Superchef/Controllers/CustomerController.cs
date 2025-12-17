@@ -1,8 +1,10 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Superchef.Controllers;
 
+[Authorize(Roles = "Admin")]
 public class CustomerController : Controller
 {
     public IActionResult Manage(ManageCustomerVM vm)

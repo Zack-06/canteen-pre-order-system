@@ -91,7 +91,6 @@
                     <div class="form-input">
                         <input asp-for="PickupFrom" />
                     </div>
-                    <span asp-validation-for="PickupFrom"></span>
                 </div>
 
                 <div class="form-group">
@@ -99,7 +98,6 @@
                     <div class="form-input">
                         <input asp-for="PickupTo" />
                     </div>
-                    <span asp-validation-for="PickupTo"></span>
                 </div>
 
                 <div class="form-group">
@@ -107,7 +105,6 @@
                     <div class="form-input">
                         <input asp-for="CreationFrom" />
                     </div>
-                    <span asp-validation-for="CreationFrom"></span>
                 </div>
 
                 <div class="form-group">
@@ -115,7 +112,6 @@
                     <div class="form-input">
                         <input asp-for="CreationTo" />
                     </div>
-                    <span asp-validation-for="CreationTo"></span>
                 </div>
             </div>
 
@@ -139,11 +135,7 @@
                     </button>
                 </div>
                 <div class="custom-select">
-                    <select>
-                        <option value="1" selected>Search By Id</option>
-                        <option value="2">Search By Customer Name</option>
-                        <option value="3">Search By Customer Id</option>
-                    </select>
+                    <select asp-for="SearchOption" asp-items="Model.AvailableSearchOptions"></select>
                 </div>
                 <button type="button" id="filter-button">
                     Filter
@@ -154,96 +146,6 @@
     </div>
 
     <div id="ajax-result-container">
-        <div class="container" data-manage-container="table" data-responsive-container>
-            <table>
-                <thead>
-                    <tr>
-                        <th class="asc selected">
-                            <a href="/Customer/Manage?Dir=desc&amp;Sort=Id&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Id</a>
-                        </th>
-                        <th class="asc ">
-                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Name&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Customer Name</a>
-                        </th>
-                        <th class="asc ">
-                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Email&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Customer Id</a>
-                        </th>
-                        <th class="asc ">
-                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Email&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Status</a>
-                        </th>
-                        <th class="asc ">
-                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Email&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Pickup At</a>
-                        </th>
-                        <th class="asc ">
-                            <a href="/Customer/Manage?Dir=asc&amp;Sort=Creation%20Date&amp;Page=1&amp;SearchOption=name"
-                                data-ajax="true" data-ajax-update="#ajax-result-container">Created At</a>
-                        </th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-
-                <tbody data-result-container>
-                    <tr>
-                        <td>afjwalfe-afejwkalf-aflkjew</td>
-                        <td>abcafewaf</td>
-                        <td>123</td>
-                        <td>
-                            <div class="status-text-container confirmed">Confirmed</div>
-                        </td>
-                        <td>26 Sep 2025 10:00 AM</td>
-                        <td>26 Sep 2025 10:00 AM</td>
-                        <td>
-                            <div class="button-group" data-flex="inline">
-                                <a href="/Order/Edit/1" data-button="accent">Edit</a>
-                            </div>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>afjwalfe-afejwkalf-aflkjew</td>
-                        <td>abcafewaf</td>
-                        <td>123</td>
-                        <td>
-                            <div class="status-text-container preparing">Preparing</div>
-                        </td>
-                        <td>26 Sep 2025 10:00 AM</td>
-                        <td>26 Sep 2025 10:00 AM</td>
-                        <td>
-                            <div class="button-group" data-flex="inline">
-                                <a href="/Order/Edit/1" data-button="accent">Edit</a>
-                            </div>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <partial name="_NoResults" model="null" />
-        </div>
-
-
-        <div class="pagination-container">
-            <ul class="pagination">
-                <li class="PagedList-skipToFirst disabled"><a>
-                        <div class="paging-symbol first"></div>
-                    </a></li>
-                <li class="PagedList-skipToPrevious disabled"><a rel="prev">
-                        <div class="paging-symbol prev"></div>
-                    </a></li>
-                <li class="active"><span>1</span></li>
-                <li class=""><span>201</span></li>
-                <li class=""><span>2</span></li>
-                <li class=""><span>2</span></li>
-                <li class=""><span>2</span></li>
-                <li class="PagedList-skipToNext disabled"><a rel="next">
-                        <div class="paging-symbol next"></div>
-                    </a></li>
-                <li class="PagedList-skipToLast disabled"><a>
-                        <div class="paging-symbol last"></div>
-                    </a></li>
-            </ul>
-        </div>
+        <partial name="_Manage" model="Model" />
     </div>
 </form>

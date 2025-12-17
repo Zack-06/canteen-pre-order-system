@@ -7,7 +7,6 @@ using Stripe.Checkout;
 
 namespace Superchef.Controllers;
 
-[Authorize(Roles = "Customer")]
 public class OrderController : Controller
 {
     private readonly DB db;
@@ -21,6 +20,7 @@ public class OrderController : Controller
         this.orderHubContext = orderHubContext;
     }
 
+    [Authorize(Roles = "Customer")]
     public IActionResult Customer(string id)
     {
         var order = db.Orders
@@ -53,6 +53,7 @@ public class OrderController : Controller
         return View(vm);
     }
 
+    [Authorize(Roles = "Customer")]
     [HttpPost]
     public IActionResult Customer(OrderCustomerVM vm)
     {
@@ -89,6 +90,7 @@ public class OrderController : Controller
         return View(vm);
     }
 
+    [Authorize(Roles = "Customer")]
     public IActionResult Slot(OrderSlotVM vm)
     {
         var order = db.Orders
@@ -162,6 +164,7 @@ public class OrderController : Controller
         return View(vm);
     }
 
+    [Authorize(Roles = "Customer")]
     [HttpPost]
     public async Task<IActionResult> SelectSlot(OrderSlotVM vm)
     {
@@ -256,6 +259,7 @@ public class OrderController : Controller
         return BadRequest("Slot not available");
     }
 
+    [Authorize(Roles = "Customer")]
     public IActionResult Confirmation(string id)
     {
         var order = db.Orders
@@ -343,6 +347,7 @@ public class OrderController : Controller
         return View("Status", "failed");
     }
 
+    [Authorize(Roles = "Customer")]
     public IActionResult Info(string id)
     {
         var order = db.Orders
@@ -370,6 +375,28 @@ public class OrderController : Controller
     [Authorize(Roles = "Vendor")]
     public IActionResult Manage(ManageOrderVM vm)
     {
+        if (vm.Id == null)
+        {
+            var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
+            if (sessionStoreId == null)
+            {
+                TempData["Message"] = "Please choose a store first";
+                return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Manage") });
+            }
+
+            return RedirectToAction("Manage", new { id = sessionStoreId });
+        }
+
+        var store = db.Stores.FirstOrDefault(s =>
+            s.Id == vm.Id &&
+            s.AccountId == HttpContext.GetAccount()!.Id &&
+            !s.IsDeleted
+        );
+        if (store == null)
+        {
+            return NotFound();
+        }
+
         Dictionary<string, Expression<Func<Order, object>>> sortOptions = new()
         {
             { "Id", a => a.Id },
@@ -384,8 +411,8 @@ public class OrderController : Controller
 
         if (vm.Sort == null || !sortOptions.ContainsKey(vm.Sort) || (vm.Dir != "asc" && vm.Dir != "desc"))
         {
-            vm.Sort = sortOptions.Keys.First();
-            vm.Dir = "asc";
+            vm.Sort = sortOptions.Keys.Last();
+            vm.Dir = "desc";
         }
 
         vm.AvailableSearchOptions = [
@@ -393,25 +420,96 @@ public class OrderController : Controller
             new() { Value = "customer_name", Text = "Search By Customer Name" },
             new() { Value = "customer_id", Text = "Search By Customer Id" },
         ];
-        vm.AvailableStatuses = ["Confirmed", "Preparing", "Completed", "Cancelled"];
+        vm.AvailableStatuses = ["Confirmed", "Preparing", "To Pickup", "Completed", "Cancelled"];
 
         if (vm.SearchOption == null || !vm.AvailableSearchOptions.Any(o => o.Value == vm.SearchOption))
         {
             vm.SearchOption = vm.AvailableSearchOptions.First().Value;
         }
 
-        ViewBag.StoreName = "abc";
+        var results = db.Orders
+            .Include(o => o.Slot)
+            .Where(o => o.StoreId == store.Id && o.Status != "Pending")
+            .AsQueryable();
+
+        // Search
+        if (!string.IsNullOrWhiteSpace(vm.Search))
+        {
+            var search = vm.Search.Trim() ?? "";
+
+            switch (vm.SearchOption)
+            {
+                case "id":
+                    results = results.Where(o => o.Id.ToString().Contains(search));
+                    break;
+                case "customer_name":
+                    results = results.Where(o => o.Name.Contains(search));
+                    break;
+                case "customer_id":
+                    results = results.Where(o => o.AccountId.ToString().Contains(search));
+                    break;
+            }
+        }
+
+        // Filter
+        if (vm.Statuses.Count > 0)
+        {
+            results = results.Where(o => vm.Statuses.Contains(o.Status));
+        }
+
+        if (vm.CreationFrom != null)
+        {
+            results = results.Where(o => o.CreatedAt >= vm.CreationFrom);
+        }
+
+        if (vm.CreationTo != null)
+        {
+            results = results.Where(o => o.CreatedAt <= vm.CreationTo);
+        }
+
+        // Sort
+        results = vm.Dir == "asc"
+            ? results.OrderBy(sortOptions[vm.Sort])
+            : results.OrderByDescending(sortOptions[vm.Sort]);
+
+        vm.Results = results.ToPagedList(vm.Page, 10);
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_Manage", vm);
+        }
+
+        ViewBag.StoreName = store.Name;
 
         return View(vm);
     }
 
     [Authorize(Roles = "Vendor")]
-    public IActionResult Edit(int id)
+    public IActionResult Edit(string id)
     {
-        // edit order details (vendor)
-        return View();
+        var order = db.Orders
+            .Include(o => o.Payment)
+            .Include(o => o.Slot)
+            .Include(o => o.Store)
+                .ThenInclude(s => s.Venue)
+            .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Variant)
+                    .ThenInclude(v => v.Item)
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.Store.AccountId == HttpContext.GetAccount()!.Id &&
+                o.Status != "Pending"
+            );
+
+        if (order == null)
+        {
+            return NotFound("Order not found");
+        }
+
+        return View(order);
     }
 
+    [Authorize(Roles = "Customer")]
     [HttpPost]
     public IActionResult Reorder(string id)
     {
@@ -471,28 +569,101 @@ public class OrderController : Controller
     [Authorize(Roles = "Customer,Vendor")]
     public async Task<IActionResult> Cancel(string id)
     {
-        Order? order;
-        if (HttpContext.GetAccount()!.AccountType.Name == "Customer")
-        {
-            order = db.Orders
+        var order = db.Orders
+            .Include(o => o.Store)
             .FirstOrDefault(o =>
                 o.Id == id &&
-                o.AccountId == HttpContext.GetAccount()!.Id &&
                 (o.Status == "Pending" || o.Status == "Confirmed")
             );
-        } else
+
+        if (order == null)
         {
-            order = db.Orders
-                .FirstOrDefault(o =>
-                    o.Id == id &&
-                    o.Store.AccountId == HttpContext.GetAccount()!.Id &&
-                    o.Status == "Confirmed"
-                );
+            return NotFound("Order not found");
         }
 
-        if (order == null) return NotFound("Order not found");
+        var acc = HttpContext.GetAccount()!;
+
+        if (acc.AccountType.Name == "Customer")
+        {
+            if (order.AccountId != acc.Id)
+            {
+                return Unauthorized("You are not authorized to cancel this order");
+            }
+        }
+        else if (acc.AccountType.Name == "Vendor")
+        {
+            if (order.Status == "Pending")
+            {
+                return Unauthorized("You are not authorized to cancel this order");
+            }
+
+            if (order.Store.AccountId != acc.Id)
+            {
+                return Unauthorized("You are not authorized to cancel this order");
+            }
+        } else
+        {
+            if (order.Status == "Pending")
+            {
+                return Unauthorized("You are not authorized to cancel this order");
+            }
+        }
 
         await sysOrderSrv.CancelOrder(order);
+        return Ok();
+    }
+
+    [Authorize(Roles = "Vendor")]
+    public IActionResult MarkReady(string id)
+    {
+        var order = db.Orders
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.Store.AccountId == HttpContext.GetAccount()!.Id
+            );
+
+        if (order == null)
+        {
+            return NotFound("Order not found");
+        }
+
+        if (order.Status != "Preparing")
+        {
+            return BadRequest("Order unable to be marked as ready");
+        }
+        
+        order.Status = "To Pickup";
+        db.SaveChanges();
+
+        // todo: notify customer
+
+        return Ok();
+    }
+
+    [Authorize(Roles = "Vendor")]
+    public IActionResult Complete(string id)
+    {
+        var order = db.Orders
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.Store.AccountId == HttpContext.GetAccount()!.Id
+            );
+
+        if (order == null)
+        {
+            return NotFound("Order not found");
+        }
+
+        if (order.Status != "To Pickup" && order.Status != "Preparing")
+        {
+            return BadRequest("Order unable to be marked as completed");
+        }
+
+        order.Status = "Completed";
+        db.SaveChanges();
+
+        // todo: notify customer
+
         return Ok();
     }
 }

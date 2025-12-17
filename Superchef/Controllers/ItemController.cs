@@ -320,6 +320,16 @@ public class ItemController : Controller
             results = results.Where(i => i.Variants.Count(v => !v.IsDeleted) <= vm.MaxVariantsCount);
         }
 
+        if (vm.CreationFrom != null)
+        {
+            results = results.Where(i => i.CreatedAt >= vm.CreationFrom);
+        }
+
+        if (vm.CreationTo != null)
+        {
+            results = results.Where(i => i.CreatedAt <= vm.CreationTo);
+        }
+
         // Sort
         results = vm.Dir == "asc"
             ? results.OrderBy(sortOptions[vm.Sort])
@@ -484,6 +494,7 @@ public class ItemController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Vendor")]
     public IActionResult Edit(EditItemVM vm)
     {
         var item = db.Items
@@ -602,6 +613,7 @@ public class ItemController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Vendor")]
     public IActionResult Delete(int id)
     {
         if (!Request.IsAjax()) return NotFound();

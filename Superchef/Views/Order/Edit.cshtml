@@ -1,3 +1,5 @@
+@model Order
+
 <div class="container" data-limit-container>
     <div class="title">Order Details</div>
 
@@ -6,23 +8,23 @@
         <div data-column-container="3">
             <div>Id</div>
             <div>:</div>
-            <div>idk Lorem ipsum dolor, sit amet consectetur adipisicing elit. Quidem, itaque?</div>
+            <div>@Model.Id</div>
 
             <div>Date</div>
             <div>:</div>
-            <div>IDK SUERP LONG</div>
+            <div>@FormatService.ToDateTimeFormat(Model.CreatedAt, "dd MMM yyyy (ddd)")</div>
 
             <div>Time</div>
             <div>:</div>
-            <div>IDK SUERP LONG</div>
+            <div>@FormatService.ToDateTimeFormat(Model.CreatedAt, "h:mm tt")</div>
 
             <div>Total Price</div>
             <div>:</div>
-            <div>IDK SUERP LONG</div>
+            <div>@FormatService.ToRMFormat(Model.OrderItems.Sum(i => (decimal?)i.Price * i.Quantity) ?? 0m)</div>
 
             <div>Status</div>
             <div>:</div>
-            <div>IDK SUERP LONG</div>
+            <div>@Model.Status</div>
         </div>
     </div>
 </div>
@@ -33,94 +35,140 @@
     <div data-column-container="3">
         <div>Date</div>
         <div>:</div>
-        <div>idk</div>
+        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "dd MMM yyyy (ddd)")</div>
 
         <div>Time</div>
         <div>:</div>
-        <div>idk</div>
+        <div>@FormatService.ToDateTimeFormat(Model.Slot.StartTime, "h:mm tt") -
+            @FormatService.ToDateTimeFormat(Model.Slot.EndTime, "h:mm tt")</div>
 
         <div>Store</div>
         <div>:</div>
-        <div><a href="">store link</a></div>
+        <div><a href="/Store/Info/@Model.Store.Slug">@Model.Store.Name</a></div>
 
         <div>Venue</div>
         <div>:</div>
-        <div>Redbrick</div>
+        <div>@Model.Store.Venue.Name</div>
     </div>
 </div>
+
 <div class="container" data-limit-container>
     <div class="title">Customer Details</div>
 
     <div data-column-container="3">
         <div>Id</div>
         <div>:</div>
-        <div>123</div>
+        <div>@Model.AccountId</div>
 
         <div>Name</div>
         <div>:</div>
-        <div>idk</div>
+        <div>@Model.Name</div>
 
         <div>Phone Number</div>
         <div>:</div>
-        <div>idk</div>
+        <div>@Model.PhoneNumber</div>
     </div>
 </div>
 
-<div class="container" data-limit-container>
-    <div class="title">Payment Details</div>
 
-    <div data-column-container="3">
-        <div>Payment Option</div>
-        <div>:</div>
-        <div>Grab Pay</div>
+@if (Model.Payment != null)
+{
+    <div class="container" data-limit-container>
+        <div class="title">Payment Details</div>
 
-        <div>Paid At</div>
-        <div>:</div>
-        <div>29 Oct 2025 - 09:21 PM</div>
+        <div data-column-container="3">
+            <div>Payment Option</div>
+            <div>:</div>
+            <div>@Model.Payment.PaymentMethod</div>
+
+            @if (!string.IsNullOrEmpty(Model.Payment.Details))
+            {
+                <div>Details</div>
+                <div>:</div>
+                <div>@Model.Payment.Details</div>
+            }
+
+            <div>Paid At</div>
+            <div>:</div>
+            <div>@FormatService.ToDateTimeFormat(Model.Payment.CreatedAt, "dd MMM yyyy - h:mm tt")</div>
+
+            @{
+                string? statusText = null;
+                if (Model.Status == "Completed")
+                {
+                    statusText = Model.Payment.IsPayoutFinished ? "Paid Out" : "Pending Payout";
+                }
+                else if (Model.Status == "Cancelled")
+                {
+                    statusText = Model.Payment.IsRefunded ? "Refunded" : "Pending Refund";
+                }
+            }
+
+            @if (statusText != null)
+            {
+                <div>Status</div>
+                <div>:</div>
+                <div>@statusText</div>
+            }
+        </div>
     </div>
-</div>
+}
 
 <div class="container" data-limit-container>
     <div class="title">Ordered Items</div>
 
     <div class="container" data-no="padding margin" data-flex="column gap">
-        @for (int i = 0; i < 3; i++)
+        @foreach (var item in Model.OrderItems)
         {
             var card = new OrderItemCardDM
             {
-                Link = i == 0 ? null : "breh",
-                Image = "",
-                Id = i,
-                Name = "item",
-                Variant = "variant",
-                Quantity = i,
-                Subtotal = 100.00m
+                Id = item.VariantId,
+                Name = item.Variant.Item.Name,
+                Variant = item.Variant.Name,
+                Quantity = item.Quantity,
+                Subtotal = item.Price * item.Quantity,
+                Image = item.Variant.Image,
+                Link = !item.Variant.Item.IsDeleted ? $"/Item/Edit/{item.VariantId}" : null
             };
             <partial name="_OrderItemCard" model="@card" />
         }
     </div>
 </div>
 
-<div class="container" data-limit-container>
-    <div class="title">Action</div>
-    <div class="button-group" data-flex="inline column">
-        <a data-button="accent" data-ajax="true" data-ajax-url="" data-ajax-method="POST"
-            data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
-            data-ajax-confirm="Are you sure you want to mark this order as ready for pickup?">Mark as Ready</a>
+@if (Model.Status != "Cancelled")
+{
+    <div class="container" data-limit-container>
+        <div class="title">Action</div>
+        <div class="button-group" data-flex="inline column">
+            @if (Model.Status == "Preparing")
+            {
+                <a data-button="accent" data-ajax="true" data-ajax-url="@Url.Action("MarkReady", new { id = Model.Id })"
+                    data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+                    data-ajax-confirm="Are you sure you want to mark this order as ready for pickup?">Mark as Ready</a>
+            }
 
-        <a data-button="danger" data-ajax="true" data-ajax-url="" data-ajax-method="POST"
-            data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
-            data-ajax-confirm="Are you sure you want to Cancel this order?">Cancel Order</a>
+            @if (Model.Status == "Confirmed")
+            {
+                <a data-button="danger" data-ajax="true" data-ajax-url="@Url.Action("Cancel", new { id = Model.Id })"
+                    data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+                    data-ajax-confirm="Are you sure you want to cancel this order?">Cancel Order</a>
+            }
 
-        <a data-button="success" data-ajax="true" data-ajax-url="" data-ajax-method="POST"
-            data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
-            data-ajax-confirm="Are you sure you want to Complete this order?">Complete Order</a>
+            @if (Model.Status == "Preparing" || Model.Status == "To Pickup")
+            {
+                <a data-button="success" data-ajax="true" data-ajax-url="@Url.Action("Complete", new { id = Model.Id })"
+                    data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"
+                    data-ajax-confirm="Are you sure you want to complete this order?">Complete Order</a>
+            }
+        </div>
     </div>
+}
+
 
 @section foot {
-        <script src="/js/qrcode.min.js"></script>
-        <script>
-            var bookingId = "12345";
-            new QRCode(document.getElementById("qr-container"), bookingId);
-        </script>
+    <script src="/js/qrcode.min.js"></script>
+    <script>
+        var bookingId = "@Model.Id";
+        new QRCode(document.getElementById("qr-container"), bookingId);
+    </script>
 }
