@@ -1,33 +1,24 @@
 @model ManageSlotVM
 
 @{
-    ViewBag.Title = ((ViewBag.InitSlot == null || ViewBag.InitSlot == false) ? "Manage Slots" : "Setup Slots") + " | Superchef";
+    ViewBag.Title = "Manage Slots | Superchef";
 }
 
-<form data-ajax="true" data-ajax-update="#ajax-result-container" data-ajax-failure="defaultOnFailure" method="get">
+<form data-ajax="true" data-ajax-update="#ajax-result-container" data-ajax-failure="defaultOnFailure">
     <div class="container" data-limit-container>
-        <div class="title">@((ViewBag.InitSlot == null || ViewBag.InitSlot == false) ? "Manage Slots" : "Setup Slots") -
-            @ViewBag.StoreName</div>
+        <div class="title">Manage Slots - @ViewBag.StoreName</div>
 
-        @if (ViewBag.InitSlot == null || ViewBag.InitSlot == false)
-        {
-            <div class="custom-tick-container center-text">
-                @foreach (var type in Model.AvailableTypes)
-                {
-                    <label>
-                        <input type="radio" name="Type" value="@type" @(Model.Type == type ? "checked" : "") data-auto-submit>
-                        <div>
-                            <div class="text">@type</div>
-                        </div>
-                    </label>
-                }
-            </div>
-        }
-        else
-        {
-            <p>Publishing will finalize your first slots. After that, future slots update automatically. Slots within the
-                next three days cannot be edited.</p>
-        }
+        <div class="custom-tick-container center-text">
+            @foreach (var type in Model.AvailableTypes)
+            {
+                <label>
+                    <input type="radio" value="@type" asp-for="Type" data-auto-submit>
+                    <div>
+                        <div class="text">@type</div>
+                    </div>
+                </label>
+            }
+        </div>
     </div>
 
     <div id="ajax-result-container" class="container" data-limit-container>
@@ -35,75 +26,56 @@
     </div>
 </form>
 
-<form data-ajax="true" data-ajax-failure="formFailed" method="post">
-    <input id="post-type" asp-for="Type" hidden>
-    <input id="post-date" asp-for="Date" hidden>
-    <input id="post-day" asp-for="Day" hidden>
-    <input id="post-add-slot" asp-for="AddSlot" hidden>
-    <input id="post-remove-slot" asp-for="RemoveSlot" hidden>
-    <input id="post-enable-all" asp-for="IsEnabledAll" hidden>
-    <input id="post-disable-all" asp-for="IsDisabledAll" hidden>
-    <input id="post-use-recurring" asp-for="IsUseRecurring" hidden>
-</form>
-
 @section foot {
     <script>
-        const getForm = $("main form[method='get']")
-        const postForm = $("main form[method='post']")
-
-        $(document).on("change", "input[name='Slots']", async function () {
-            const $input = $(this)
-            const value = $input.val()
-            const sendAdd = $input.prop("checked")
-
-            clearInputs()
-            addNecessaryInputs()
-            $(sendAdd ? "#post-add-slot" : "#post-remove-slot").val(value)
-            submitForm()
-        })
-
         $(document).on("click", "#enable-all", function () {
-            clearInputs()
-            addNecessaryInputs()
-            $("#post-enable-all").prop("checked", true)
-            submitForm()
+            $("input[name='Slots']").each(function () {
+                $(this).prop("checked", "true")
+            })
         })
 
         $(document).on("click", "#disable-all", function () {
-            clearInputs()
-            addNecessaryInputs()
-            $("#post-disable-all").prop("checked", true)
-            submitForm()
-        })
-
-        $(document).on("click", "#use-recurring", function () {
-            clearInputs()
-            addNecessaryInputs()
-            $("#post-use-recurring").prop("checked", true)
-            submitForm()
-        })
-
-        function clearInputs() {
-            $(postForm).find("input").each(function () {
-                $(this).val("")
+            $("input[name='Slots']").each(function () {
+                $(this).prop("checked", "")
             })
+        })
+
+        function hi() {
+            console.log("hi")
         }
 
-        function addNecessaryInputs() {
-            $("#post-type").val(getForm.find("input[name='Type']").val())
-            $("#post-date").val(getForm.find("input[name='Date']").val())
-            $("#post-day").val(getForm.find("input[name='Day']").val())
-        }
+        $(document).on("click", "#use-recurring", function (e) {
+            e.preventDefault()
+            e.stopPropagation()
 
-        function submitForm(method = "post") {
-            if (method == "post") return postForm.trigger("submit")
+            const selectedDate = $("input[name='Date']:checked").val()
 
-            getForm.trigger("submit")
-        }
+            $.ajax({
+                url: '@Url.Action("GetRecurringSlots", new { id = Model.Id })',
+                data: { date: selectedDate },
+                success: function (data) {
+                    $("input[name='Slots']").each(function () {
+                        const input = $(this)
+                        input.prop("checked", data.includes(input.val()) ? "true" : "")
+                    })
+                },
+                error: defaultOnFailure
+            })
 
-        function formFailed(...args) {
-            defaultOnFailure(...args)
-            submitForm("get")
-        }
+        })
+
+        $(document).on("click", "#save-slots-button", async function () {
+            const formData = $(this).closest("form").serialize()
+
+            $.ajax({
+                url: '@Url.Action("Slots", new { id = Model.Id })',
+                type: 'POST',
+                data: formData,
+                success: function (data) {
+                    showToast("Slots saved successfully")
+                },
+                error: defaultOnFailure
+            })
+        })
     </script>
 }

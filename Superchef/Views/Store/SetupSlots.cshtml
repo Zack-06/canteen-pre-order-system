@@ -1,0 +1,84 @@
+@model SetupSlotVM
+
+@{
+    ViewBag.Title = "Setup Slots | Superchef";
+}
+
+<form data-ajax="true" data-ajax-update="#ajax-result-container" data-ajax-failure="defaultOnFailure">
+    <div class="container" data-limit-container>
+        <div class="title">Setup Slots - @ViewBag.StoreName</div>
+
+        <p>Publishing will finalize your first slots. After that, future slots update automatically according to your
+            <strong>recurring</strong> slots. Slots for today and the next two days are <strong>locked</strong> and
+            cannot be modified.
+        </p>
+    </div>
+
+    <div class="container" data-limit-container>
+        @foreach (var date in Model.AvailableSlots)
+        {
+            <div class="title">@FormatHelper.ToDateTimeFormat(date.Key.ToDateTime(TimeOnly.MinValue), "dd MMM yyyy (ddd)")
+            </div>
+
+            <div class="container" data-no="padding color">
+                <div class="listing-container custom-tick-container center-text">
+                    @foreach (var slot in date.Value)
+                    {
+                        var card = new SlotCardDM
+                        {
+                            Text = FormatHelper.ToDateTimeFormat(slot, "hh:mm tt"),
+                            ValueDateTime = slot,
+                            IsChecked = false,
+                            IsManage = true,
+                            ReadOnly = false
+                        };
+
+                        <partial name="_SlotCard" model="@card" />
+                    }
+                </div>
+            </div>
+
+            <div class="container divider" data-orientation="horizontal" data-no="padding"></div>
+        }
+
+        <div class="container" data-no="padding color">
+            <div class="button-group" data-flex="wrap">
+                <button id="enable-all" type="button" data-button="info">Enable All</button>
+                <button id="disable-all" type="button" data-button="danger">Disable All</button>
+                <button  data-button="success">Setup Slots</button>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section foot {
+    <script>
+        $(document).on("click", "#enable-all", function () {
+            $("input[name='Slots']").each(function () {
+                $(this).prop("checked", "true")
+            })
+        })
+
+        $(document).on("click", "#disable-all", function () {
+            $("input[name='Slots']").each(function () {
+                $(this).prop("checked", "")
+            })
+        })
+
+        $(document).on("submit", "main > form", async function () {
+            if (!(await confirmation("Are you sure you want to publish these slots for today and the next two days? Once published, they cannot be edited."))) return
+
+            const formData = $(this).serialize()
+
+            $.ajax({
+                url: '@Url.Action("SetupSlots", new { id = Model.Id })',
+                type: 'POST',
+                data: formData,
+                success: function (data) {
+                    window.location.href = data
+                },
+                error: defaultOnFailure
+            })
+        })
+    </script>
+}

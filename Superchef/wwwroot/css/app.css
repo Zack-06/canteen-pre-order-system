@@ -1828,6 +1828,9 @@ main:has([data-result-container]):has([data-result-container] *) #no-results {
 	pointer-events: none;
 	background-color: var(--bg-card) !important;
 }
+.slot-card.readonly {
+    pointer-events: none;
+}
 
 /* Column Container */
 [data-column-container] {

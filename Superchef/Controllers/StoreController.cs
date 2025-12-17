@@ -379,8 +379,18 @@ public class StoreController : Controller
             store.Name = vm.Name.Trim();
             store.Slug = vm.Slug;
             store.Description = vm.Description.Trim();
-            store.SlotMaxOrders = vm.SlotMaxOrders;
             store.VenueId = vm.Venue;
+            store.SlotMaxOrders = vm.SlotMaxOrders;
+
+            var tmpNow = DateTime.Now;
+            foreach (var slot in store.Slots)
+            {
+                if (DateOnly.FromDateTime(slot.StartTime) == DateOnly.FromDateTime(tmpNow.AddDays(3)))
+                {
+                    slot.MaxOrders = vm.SlotMaxOrders;
+                }
+            }
+
             db.SaveChanges();
 
             TempData["Message"] = "Store updated successfully";
@@ -395,20 +405,126 @@ public class StoreController : Controller
         return View(vm);
     }
 
+    [Authorize(Roles = "Vendor")]
+    public IActionResult SetupSlots(SetupSlotVM vm)
+    {
+        var store = db.Stores
+            .FirstOrDefault(s =>
+                s.Id == vm.Id &
+                !s.IsDeleted &
+                s.AccountId == HttpContext.GetAccount()!.Id &
+                !s.HasPublishedFirstSlots
+            );
+        if (store == null)
+        {
+            return NotFound();
+        }
+
+        var tmpNow = DateTime.Now;
+        List<DateOnly> availableDates = [
+            DateOnly.FromDateTime(tmpNow),
+            DateOnly.FromDateTime(tmpNow.AddDays(1)),
+            DateOnly.FromDateTime(tmpNow.AddDays(2))
+        ];
+
+        vm.AvailableSlots = [];
+        foreach (var date in availableDates)
+        {
+            vm.AvailableSlots.Add(
+                date,
+                db.SlotTemplates
+                    .Where(s => s.DayOfWeek == (int)date.DayOfWeek)
+                    .Select(s => new DateTime(
+                        date.Year, date.Month, date.Day,
+                        s.StartTime.Hour, s.StartTime.Minute, 0
+                    ))
+                    .ToList()
+            );
+        }
+
+        if (Request.Method == "GET")
+        {
+            vm.Slots = [];
+
+            ViewBag.StoreName = store.Name;
+            return View(vm);
+        }
+
+        // Validate Slots
+        foreach (var slot in vm.Slots)
+        {
+            var date = DateOnly.FromDateTime(slot);
+            if (!vm.AvailableSlots.ContainsKey(date))
+            {
+                return BadRequest("Invalid date! Refresh the page and try again");
+            }
+
+            if (!vm.AvailableSlots[date].Contains(slot))
+            {
+                return BadRequest("Invalid slot! Refresh the page and try again");
+            }
+        }
+
+        // Add slots
+        foreach (var slotDateTime in vm.Slots)
+        {
+            var slot = new Slot
+            {
+                StartTime = slotDateTime,
+                EndTime = slotDateTime.AddMinutes(30),
+                MaxOrders = store.SlotMaxOrders,
+                StoreId = vm.Id
+            };
+            db.Slots.Add(slot);
+        }
+        
+        store.HasPublishedFirstSlots = true;
+        db.SaveChanges();
+
+        TempData["Message"] = "Slots published successfully";
+        return Ok(Url.Action("Slots", "Store", new { id = vm.Id }));
+    }
+
+    [Authorize(Roles = "Vendor")]
     public IActionResult Slots(ManageSlotVM vm)
     {
         var store = db.Stores
             .Include(s => s.SlotTemplates)
             .FirstOrDefault(s =>
-                s.Id == vm.StoreId
+                s.Id == vm.Id &
+                !s.IsDeleted &
+                s.AccountId == HttpContext.GetAccount()!.Id
             );
+        if (store == null)
+        {
+            return NotFound();
+        }
 
-        vm.AvailableTypes = ["Custom", "Recurring"];
-        vm.AvailableDates = [
-            DateOnly.FromDateTime(DateTime.Now.AddDays(2)),
-            DateOnly.FromDateTime(DateTime.Now.AddDays(3)),
-            DateOnly.FromDateTime(DateTime.Now.AddDays(4))
-        ];
+        if (!store.HasPublishedFirstSlots)
+        {
+            return RedirectToAction("SetupSlots", "Store", new { id = vm.Id });
+        }
+
+        var tmpNow = DateTime.Now;
+
+        vm.AvailableTypes = ["Custom", "Recurring", "Live"];
+        if (vm.Type == "Live")
+        {
+            vm.AvailableDates = [
+                DateOnly.FromDateTime(tmpNow),
+                DateOnly.FromDateTime(tmpNow.AddDays(1)),
+                DateOnly.FromDateTime(tmpNow.AddDays(2))
+            ];
+        }
+        else
+        {
+            vm.AvailableDates = [
+                DateOnly.FromDateTime(tmpNow.AddDays(3)),
+                DateOnly.FromDateTime(tmpNow.AddDays(4)),
+                DateOnly.FromDateTime(tmpNow.AddDays(5))
+            ];
+        }
+
         vm.AvailableDays = new()
         {
             [0] = "Sun",
@@ -419,66 +535,156 @@ public class StoreController : Controller
             [5] = "Fri",
             [6] = "Sat"
         };
-        ViewBag.InitSlot = false;
 
         if (vm.Type == null || !vm.AvailableTypes.Contains(vm.Type))
         {
+            if (Request.Method == "POST")
+            {
+                return BadRequest("Invalid type! Refresh the page and try again");
+            }
+
             vm.Type = vm.AvailableTypes.First();
         }
 
-        if (vm.Date == null || !vm.AvailableDates.Contains(vm.Date.Value))
-        {
-            vm.Date = vm.AvailableDates.First();
-        }
-
-        if (vm.Day == null || !vm.AvailableDays.ContainsKey(vm.Day.Value))
-        {
-            vm.Day = vm.AvailableDays.First().Key;
-        }
-
         // Available Slots
-        if (vm.Type == "Custom")
+        if (vm.Type == "Custom" || vm.Type == "Live")
         {
+            if (vm.Date == null || !vm.AvailableDates.Contains(vm.Date.Value))
+            {
+                vm.Date = vm.AvailableDates.First();
+            }
+
             vm.AvailableSlots = [];
             foreach (var avSlot in db.SlotTemplates.Where(s => s.DayOfWeek == (int)vm.Date.Value.DayOfWeek))
             {
                 var slot = new DateTime(vm.Date.Value.Year, vm.Date.Value.Month, vm.Date.Value.Day, avSlot.StartTime.Hour, avSlot.StartTime.Minute, 0);
-                if (slot > DateTime.Now)
+                if (slot > tmpNow.AddMinutes(-30))
                 {
-                    vm.AvailableSlots.Add(TimeOnly.FromDateTime(slot));
+                    vm.AvailableSlots.Add(avSlot.StartTime);
                 }
             }
         }
         else
         {
+            if (vm.Day == null || !vm.AvailableDays.ContainsKey(vm.Day.Value))
+            {
+                vm.Day = vm.AvailableDays.First().Key;
+            }
+
             vm.AvailableSlots = db.SlotTemplates.Where(s => s.DayOfWeek == vm.Day).Select(s => s.StartTime).ToList();
         }
 
-        // Enabled Slots
-        if (vm.Type == "Custom" || (ViewBag.InitSlot != null && ViewBag.InitSlot == true))
+        if (Request.Method == "GET")
         {
-            vm.Slots = db.Slots.Where(s => s.StoreId == vm.StoreId && DateOnly.FromDateTime(s.StartTime) == vm.Date).Select(s => TimeOnly.FromDateTime(s.StartTime)).ToList();
-        }
-        else
-        {
-            // select
-            if (store != null)
+            // Selected Slots
+            if (vm.Type == "Custom" || vm.Type == "Live")
             {
-                vm.Slots = store.SlotTemplates.Where(s => s.DayOfWeek == vm.Day).Select(s => s.StartTime).ToList();
+                vm.Slots = db.Slots.Where(s => s.StoreId == vm.Id && DateOnly.FromDateTime(s.StartTime) == vm.Date).Select(s => TimeOnly.FromDateTime(s.StartTime)).ToList();
             }
             else
             {
-                vm.Slots = [];
+                vm.Slots = store.SlotTemplates.Where(s => s.DayOfWeek == vm.Day).Select(s => s.StartTime).ToList();
+            }
+
+            if (Request.IsAjax())
+            {
+                return PartialView("_Slots", vm);
+            }
+
+            ViewBag.StoreName = store.Name;
+            return View(vm);
+        }
+
+        if (vm.Type == "Live")
+        {
+            return BadRequest("Live slots cannot be modified");
+        }
+
+        // Validate Slots
+        foreach (var slot in vm.Slots)
+        {
+            if (!vm.AvailableSlots.Contains(slot))
+            {
+                return BadRequest("Invalid slot! Refresh the page and try again");
             }
         }
 
-        if (Request.IsAjax())
+        // Remove Slots
+        if (vm.Type == "Custom")
         {
-            return PartialView("_Slots", vm);
+            if (vm.Date == null || !vm.AvailableDates.Contains(vm.Date.Value))
+            {
+                return BadRequest("Invalid date! Refresh the page and try again");
+            }
+
+            // Remove slots
+            var pendingRemovals = db.Slots
+                .Where(s =>
+                    s.StoreId == vm.Id &&
+                    DateOnly.FromDateTime(s.StartTime) == vm.Date
+                )
+                .ToList();
+            db.Slots.RemoveRange(pendingRemovals);
+
+            // Add slots
+            foreach (var slotTime in vm.Slots)
+            {
+                var slotDateTime = new DateTime(vm.Date.Value.Year, vm.Date.Value.Month, vm.Date.Value.Day, slotTime.Hour, slotTime.Minute, 0);
+                var slot = new Slot
+                {
+                    StartTime = slotDateTime,
+                    EndTime = slotDateTime.AddMinutes(30),
+                    MaxOrders = store.SlotMaxOrders,
+                    StoreId = vm.Id
+                };
+                db.Slots.Add(slot);
+            }
+        }
+        else
+        {
+            if (vm.Day == null || !vm.AvailableDays.ContainsKey(vm.Day.Value))
+            {
+                return BadRequest("Invalid day! Refresh the page and try again");
+            }
+
+            store.SlotTemplates.RemoveAll(s => s.DayOfWeek == vm.Day);
+
+            // Add slots
+            foreach (var slotTime in vm.Slots)
+            {
+                var recurringSlot = db.SlotTemplates.FirstOrDefault(s => s.DayOfWeek == vm.Day && s.StartTime == slotTime);
+                if (recurringSlot == null) continue;
+
+                store.SlotTemplates.Add(recurringSlot);
+            }
         }
 
-        ViewBag.StoreName = "Hainan Chicken Rice";
-        return View(vm);
+        if (!store.HasPublishedFirstSlots)
+        {
+            store.HasPublishedFirstSlots = true;
+            TempData["Message"] = "Slots published successfully";
+        }
+        db.SaveChanges();
+        return Ok();
+    }
+
+    public IActionResult GetRecurringSlots(int id, DateOnly date)
+    {
+        if (!Request.IsAjax()) return NotFound();
+
+        var store = db.Stores
+            .Include(s => s.SlotTemplates)
+            .FirstOrDefault(s => s.Id == id && !s.IsDeleted);
+        if (store == null)
+        {
+            return NotFound("Store not found");
+        }
+
+        var recurringSlots = store.SlotTemplates
+            .Where(s => s.DayOfWeek == (int)date.DayOfWeek)
+            .Select(s => FormatHelper.ToDateTimeFormat(DateTime.Today.Add(s.StartTime.ToTimeSpan()), "h:mm tt"))
+            .ToList();
+        return Json(recurringSlots);
     }
 
     public IActionResult Report(int id)

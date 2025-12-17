@@ -428,18 +428,21 @@ public class EditStoreVM
     public List<SelectListItem> AvailableVenues { get; set; } = [];
 }
 
+public class SetupSlotVM
+{
+    public int Id { get; set; }
+    public List<DateTime> Slots { get; set; } = [];
+
+    public Dictionary<DateOnly, List<DateTime>> AvailableSlots { get; set; } = [];
+}
+
 public class ManageSlotVM
 {
-    public int StoreId { get; set; }
+    public int Id { get; set; }
     public string? Type { get; set; }
     public DateOnly? Date { get; set; }
     public int? Day { get; set; }
     public List<TimeOnly> Slots { get; set; } = [];
-    public TimeOnly? AddSlot { get; set; }
-    public TimeOnly? RemoveSlot { get; set; }
-    public bool IsEnabledAll { get; set; }
-    public bool IsDisabledAll { get; set; }
-    public bool IsUseRecurring { get; set; }
 
     public List<string> AvailableTypes { get; set; } = [];
     public List<DateOnly> AvailableDates { get; set; } = [];

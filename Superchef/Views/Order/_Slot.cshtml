@@ -28,7 +28,8 @@
                 Text = FormatHelper.ToDateTimeFormat(DateTime.Today.Add(slot.ToTimeSpan()), "hh:mm tt"),
                 Value = slot,
                 IsDisabled = !Model.EnabledSlots.Contains(slot),
-                IsChecked = slot == Model.Slot
+                IsChecked = slot == Model.Slot,
+                ReadOnly = false
             };
 
             <partial name="_SlotCard" model="@card" />

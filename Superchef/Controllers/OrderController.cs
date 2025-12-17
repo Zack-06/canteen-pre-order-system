@@ -129,20 +129,20 @@ public class OrderController : Controller
         foreach (var avSlot in db.SlotTemplates.Where(s => s.DayOfWeek == (int)vm.Date.Value.DayOfWeek))
         {
             var slot = new DateTime(vm.Date.Value.Year, vm.Date.Value.Month, vm.Date.Value.Day, avSlot.StartTime.Hour, avSlot.StartTime.Minute, 0);
-            if (slot > tmpNow.AddMinutes(8 + 30))
+            if (slot > startOrderTime)
             {
                 vm.AvailableSlots.Add(avSlot.StartTime);
             }
         }
 
         vm.EnabledSlots = db.Slots
-             .Where(s =>
-                 s.StoreId == order.StoreId &&
-                 DateOnly.FromDateTime(s.StartTime) == vm.Date &&
-                 s.MaxOrders > s.Orders.Count
-             )
-             .Select(s => TimeOnly.FromDateTime(s.StartTime))
-             .ToList();
+            .Where(s =>
+                s.StoreId == order.StoreId &&
+                DateOnly.FromDateTime(s.StartTime) == vm.Date &&
+                s.MaxOrders > s.Orders.Count
+            )
+            .Select(s => TimeOnly.FromDateTime(s.StartTime))
+            .ToList();
 
         vm.Slot = null;
         if (vm.Date == DateOnly.FromDateTime(order.Slot.StartTime))
