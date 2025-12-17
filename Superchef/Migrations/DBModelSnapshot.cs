@@ -440,6 +440,11 @@ namespace Superchef.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<string>("StripeChargeId")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("StripePaymentIntentId")
                         .IsRequired()
                         .HasMaxLength(100)

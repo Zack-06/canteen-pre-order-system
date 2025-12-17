@@ -92,7 +92,7 @@ public class ItemController : Controller
 
     public IActionResult VariantStockCount(int id)
     {
-        var variant = db.Variants.FirstOrDefault(v => v.Id == id &&v.IsActive);
+        var variant = db.Variants.FirstOrDefault(v => v.Id == id && v.IsActive);
 
         if (variant == null)
         {
@@ -204,6 +204,80 @@ public class ItemController : Controller
         db.SaveChanges();
 
         return Content(fav == null ? "added" : "removed");
+    }
+
+    [Authorize(Roles = "Customer")]
+    [HttpPost]
+    public IActionResult AddReview(ReviewInputVM vm)
+    {
+        if (!Request.IsAjax()) return NotFound();
+
+        var item = db.Items.FirstOrDefault(i => 
+            i.Id == vm.Id && 
+            i.IsActive
+        );
+        if (item == null)
+        {
+            return NotFound("Item not found");
+        }
+
+        var acc = HttpContext.GetAccount()!;
+
+        if (db.Reviews.Any(r => r.AccountId == acc.Id && r.ItemId == vm.Id))
+        {
+            return BadRequest("You have already written a review for this item");
+        }
+
+        if (ModelState.IsValid)
+        {
+            db.Reviews.Add(new()
+            {
+                AccountId = acc.Id,
+                ItemId = vm.Id,
+                Rating = vm.Rating,
+                Comment = vm.Comment,
+            });
+            db.SaveChanges();
+        }
+        
+        ViewBag.AccountImageUrl = acc.Image == null ? "/img/pfp.png" : $"/uploads/account/{acc.Image}";
+        ViewBag.Authenticated = true;
+        
+        ViewBag.HasBought = db.OrderItems.Any(oi => oi.Order.AccountId == acc.Id && oi.Variant.ItemId == item.Id && oi.Order.Status == "Completed");
+        ViewBag.HasCommented = false;
+        var ownReview = db.Reviews.FirstOrDefault(r => r.AccountId == acc.Id && r.ItemId == item.Id);
+        if (ownReview != null)
+        {
+            vm = new()
+            {
+                Rating = ownReview.Rating,
+                Comment = ownReview.Comment
+            };
+            ViewBag.HasCommented = true;
+        }
+
+        vm.Id = item.Id;
+
+        return PartialView("_AddReview", vm);
+    }
+
+    [HttpPost]
+    [Authorize(Roles = "Customer")]
+    public IActionResult DeleteReview(int Id)
+    {
+        if (!Request.IsAjax()) return NotFound();
+
+        var review = db.Reviews.FirstOrDefault(r => r.AccountId == HttpContext.GetAccount()!.Id && r.ItemId == Id);
+        if (review == null)
+        {
+            return NotFound("Own review not found");
+        }
+
+        db.Reviews.Remove(review);
+        db.SaveChanges();
+
+        TempData["Message"] = "You have deleted your review successfully!";
+        return Ok();
     }
 
     [Authorize(Roles = "Vendor")]
@@ -543,7 +617,8 @@ public class ItemController : Controller
             {
                 ModelState.SetModelValue("Active", new ValueProviderResult("false"));
                 ModelState.AddModelError("Active", "Item activation failed. The store has not published initial slots yet.");
-            } else if (!item.Variants.Any(v => !v.IsDeleted))
+            }
+            else if (!item.Variants.Any(v => !v.IsDeleted))
             {
                 ModelState.SetModelValue("Active", new ValueProviderResult("false"));
                 ModelState.AddModelError("Active", "Item activation failed. The item has no variants.");
@@ -618,7 +693,7 @@ public class ItemController : Controller
     {
         if (!Request.IsAjax()) return NotFound();
 
-        var item = db.Items.FirstOrDefault(i => 
+        var item = db.Items.FirstOrDefault(i =>
             i.Id == id &&
             !i.IsDeleted &&
             i.Store.AccountId == HttpContext.GetAccount()!.Id

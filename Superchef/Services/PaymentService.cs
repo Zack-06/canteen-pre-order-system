@@ -18,7 +18,7 @@ public class PaymentService
         // Retrieve OrderId from PaymentIntent metadata
         if (!paymentIntent.Metadata.TryGetValue("OrderId", out var orderIdStr))
         {
-            db.AuditLogs.Add(new AuditLog
+            db.AuditLogs.Add(new()
             {
                 AccountId = 1,
                 Entity = "error",
@@ -34,7 +34,7 @@ public class PaymentService
             .FirstOrDefault(o => o.Id == orderIdStr);
         if (order == null || order.Payment != null)
         {
-            db.AuditLogs.Add(new AuditLog
+            db.AuditLogs.Add(new()
             {
                 AccountId = 1,
                 Entity = "error",
@@ -88,6 +88,7 @@ public class PaymentService
         {
             OrderId = order.Id,
             StripePaymentIntentId = paymentIntent.Id,
+            StripeChargeId = paymentIntent.LatestChargeId,
             Amount = paymentIntent.AmountReceived / 100m, // convert cents to RM
             PaymentMethod = methodStr,
             Details = details,
@@ -107,7 +108,7 @@ public class PaymentService
         var payment = db.Payments.FirstOrDefault(p => p.StripePaymentIntentId == charge.PaymentIntentId);
         if (payment == null)
         {
-            db.AuditLogs.Add(new AuditLog
+            db.AuditLogs.Add(new()
             {
                 AccountId = 1,
                 Entity = "error",
@@ -127,32 +128,63 @@ public class PaymentService
     public void TriggerPayout(Order order)
     {
         order = db.Orders
+            .Include(o => o.Store)
             .Include(o => o.Payment)
             .FirstOrDefault(o => o.Id == order.Id)!;
 
-        if (order.Payment == null) return;
+        if (order.Payment == null)
+        {
+            db.AuditLogs.Add(new()
+            {
+                AccountId = 1,
+                Entity = "error",
+                Action = $"Trigger Payout failed: Missing Payment for Order with ID {order.Id}",
+            });
+            db.SaveChanges();
+
+            return;
+        }
         if (order.Payment.IsPayoutFinished) return;
 
-        // Send money to vendor via Stripe Transfer
-        var store = db.Stores.FirstOrDefault(v => v.Id == order.StoreId);
-        if (store != null && !string.IsNullOrEmpty(store.StripeAccountId))
+        var chargeService = new ChargeService();
+        var charge = chargeService.Get(order.Payment.StripeChargeId, new()
         {
-            var transferService = new TransferService();
-            var transferOptions = new TransferCreateOptions
+            Expand = ["balance_transaction"]
+        });
+
+        // BalanceTransaction.Net is the actual amount available to transfer
+        long netAmountInCents = charge.BalanceTransaction.Net;
+
+        if (!string.IsNullOrEmpty(order.Store.StripeAccountId))
+        {
+            db.AuditLogs.Add(new()
             {
-                Amount = (long)(order.Payment.Amount * 100), // in cents
-                Currency = "myr",
-                Destination = store.StripeAccountId,
-                TransferGroup = order.Payment.StripePaymentIntentId
-            };
-
-            var transfer = transferService.Create(transferOptions);
-
-            // Update transfer status
-            order.Payment.PayoutTransferId = transfer.Id;
-            order.Payment.IsPayoutFinished = true;
+                AccountId = 1,
+                Entity = "error",
+                Action = $"Trigger Payout failed: Store with ID {order.StoreId} has no Stripe Account ID",
+            });
             db.SaveChanges();
+
+            return;
         }
+
+        // Send money to vendor via Stripe Transfer
+        var transferService = new TransferService();
+        var transferOptions = new TransferCreateOptions
+        {
+            Amount = netAmountInCents,
+            Currency = "myr",
+            SourceTransaction = order.Payment.StripeChargeId,
+            Destination = order.Store.StripeAccountId,
+            TransferGroup = order.Payment.StripePaymentIntentId
+        };
+
+        var transfer = transferService.Create(transferOptions);
+
+        // Update transfer status
+        order.Payment.PayoutTransferId = transfer.Id;
+        order.Payment.IsPayoutFinished = true;
+        db.SaveChanges();
     }
 
     public void TriggerRefund(string paymentIntentId)
@@ -168,7 +200,7 @@ public class PaymentService
         var charge = charges.Data.FirstOrDefault();
         if (charge == null)
         {
-            db.AuditLogs.Add(new AuditLog
+            db.AuditLogs.Add(new()
             {
                 AccountId = 1,
                 Entity = "error",
@@ -187,7 +219,7 @@ public class PaymentService
         }
         catch (StripeException ex)
         {
-            db.AuditLogs.Add(new AuditLog
+            db.AuditLogs.Add(new()
             {
                 AccountId = 1,
                 Entity = "error",

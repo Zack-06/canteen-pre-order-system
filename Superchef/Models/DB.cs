@@ -385,6 +385,8 @@ public class Payment
     [MaxLength(100)]
     public string StripePaymentIntentId { get; set; }
     [MaxLength(100)]
+    public string StripeChargeId { get; set; }
+    [MaxLength(100)]
     public string? PayoutTransferId { get; set; }
     public bool IsPayoutFinished { get; set; } = false;
     public bool IsRefunded { get; set; } = false;

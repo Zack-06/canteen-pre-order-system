@@ -2,7 +2,7 @@
 
 @foreach (var review in Model)
 {
-    var accountImageUrl = review.Account.Image == null ? "/img/default-pfp.png" :
+    var accountImageUrl = review.Account.Image == null ? "/img/pfp.png" :
     $"/uploads/account/{review.Account.Image}";
 
     <div class="review-container">

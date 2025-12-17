@@ -155,19 +155,19 @@ public class CartController : Controller
 
         bool isValid = true;
         decimal totalPrice = 0;
-        int TotalItems = 0;
+        int totalItems = 0;
         foreach (var cItem in cartItems)
         {
             if (cItem.Quantity < 1 || cItem.Quantity > 10 || cItem.Quantity > cItem.Variant.Stock)
             {
                 totalPrice = 0;
-                TotalItems = 0;
+                totalItems = 0;
                 isValid = false;
                 break;
             }
 
             totalPrice += cItem.Variant.Price * cItem.Quantity;
-            TotalItems += cItem.Quantity;
+            totalItems += cItem.Quantity;
         }
 
         if (Request.Method == "GET")
@@ -175,7 +175,7 @@ public class CartController : Controller
             return PartialView("_SummaryContainer", new SummaryContainerDM
             {
                 TotalPrice = totalPrice,
-                TotalItems = TotalItems,
+                TotalItems = totalItems,
                 SubmitText = "Checkout"
             });
         }
@@ -183,9 +183,21 @@ public class CartController : Controller
         {
             return BadRequest("Checkout failed! Please select at least one item");
         }
-        else if (!isValid || totalPrice < 2 || TotalItems < 1)
+        else if (!isValid || totalPrice < 2 || totalItems < 1)
         {
             return BadRequest("Checkout failed! Please check your cart");
+        }
+
+        if (db.Orders.Any(o => o.Status == "Pending" && o.AccountId == HttpContext.GetAccount()!.Id))
+        {
+            TempData["Message"] = "Checkout failed! You have an existing pending order";
+            Response.Headers.Append("X-Redirect-Url", Url.Action("History", "Account"));
+            return Ok();
+        }
+
+        if (totalPrice > 1000)
+        {
+            return BadRequest("Checkout failed! Total price cannot exceed RM 1000.00");
         }
 
         var startOrderTime = DateTime.Now;
@@ -255,11 +267,6 @@ public class CartController : Controller
         await orderHubContext.Clients.All.SendAsync("UpdateStock", store.Id);
 
         Response.Headers.Append("X-Redirect-Url", Url.Action("Customer", "Order", new { id = order.Id }));
-        return PartialView("_SummaryContainer", new SummaryContainerDM
-        {
-            TotalPrice = totalPrice,
-            TotalItems = TotalItems,
-            SubmitText = "Checkout"
-        });
+        return Ok();
     }
 }

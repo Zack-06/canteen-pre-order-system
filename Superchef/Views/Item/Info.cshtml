@@ -835,8 +835,8 @@
         </form>
     </div>
 
-    <form id="own-review-container" action="/Item/AddReview?id=@Model.Item.Id" method="post" data-ajax="true"
-        data-ajax-update="#own-review-container">
+    <form id="own-review-container" action="/Item/AddReview/@Model.Item.Id" method="post" data-ajax="true"
+        data-ajax-update="#own-review-container" data-ajax-failure="defaultOnFailure">
         <partial name="_AddReview" model="Model.NewReview" />
     </form>
 
