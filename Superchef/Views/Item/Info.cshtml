@@ -2,6 +2,7 @@
 @model ItemInfoVM
 
 @{
+    ViewBag.Title = "Item Info | Superchef";
     decimal ratingValue = Model.AverageRating;
     decimal minPrice = Model.Item.Variants.Min(v => (decimal?)v.Price) ?? 0m;
     decimal maxPrice = Model.Item.Variants.Max(v => (decimal?)v.Price) ?? 0m;

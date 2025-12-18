@@ -1,6 +1,6 @@
 @model string
 @{
-    ViewBag.Title = "Payment Status | SuperChef";
+    ViewBag.Title = $"Payment {(Model == "success" ? "Successful" : "Failed")} | SuperChef";
     var statusClass = Model?.ToLower() ?? "failed";
 }
 
