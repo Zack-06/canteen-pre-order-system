@@ -1,3 +1,5 @@
+@model StoreReportVM
+
 @section head {
     <style>
         .sales-container {
@@ -50,14 +52,6 @@
             border-bottom: none;
         }
 
-        .sales-container:has(input[type="radio"][value="annually"]:checked) .quarterly-table {
-            display: none;
-        }
-
-        .sales-container:has(input[type="radio"][value="quarterly"]:checked) .annually-table {
-            display: none;
-        }
-
         .sales-container button {
             position: absolute;
             right: 1.5rem;
@@ -86,268 +80,91 @@
                 flex-direction: column;
             }
         }
+
+        #no-results {
+            display: flex !important;
+        }
     </style>
 }
 
-<div class="container sales-container" data-flex="column center">
+<form class="container sales-container" data-flex="column center" data-ajax="true"
+    data-ajax-url="@Url.Action("DailySalesSummary")" data-ajax-update="#daily-sales-result-container">
+    <input type="hidden" asp-for="dailySalesSummary.Id" name="Id">
+
     <div class="title">Daily Sales Summary</div>
 
     <div class="form-group">
         <div class="form-input">
-            <input type="date">
+            <input name="Date" asp-for="dailySalesSummary.Date" data-auto-submit>
         </div>
     </div>
 
-    <div class="container" data-no="padding color margin" data-overflow>
-        <table class="annually-table">
-            <caption><button></button></caption>
-            <tbody>
-                <tr>
-                    <th>Total Orders</th>
-                    <td>100</td>
-                </tr>
-                <tr>
-                    <th>Total Revenue</th>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>Total Items Sold</th>
-                    <td>100</td>
-                </tr>
-                <tr>
-                    <th>Peak Pickup Slot</th>
-                    <td>12:00 PM - 12:30 PM</td>
-                </tr>
-            </tbody>
-        </table>
+    <div id="daily-sales-result-container" class="container" data-no="padding color margin" data-overflow>
+        <partial name="_DailySalesSummary" model="Model.dailySalesSummary" />
     </div>
-</div>
+</form>
 
-<div class="container sales-container" data-flex="column center">
+<form class="container sales-container" data-flex="column center" data-ajax="true"
+    data-ajax-url="@Url.Action("SalesReport")" data-ajax-update="#sales-report-result-container">
+    <input type="hidden" asp-for="salesReport.Id" name="Id">
+
     <div class="title">Sales Report</div>
 
     <div class="form-group">
         <div class="custom-tick-container center-items">
-            <label>
-                <input type="radio" name="sales_report" value="annually" checked>
-                <div class="text">Anually</div>
-            </label>
-            <label>
-                <input type="radio" name="sales_report" value="quarterly">
-                <div class="text">Quarterly</div>
-            </label>
+            @foreach (var type in Model.salesReport.AvailableTypes)
+            {
+                <label>
+                    <input type="radio" name="Type" asp-for="salesReport.Type" value="@type" data-auto-submit>
+                    <div class="text">@type</div>
+                </label>
+            }
         </div>
     </div>
 
     <div class="form-group">
         <div class="form-input">
-            <input type="date">
+            <input name="DateFrom" asp-for="salesReport.DateFrom" data-auto-submit>
             <span>to</span>
-            <input type="date">
+            <input name="DateTo" asp-for="salesReport.DateTo" data-auto-submit>
         </div>
     </div>
 
-    <div class="container" data-no="color padding" data-overflow>
-        <table class="annually-table">
-            <caption><button></button></caption>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>2025</th>
-                    <th>2024</th>
-                    <th>2023</th>
-                    <th>2022</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th>Total Revenue</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>Revenue Growth</th>
-                    <td>100%</td>
-                    <td>100%</td>
-                    <td>100%</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <th>Total Orders</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>Average Order Value</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <table class="quarterly-table">
-            <caption><button></button></caption>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>2025 (Q4)</th>
-                    <th>2025 (Q3)</th>
-                    <th>2025 (Q2)</th>
-                    <th>2025 (Q1)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th>Total Revenue</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>Revenue Growth</th>
-                    <td>100%</td>
-                    <td>100%</td>
-                    <td>100%</td>
-                    <td>100%</td>
-                </tr>
-                <tr>
-                    <th>Total Orders</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>Average Order Value</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-            </tbody>
-        </table>
+    <div id="sales-report-result-container" class="container" data-no="color padding" data-overflow>
+        <partial name="_SalesReport" model="Model.salesReport" />
     </div>
-</div>
+</form>
 
-<div class="container sales-container" data-flex="column center">
+<form class="container sales-container" data-flex="column center" data-ajax="true"
+    data-ajax-url="@Url.Action("SalesByItems")" data-ajax-update="#sales-by-items-result-container">
+    <input type="hidden" asp-for="salesByItems.Id" name="Id">
+
     <div class="title">Sales By Items</div>
 
     <div class="form-group">
         <div class="custom-tick-container center-items">
-            <label>
-                <input type="radio" name="sales_items" value="annually" checked>
-                <div class="text">Anually</div>
-            </label>
-            <label>
-                <input type="radio" name="sales_items" value="quarterly">
-                <div class="text">Quarterly</div>
-            </label>
+            @foreach (var type in Model.salesByItems.AvailableTypes)
+            {
+                <label>
+                    <input name="Type" type="radio" asp-for="salesByItems.Type" value="@type" data-auto-submit>
+                    <div class="text">@type</div>
+                </label>
+            }
         </div>
     </div>
 
     <div class="form-group">
         <div class="form-input">
-            <input type="date">
+            <input name="DateFrom" asp-for="salesByItems.DateFrom" data-auto-submit>
             <span>to</span>
-            <input type="date">
+            <input name="DateTo" asp-for="salesByItems.DateTo" data-auto-submit>
         </div>
     </div>
 
-    <div class="container" data-no="padding color" data-overflow>
-        <table class="annually-table">
-            <caption><button></button></caption>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>2025</th>
-                    <th>2024</th>
-                    <th>2023</th>
-                    <th>2022</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th>38 - Burger</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>ID - Name</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>39 - Maggie Curry</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>100 - Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nobis, sunt.</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <table class="quarterly-table">
-            <caption><button></button></caption>
-            <thead>
-                <tr>
-                    <th></th>
-                    <th>2025 (Q4)</th>
-                    <th>2025 (Q3)</th>
-                    <th>2025 (Q2)</th>
-                    <th>2025 (Q1)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <th>38 - Burger</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>ID - Name</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>39 - Maggie Curry</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-                <tr>
-                    <th>100 - Lorem ipsum, dolor sit amet consectetur adipisicing elit. Nobis, sunt.</th>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                    <td>RM 100.00</td>
-                </tr>
-            </tbody>
-        </table>
+    <div id="sales-by-items-result-container" class="container" data-no="padding color" data-overflow>
+        <partial name="_SalesByItems" model="Model.salesByItems" />
     </div>
-</div>
+</form>
 
 @section foot {
     <script>
@@ -379,14 +196,12 @@
 
         function downloadCSVFile(csv_data, name = "Unknown") {
 
-            // Create CSV file object and feed
-            // our csv_data into it
+            // Create CSV file object and feed csv_data into it
             CSVFile = new Blob([csv_data], {
                 type: "text/csv"
             });
 
-            // Create to temporary link to initiate
-            // download process
+            // Create to temporary link to initiate download process
             let temp_link = document.createElement('a');
 
             // Download csv file
@@ -398,8 +213,7 @@
             temp_link.style.display = "none";
             document.body.appendChild(temp_link);
 
-            // Automatically click the link to
-            // trigger download
+            // Automatically click the link to trigger download
             temp_link.click();
             document.body.removeChild(temp_link);
         }

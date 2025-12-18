@@ -179,19 +179,23 @@
     <div class="container stat-container sales-container" data-no="margin">
         <div class="title normal" data-no="margin">Total Sales (@Model.DisplayMonth)</div>
         <div class="value">@FormatHelper.ToRMFormat(Model.TotalSales)</div>
-        <div class="trend @(Model.TotalSalesStat < 0 ? "down" : "")">@FormatHelper.ToPercentage(Model.TotalSalesStat) vs last month</div>
+        <div class="trend @(Model.TotalSalesStat < 0 ? "down" : "")">
+            @FormatHelper.ToPercentage(Math.Abs(Model.TotalSalesStat)) vs last month
+        </div>
     </div>
 
     <div class="container stat-container orders-container" data-no="margin">
         <div class="title normal" data-no="margin">Completed Orders (@Model.DisplayMonth)</div>
         <div class="value">@Model.TotalOrders</div>
-        <div class="trend @(Model.TotalOrdersStat < 0 ? "down" : "")">@FormatHelper.ToPercentage(Model.TotalOrdersStat) vs last month</div>
+        <div class="trend @(Model.TotalOrdersStat < 0 ? "down" : "")">
+            @FormatHelper.ToPercentage(Math.Abs(Model.TotalOrdersStat)) vs last month</div>
     </div>
 
     <div class="container stat-container customers-container" data-no="margin">
         <div class="title normal" data-no="margin">New Customers (@Model.DisplayMonth)</div>
         <div class="value">@Model.TotalCustomers</div>
-        <div class="trend @(Model.TotalCustomersStat < 0 ? "down" : "")">@FormatHelper.ToPercentage(Model.TotalCustomersStat) vs last month</div>
+        <div class="trend @(Model.TotalCustomersStat < 0 ? "down" : "")">
+            @FormatHelper.ToPercentage(Math.Abs(Model.TotalCustomersStat)) vs last month</div>
     </div>
 
     <div class="container performance-container" data-no="margin">

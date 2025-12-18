@@ -1,3 +1,4 @@
+using Humanizer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -653,4 +654,54 @@ public class AdminHomePageVM
     public List<int> LoginDevicesCount { get; set; } = [];
     public int Page { get; set; } = 1;
     public IPagedList<AuditLog> ActivityLogs { get; set; }
+}
+
+public class StoreReportVM
+{
+    public int Id { get; set; }
+    public DailySalesSummaryVM dailySalesSummary { get; set; }
+    public SalesReportVM salesReport { get; set; }
+    public SalesByItemsVM salesByItems { get; set; }
+}
+
+public class DailySalesSummaryVM
+{
+    public int Id { get; set; }
+    [DataType(DataType.Date)]
+    public DateOnly? Date { get; set; }
+    public int TotalOrders { get; set; }
+    public decimal TotalRevenue { get; set; }
+    public int TotalItemsSold { get; set; }
+    public Slot? PeakSlot { get; set; }
+}
+
+public class SalesReportVM
+{
+    public int Id { get; set; }
+    public string? Type { get; set; }
+    [DataType(DataType.Date)]
+    public DateOnly? DateFrom { get; set; }
+    [DataType(DataType.Date)]
+    public DateOnly? DateTo { get; set; }
+    public List<string> Header { get; set; } = [];
+    public List<decimal> TotalRevenue { get; set; } = [];
+    public List<decimal> RevenueGrowth { get; set; } = [];
+    public List<int> TotalOrders { get; set; } = [];
+    public List<decimal> AvgOrderValue { get; set; } = [];
+
+    public List<string> AvailableTypes { get; set; } = [];
+}
+
+public class SalesByItemsVM
+{
+    public int Id { get; set; }
+    public string? Type { get; set; }
+    [DataType(DataType.Date)]
+    public DateOnly? DateFrom { get; set; }
+    [DataType(DataType.Date)]
+    public DateOnly? DateTo { get; set; }
+    public List<string> Header { get; set; } = [];
+    public List<(string, List<decimal>)> Results { get; set; } = [];
+
+    public List<string> AvailableTypes { get; set; } = [];
 }

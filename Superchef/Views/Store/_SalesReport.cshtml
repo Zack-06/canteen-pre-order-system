@@ -1,0 +1,73 @@
+@model SalesReportVM
+
+@if (Model.Header.Count == 0)
+{
+    <partial name="_NoResults" model="null" />
+}
+else
+{
+
+    <table>
+        <caption><button></button></caption>
+        <thead>
+            <tr>
+                <th></th>
+                @foreach (var header in Model.Header)
+                {
+                    <th>@header</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <th>Total Revenue</th>
+                @foreach (var revenue in Model.TotalRevenue)
+                {
+                    if (revenue == 0)
+                    {
+                        <td>-</td>
+                    }
+                    else
+                    {
+                        <td>@FormatHelper.ToRMFormat(revenue)</td>
+                    }
+                }
+            </tr>
+            <tr>
+                <th>Revenue Growth</th>
+                @foreach (var growth in Model.RevenueGrowth)
+                {
+                    if (growth == 0)
+                    {
+                        <td>-</td>
+                    }
+                    else
+                    {
+                        <td>@FormatHelper.ToPercentage(growth)</td>
+                    }
+                }
+            </tr>
+            <tr>
+                <th>Total Orders</th>
+                @foreach (var orders in Model.TotalOrders)
+                {
+                    <td>@orders</td>
+                }
+            </tr>
+            <tr>
+                <th>Average Order Value</th>
+                @foreach (var avg in Model.AvgOrderValue)
+                {
+                    if (avg == 0)
+                    {
+                        <td>-</td>
+                    }
+                    else
+                    {
+                        <td>@FormatHelper.ToRMFormat(avg)</td>
+                    }
+                }
+            </tr>
+        </tbody>
+    </table>
+}

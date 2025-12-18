@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
+using Stripe.Tax;
 
 namespace Superchef.Controllers;
 
@@ -477,7 +478,7 @@ public class StoreController : Controller
             };
             db.Slots.Add(slot);
         }
-        
+
         store.HasPublishedFirstSlots = true;
         db.SaveChanges();
 
@@ -687,10 +688,460 @@ public class StoreController : Controller
         return Json(recurringSlots);
     }
 
-    public IActionResult Report(int id)
+    [Authorize(Roles = "Vendor")]
+    public IActionResult Report(int? id)
     {
-        // view sales report
-        return View();
+        if (id == null)
+        {
+            var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
+            if (sessionStoreId == null)
+            {
+                TempData["Message"] = "Please choose a store first";
+                return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Report") });
+            }
+
+            return RedirectToAction("Report", new { id = sessionStoreId });
+        }
+
+        var store = db.Stores
+            .Include(s => s.Items)
+            .Include(s => s.Orders)
+                .ThenInclude(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Variant)
+            .FirstOrDefault(s =>
+                s.Id == id &&
+                s.AccountId == HttpContext.GetAccount()!.Id &&
+                !s.IsDeleted
+            );
+        if (store == null)
+        {
+            TempData["Message"] = "Store not found! Please choose a store";
+            return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Report") });
+        }
+
+        var vm = new StoreReportVM
+        {
+            Id = store.Id
+        };
+
+        var todayDate = DateOnly.FromDateTime(DateTime.Today);
+        var defaultDateFrom = todayDate.AddDays(-30);
+        List<string> availableTypes = ["Daily", "Monthly", "Annually"];
+        var defaultType = availableTypes.First();
+
+        vm.dailySalesSummary = new()
+        {
+            Id = store.Id,
+            Date = todayDate,
+            TotalOrders = store.Orders.Count(o => o.Status == "Completed" && DateOnly.FromDateTime(o.CreatedAt) == todayDate),
+            TotalRevenue = store.Orders
+                .Where(o => o.Status == "Completed" && DateOnly.FromDateTime(o.CreatedAt) == todayDate)
+                .SelectMany(o => o.OrderItems)
+                .Sum(oi => (decimal?)oi.Price * oi.Quantity)
+                ?? 0m,
+            TotalItemsSold = store.Orders
+                .Where(o => o.Status == "Completed" && DateOnly.FromDateTime(o.CreatedAt) == todayDate)
+                .SelectMany(o => o.OrderItems)
+                .Sum(oi => (int?)oi.Quantity)
+                ?? 0,
+            PeakSlot = db.Slots
+                .Include(s => s.Orders)
+                .Where(s => s.StoreId == store.Id && DateOnly.FromDateTime(s.StartTime) == todayDate)
+                .OrderByDescending(s => s.Orders.Count(o => o.Status == "Completed"))
+                .FirstOrDefault()
+        };
+
+        vm.salesReport = new()
+        {
+            Id = store.Id,
+            Type = defaultType,
+            AvailableTypes = availableTypes,
+            DateFrom = defaultDateFrom,
+            DateTo = todayDate,
+            Header = [],
+            TotalRevenue = [],
+            RevenueGrowth = [],
+            TotalOrders = [],
+            AvgOrderValue = []
+        };
+
+        for (var date = defaultDateFrom; date <= todayDate; date = date.AddDays(1))
+        {
+            var dayOrders = store.Orders
+                .Where(o => o.Status == "Completed" && DateOnly.FromDateTime(o.CreatedAt) == date)
+                .ToList();
+
+            var dailyRevenue = dayOrders.SelectMany(o => o.OrderItems).Sum(oi => (decimal?)oi.Price * oi.Quantity) ?? 0m;
+            var dailyOrderCount = dayOrders.Count;
+
+            vm.salesReport.Header.Add(FormatHelper.ToDateTimeFormat(date.ToDateTime(TimeOnly.MinValue), "dd MMM yyyy"));
+            vm.salesReport.TotalRevenue.Add(dailyRevenue);
+            vm.salesReport.TotalOrders.Add(dailyOrderCount);
+        }
+
+        for (int i = 0; i < vm.salesReport.Header.Count; i++)
+        {
+            // Calculate average order value
+            decimal avg = 0;
+            if (vm.salesReport.TotalOrders[i] > 0)
+            {
+                avg = vm.salesReport.TotalRevenue[i] / vm.salesReport.TotalOrders[i];
+            }
+            vm.salesReport.AvgOrderValue.Add(avg);
+
+            // Calculate revenue growth
+            if (i == 0)
+            {
+                vm.salesReport.RevenueGrowth.Add(0); // No prev day to compare to
+            }
+            else
+            {
+                vm.salesReport.RevenueGrowth.Add(
+                    CalculateHelper.CalculatePercentageChange(
+                        vm.salesReport.TotalRevenue[i - 1],
+                        vm.salesReport.TotalRevenue[i]
+                    )
+                );
+            }
+        }
+
+        vm.salesByItems = new()
+        {
+            Id = store.Id,
+            Type = defaultType,
+            AvailableTypes = availableTypes,
+            DateFrom = defaultDateFrom,
+            DateTo = todayDate,
+            Header = [],
+            Results = []
+        };
+
+        for (var date = defaultDateFrom; date <= todayDate; date = date.AddDays(1))
+        {
+            vm.salesByItems.Header.Add(FormatHelper.ToDateTimeFormat(date.ToDateTime(TimeOnly.MinValue), "dd MMM yyyy"));
+        }
+
+        var allOrderItems = db.OrderItems
+            .Where(oi =>
+                oi.Order.Status == "Completed" &&
+                DateOnly.FromDateTime(oi.Order.CreatedAt) >= defaultDateFrom &&
+                DateOnly.FromDateTime(oi.Order.CreatedAt) <= todayDate
+            )
+            .Select(oi => new
+            {
+                ItemId = oi.Variant.ItemId,
+                Date = DateOnly.FromDateTime(oi.Order.CreatedAt),
+                Total = oi.Quantity * oi.Price
+            })
+            .ToList();
+
+        foreach (var item in store.Items.Where(i => !i.IsDeleted))
+        {
+            List<decimal> results = [];
+
+            for (var date = defaultDateFrom; date <= todayDate; date = date.AddDays(1))
+            {
+                var dailySum = allOrderItems
+                    .Where(oi => oi.ItemId == item.Id && oi.Date == date)
+                    .Sum(oi => (decimal?)oi.Total) ?? 0m;
+
+                results.Add(dailySum);
+            }
+
+            vm.salesByItems.Results.Add(($"{item.Id} - {item.Name}", results));
+        }
+
+        return View(vm);
+    }
+
+    [Authorize(Roles = "Vendor")]
+    public IActionResult DailySalesSummary(DailySalesSummaryVM vm)
+    {
+        if (vm.Date == null)
+        {
+            return PartialView("_NoResults", "Please select a date");
+        }
+
+        var store = db.Stores
+            .Include(s => s.Orders)
+                .ThenInclude(o => o.OrderItems)
+            .FirstOrDefault(s =>
+                s.Id == vm.Id &&
+                s.AccountId == HttpContext.GetAccount()!.Id &&
+                !s.IsDeleted
+            );
+        if (store == null)
+        {
+            return PartialView("_NoResults", "Store not found! Try refreshing the page");
+        }
+
+        vm.TotalOrders = store.Orders.Count(o => o.Status == "Completed" && DateOnly.FromDateTime(o.CreatedAt) == vm.Date);
+        vm.TotalRevenue = store.Orders
+            .Where(o => o.Status == "Completed" && DateOnly.FromDateTime(o.CreatedAt) == vm.Date)
+            .SelectMany(o => o.OrderItems)
+            .Sum(oi => (decimal?)oi.Price * oi.Quantity)
+            ?? 0m;
+        vm.TotalItemsSold = store.Orders
+            .Where(o => o.Status == "Completed" && DateOnly.FromDateTime(o.CreatedAt) == vm.Date)
+            .SelectMany(o => o.OrderItems)
+            .Sum(oi => (int?)oi.Quantity)
+            ?? 0;
+        vm.PeakSlot = db.Slots
+            .Include(s => s.Orders)
+            .Where(s => s.StoreId == store.Id && DateOnly.FromDateTime(s.StartTime) == vm.Date)
+            .OrderByDescending(s => s.Orders.Count(o => o.Status == "Completed"))
+            .FirstOrDefault();
+
+        return PartialView("_DailySalesSummary", vm);
+    }
+
+    [Authorize(Roles = "Vendor")]
+    public IActionResult SalesReport(SalesReportVM vm)
+    {
+        if (vm.DateFrom == null || vm.DateTo == null)
+        {
+            return PartialView("_NoResults", "Please select a date range");
+        }
+
+        if (vm.DateFrom.Value > vm.DateTo.Value)
+        {
+            return PartialView("_NoResults", "Invalid date range");
+        }
+
+        vm.AvailableTypes = ["Daily", "Monthly", "Annually"];
+        if (vm.Type == null || !vm.AvailableTypes.Contains(vm.Type))
+        {
+            return PartialView("_NoResults", "Invalid report type");
+        }
+
+        var store = db.Stores
+            .Include(s => s.Orders)
+                .ThenInclude(o => o.OrderItems)
+            .FirstOrDefault(s =>
+                s.Id == vm.Id &&
+                s.AccountId == HttpContext.GetAccount()!.Id &&
+                !s.IsDeleted
+            );
+        if (store == null)
+        {
+            return PartialView("_NoResults", "Store not found! Try refreshing the page");
+        }
+
+        vm.Header = [];
+        vm.TotalRevenue = [];
+        vm.RevenueGrowth = [];
+        vm.TotalOrders = [];
+        vm.AvgOrderValue = [];
+
+        if (vm.Type == "Daily")
+        {
+            for (var date = vm.DateFrom.Value; date <= vm.DateTo.Value; date = date.AddDays(1))
+            {
+                var dayOrders = store.Orders
+                    .Where(o => o.Status == "Completed" && DateOnly.FromDateTime(o.CreatedAt) == date)
+                    .ToList();
+
+                var dailyRevenue = dayOrders.SelectMany(o => o.OrderItems).Sum(oi => (decimal?)oi.Price * oi.Quantity) ?? 0m;
+                var dailyOrderCount = dayOrders.Count;
+
+                vm.Header.Add(FormatHelper.ToDateTimeFormat(date.ToDateTime(TimeOnly.MinValue), "dd MMM yyyy"));
+                vm.TotalRevenue.Add(dailyRevenue);
+                vm.TotalOrders.Add(dailyOrderCount);
+            }
+        }
+        else if (vm.Type == "Monthly")
+        {
+            // first day of the selected month
+            var start = new DateOnly(vm.DateFrom.Value.Year, vm.DateFrom.Value.Month, 1);
+
+            for (var date = start; date <= vm.DateTo.Value; date = date.AddMonths(1))
+            {
+                var endOfMonth = new DateOnly(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+
+                var monthOrders = store.Orders
+                    .Where(o =>
+                        o.Status == "Completed" &&
+                        DateOnly.FromDateTime(o.CreatedAt) >= date &&
+                        DateOnly.FromDateTime(o.CreatedAt) <= endOfMonth)
+                    .ToList();
+
+                var monthRevenue = monthOrders.SelectMany(o => o.OrderItems).Sum(oi => (decimal?)oi.Price * oi.Quantity) ?? 0m;
+
+                vm.Header.Add(date.ToString("MMM yyyy"));
+                vm.TotalRevenue.Add(monthRevenue);
+                vm.TotalOrders.Add(monthOrders.Count);
+            }
+        }
+        else if (vm.Type == "Annually")
+        {
+            for (int year = vm.DateFrom.Value.Year; year <= vm.DateTo.Value.Year; year++)
+            {
+                var yearOrders = store.Orders
+                    .Where(o => o.Status == "Completed" && o.CreatedAt.Year == year)
+                    .ToList();
+
+                var yearRevenue = yearOrders.SelectMany(o => o.OrderItems).Sum(oi => (decimal?)oi.Price * oi.Quantity) ?? 0m;
+
+                vm.Header.Add(year.ToString());
+                vm.TotalRevenue.Add(yearRevenue);
+                vm.TotalOrders.Add(yearOrders.Count);
+            }
+        }
+
+        for (int i = 0; i < vm.Header.Count; i++)
+        {
+            // Calculate average order value
+            decimal avg = 0;
+            if (vm.TotalOrders[i] > 0)
+            {
+                avg = vm.TotalRevenue[i] / vm.TotalOrders[i];
+            }
+            vm.AvgOrderValue.Add(avg);
+
+            // Calculate revenue growth
+            if (i == 0)
+            {
+                vm.RevenueGrowth.Add(0); // No prev day to compare to
+            }
+            else
+            {
+                vm.RevenueGrowth.Add(
+                    CalculateHelper.CalculatePercentageChange(
+                        vm.TotalRevenue[i - 1],
+                        vm.TotalRevenue[i]
+                    )
+                );
+            }
+        }
+
+        return PartialView("_SalesReport", vm);
+    }
+
+    [Authorize(Roles = "Vendor")]
+    public IActionResult SalesByItems(SalesByItemsVM vm)
+    {
+        if (vm.DateFrom == null || vm.DateTo == null)
+        {
+            return PartialView("_NoResults", "Please select a date range");
+        }
+
+        if (vm.DateFrom.Value > vm.DateTo.Value)
+        {
+            return PartialView("_NoResults", "Invalid date range");
+        }
+
+        vm.AvailableTypes = ["Daily", "Monthly", "Annually"];
+        if (vm.Type == null || !vm.AvailableTypes.Contains(vm.Type))
+        {
+            return PartialView("_NoResults", "Invalid report type");
+        }
+
+        var store = db.Stores
+            .Include(s => s.Items)
+            .Include(s => s.Orders)
+                .ThenInclude(o => o.OrderItems)
+                    .ThenInclude(oi => oi.Variant)
+            .FirstOrDefault(s =>
+                s.Id == vm.Id &&
+                s.AccountId == HttpContext.GetAccount()!.Id &&
+                !s.IsDeleted
+            );
+        if (store == null)
+        {
+            return PartialView("_NoResults", "Store not found! Try refreshing the page");
+        }
+
+        vm.Header = [];
+        vm.Results = [];
+
+        var allOrderItems = db.OrderItems
+            .Where(oi =>
+                oi.Order.Status == "Completed" &&
+                DateOnly.FromDateTime(oi.Order.CreatedAt) >= vm.DateFrom.Value &&
+                DateOnly.FromDateTime(oi.Order.CreatedAt) <= vm.DateTo.Value
+            )
+            .Select(oi => new
+            {
+                ItemId = oi.Variant.ItemId,
+                Date = DateOnly.FromDateTime(oi.Order.CreatedAt),
+                Total = oi.Quantity * oi.Price
+            })
+            .ToList();
+
+        if (vm.Type == "Daily")
+        {
+            for (var date = vm.DateFrom.Value; date <= vm.DateTo.Value; date = date.AddDays(1))
+            {
+                vm.Header.Add(FormatHelper.ToDateTimeFormat(date.ToDateTime(TimeOnly.MinValue), "dd MMM yyyy"));
+            }
+
+            foreach (var item in store.Items.Where(i => !i.IsDeleted))
+            {
+                List<decimal> results = [];
+
+                for (var date = vm.DateFrom.Value; date <= vm.DateTo.Value; date = date.AddDays(1))
+                {
+                    var dailySum = allOrderItems
+                        .Where(oi => oi.ItemId == item.Id && oi.Date == date)
+                        .Sum(oi => (decimal?)oi.Total) ?? 0m;
+
+                    results.Add(dailySum);
+                }
+
+                vm.Results.Add(($"{item.Id} - {item.Name}", results));
+            }
+        }
+        else if (vm.Type == "Monthly")
+        {
+            var startOfMonth = new DateOnly(vm.DateFrom.Value.Year, vm.DateFrom.Value.Month, 1);
+            for (var date = startOfMonth; date <= vm.DateTo.Value; date = date.AddMonths(1))
+            {
+                vm.Header.Add(date.ToString("MMM yyyy"));
+            }
+
+            foreach (var item in store.Items.Where(i => !i.IsDeleted))
+            {
+                List<decimal> monthlySales = [];
+
+                for (var date = startOfMonth; date <= vm.DateTo.Value; date = date.AddMonths(1))
+                {
+                    var endOfMonth = new DateOnly(date.Year, date.Month, DateTime.DaysInMonth(date.Year, date.Month));
+
+                    var monthSum = allOrderItems
+                        .Where(oi => oi.ItemId == item.Id && oi.Date >= date && oi.Date <= endOfMonth)
+                        .Sum(oi => (decimal?)oi.Total) ?? 0m;
+
+                    monthlySales.Add(monthSum);
+                }
+
+                vm.Results.Add(($"{item.Id} - {item.Name}", monthlySales));
+            }
+        }
+        else if (vm.Type == "Annually")
+        {
+            for (int year = vm.DateFrom.Value.Year; year <= vm.DateTo.Value.Year; year++)
+            {
+                vm.Header.Add(year.ToString());
+            }
+
+            foreach (var item in store.Items.Where(i => !i.IsDeleted))
+            {
+                List<decimal> yearlySales = [];
+
+                for (int year = vm.DateFrom.Value.Year; year <= vm.DateTo.Value.Year; year++)
+                {
+                    var yearSum = allOrderItems
+                        .Where(oi => oi.ItemId == item.Id && oi.Date.Year == year)
+                        .Sum(oi => (decimal?)oi.Total) ?? 0m;
+
+                    yearlySales.Add(yearSum);
+                }
+
+                vm.Results.Add(($"{item.Id} - {item.Name}", yearlySales));
+            }
+        }
+
+        return PartialView("_SalesByItems", vm);
     }
 
     [Authorize(Roles = "Vendor")]

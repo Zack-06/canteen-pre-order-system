@@ -1,0 +1,26 @@
+@model DailySalesSummaryVM
+
+<table>
+    <caption><button></button></caption>
+    <tbody>
+        <tr>
+            <th>Total Orders</th>
+            <td>@Model.TotalOrders</td>
+        </tr>
+        <tr>
+            <th>Total Revenue</th>
+            <td>@FormatHelper.ToRMFormat(Model.TotalRevenue)</td>
+        </tr>
+        <tr>
+            <th>Total Items Sold</th>
+            <td>@Model.TotalItemsSold</td>
+        </tr>
+        @if (Model.PeakSlot != null)
+        {
+            <tr>
+                <th>Peak Pickup Slot</th>
+                <td>@FormatHelper.ToDateTimeFormat(Model.PeakSlot.StartTime, "hh:mm tt") - @FormatHelper.ToDateTimeFormat(Model.PeakSlot.EndTime, "hh:mm tt")</td>
+            </tr>
+        }
+    </tbody>
+</table>

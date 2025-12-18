@@ -1,0 +1,33 @@
+@model SalesByItemsVM
+
+@if (Model.Results.Count == 0 || Model.Header.Count == 0)
+{
+    <partial name="_NoResults" model="null" />
+}
+else
+{
+    <table>
+        <caption><button></button></caption>
+        <thead>
+            <tr>
+                <th></th>
+                @foreach (var header in Model.Header)
+                {
+                    <th>@header</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (itemName, results) in Model.Results)
+            {
+                <tr>
+                    <th>@itemName</th>
+                    @foreach (var sales in results)
+                    {
+                        <td>@FormatHelper.ToRMFormat(sales)</td>
+                    }
+                </tr>
+            }
+        </tbody>
+    </table>
+}

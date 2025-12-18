@@ -158,7 +158,7 @@ public class HomeController : Controller
             .Sum(oi => oi.Quantity * oi.Price);
 
         vm.TotalSales = currentSales;
-        vm.TotalSalesStat = CalculatePercentageChange(lastMonthSales, currentSales);
+        vm.TotalSalesStat = CalculateHelper.CalculatePercentageChange(lastMonthSales, currentSales);
 
         // Orders
         var currentOrders = db.Orders.Count(o =>
@@ -173,7 +173,7 @@ public class HomeController : Controller
         );
 
         vm.TotalOrders = currentOrders;
-        vm.TotalOrdersStat = CalculatePercentageChange(lastMonthOrders, currentOrders);
+        vm.TotalOrdersStat = CalculateHelper.CalculatePercentageChange(lastMonthOrders, currentOrders);
 
         // Customers
         var currentCustomers = db.Accounts.Count(a =>
@@ -188,7 +188,7 @@ public class HomeController : Controller
         );
 
         vm.TotalCustomers = currentCustomers;
-        vm.TotalCustomersStat = CalculatePercentageChange(lastMonthCustomers, currentCustomers);
+        vm.TotalCustomersStat = CalculateHelper.CalculatePercentageChange(lastMonthCustomers, currentCustomers);
 
         // Sales Performance
         vm.SalesPerformanceMonths = [];
@@ -215,15 +215,5 @@ public class HomeController : Controller
         }
 
         return View(vm);
-    }
-
-    private decimal CalculatePercentageChange(decimal previous, decimal current)
-    {
-        if (previous == 0)
-        {
-            return current > 0 ? 1m : 0m;
-        }
-
-        return (current - previous) / previous;
     }
 }
