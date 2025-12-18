@@ -315,6 +315,18 @@ public class VariantController : Controller
             variant.Price = vm.Price;
             variant.Stock = vm.StockCount;
             variant.IsActive = vm.Active;
+
+            if (acc.AccountType.Name == "Admin")
+            {
+                db.AuditLogs.Add(new()
+                {
+                    Action = "update",
+                    Entity = "variant",
+                    EntityId = variant.Id,
+                    AccountId = HttpContext.GetAccount()!.Id
+                });
+            }
+
             db.SaveChanges();
 
             TempData["Message"] = "Variant updated successfully";
@@ -351,6 +363,18 @@ public class VariantController : Controller
         if (error != null) return BadRequest(error);
 
         clnSrv.CleanUp(variant);
+
+        if (acc.AccountType.Name == "Admin")
+        {
+            db.AuditLogs.Add(new()
+            {
+                Action = "delete",
+                Entity = "variant",
+                EntityId = variant.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+            db.SaveChanges();
+        }
 
         TempData["Message"] = "Variant deleted successfully";
         return Ok();

@@ -686,6 +686,17 @@ public class ItemController : Controller
 
                 keyword.Items.Add(item);
             }
+
+            if (acc.AccountType.Name == "Admin")
+            {
+                db.AuditLogs.Add(new()
+                {
+                    Action = "update",
+                    Entity = "item",
+                    EntityId = item.Id,
+                    AccountId = HttpContext.GetAccount()!.Id
+                });
+            }
             db.SaveChanges();
 
             clnSrv.CleanUpKeyword();
@@ -738,6 +749,18 @@ public class ItemController : Controller
         if (error != null) return BadRequest(error);
 
         clnSrv.CleanUp(item);
+
+        if (acc.AccountType.Name == "Admin")
+        {
+            db.AuditLogs.Add(new()
+            {
+                Action = "delete",
+                Entity = "item",
+                EntityId = item.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+            db.SaveChanges();
+        }
 
         TempData["Message"] = "Item deleted successfully";
         return Ok();

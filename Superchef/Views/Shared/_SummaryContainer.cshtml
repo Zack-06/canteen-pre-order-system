@@ -17,7 +17,7 @@
             }
             else
             {
-                <a data-expired-disable data-button="info" href="@Model.ExitLink">@(Model.ExitText ?? "Back")</a>
+                <a data-expired-disable data-button="danger" href="@Model.ExitLink">@(Model.ExitText ?? "Back")</a>
             }
         }
         <button id="submit-button" data-button="accent">@(Model.SubmitText ?? "Continue")</button>

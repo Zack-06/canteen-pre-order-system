@@ -626,9 +626,17 @@ public class OrderController : Controller
             {
                 return Unauthorized("You are not authorized to cancel this order");
             }
+
+            db.AuditLogs.Add(new()
+            {
+                Action = $"Cancelled order with ID {order.Id}",
+                AccountId = HttpContext.GetAccount()!.Id
+            });
         }
 
         await sysOrderSrv.CancelOrder(order);
+
+        TempData["Message"] = "Order cancelled successfully";
         return Ok();
     }
 
@@ -656,6 +664,7 @@ public class OrderController : Controller
 
         // todo: notify customer
 
+        TempData["Message"] = "Order marked as ready successfully";
         return Ok();
     }
 
@@ -664,7 +673,7 @@ public class OrderController : Controller
     {
         var order = db.Orders
             .Include(o => o.Store)
-            .FirstOrDefault(o =>o.Id == id);
+            .FirstOrDefault(o => o.Id == id);
 
         if (order == null)
         {
@@ -683,12 +692,22 @@ public class OrderController : Controller
         }
 
         order.Status = "Completed";
+
+        if (acc.AccountType.Name == "Admin")
+        {
+            db.AuditLogs.Add(new()
+            {
+                Action = $"Completed order with ID {order.Id}",
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+        }
         db.SaveChanges();
 
         paySrv.TriggerPayout(order);
 
         // todo: notify customer
 
+        TempData["Message"] = "Order completed successfully";
         return Ok();
     }
 }

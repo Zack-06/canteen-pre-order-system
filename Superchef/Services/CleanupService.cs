@@ -22,20 +22,31 @@ public class CleanupService
         // remove all expired verification reqeusts if more than 1 day
         db.Verifications.RemoveRange(db.Verifications.Where(u => u.ExpiresAt < DateTime.Now.AddDays(-1)));
 
-        // Set HashSet
-        HashSet<string> OrdersToCancel = [];
-
         // Cancel all expired pending orders
+        HashSet<string> OrdersToCancel = [];
         OrdersToCancel.UnionWith(db.Orders.Where(b => b.ExpiresAt < DateTime.Now).Select(b => b.Id));
+        await sysOrderSrv.BulkCancelOrders(OrdersToCancel);
 
         // Handle all confirmed orders
-        foreach (var order in
-            db.Orders
-                .Where(b =>
-                    (b.Status == "Confirmed" || b.Status == "To Pickup") &&
-                    b.Slot.EndTime < DateTime.Now
-                )
-                .ToList()
+        foreach (var order in db.Orders
+            .Where(b => 
+                b.Status == "Confirmed" &&
+                b.Slot.StartTime.AddMinutes(30) > DateTime.Now
+            )
+            .ToList()
+        )
+        {
+            order.Status = "Preparing";
+        }
+        db.SaveChanges();
+        
+        // Handle all preparing orders
+        foreach (var order in db.Orders
+            .Where(b =>
+                (b.Status == "Preparing" || b.Status == "To Pickup") &&
+                b.Slot.EndTime < DateTime.Now
+            )
+            .ToList()
         )
         {
             order.Status = "Completed";
@@ -43,8 +54,7 @@ public class CleanupService
         }
         db.SaveChanges();
 
-        // Process cancellation
-        await sysOrderSrv.BulkCancelOrders(OrdersToCancel);
+        // Handle all preparing orders 
 
         // Handle deletion of accounts
         var deletedUsers = db.Accounts.Where(a => a.DeletionAt < DateTime.Now && !a.IsDeleted).ToList();
@@ -247,7 +257,7 @@ public class CleanupService
                 account.IsDeleted = true;
             }
         }
-        
+
         db.SaveChanges();
     }
 
@@ -272,7 +282,8 @@ public class CleanupService
             {
                 return "Please delete all stores before deleting this account.";
             }
-        } else
+        }
+        else
         {
             if (account.Email == "superchef.system@gmail.com")
             {

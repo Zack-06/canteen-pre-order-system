@@ -143,6 +143,15 @@ public class CustomerController : Controller
             db.Verifications.RemoveRange(db.Verifications.Where(v => v.DeviceId == device.Id));
             db.Devices.Remove(device);
         }
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "ban",
+            Entity = "customer account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+
         db.SaveChanges();
 
         await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);
@@ -166,6 +175,14 @@ public class CustomerController : Controller
         }
 
         account.IsBanned = false;
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "unban",
+            Entity = "customer account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
         db.SaveChanges();
 
         TempData["Message"] = "Unbanned successfully!";
@@ -187,6 +204,14 @@ public class CustomerController : Controller
         }
 
         account.DeletionAt = null;
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "revoke",
+            Entity = "customer account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
         db.SaveChanges();
 
         TempData["Message"] = "Revoke deletion successfully!";
@@ -208,6 +233,14 @@ public class CustomerController : Controller
         }
 
         account.LockoutEnd = null;
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "timeout",
+            Entity = "customer account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
         db.SaveChanges();
 
         TempData["Message"] = "Remove timeout successfully!";
@@ -231,6 +264,14 @@ public class CustomerController : Controller
             db.Verifications.RemoveRange(db.Verifications.Where(v => v.DeviceId == device.Id));
             db.Devices.Remove(device);
         }
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "logout",
+            Entity = "customer account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
         db.SaveChanges();
 
         await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);

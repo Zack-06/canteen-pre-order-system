@@ -133,6 +133,15 @@ public class CategoryController : Controller
             };
 
             db.Categories.Add(category);
+
+            db.AuditLogs.Add(new()
+            {
+                Action = "create",
+                Entity = "category",
+                EntityId = category.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+
             db.SaveChanges();
 
             TempData["Message"] = "Category created successfully";
@@ -201,6 +210,15 @@ public class CategoryController : Controller
         if (ModelState.IsValid)
         {
             category.Name = vm.Name.Trim();
+
+            db.AuditLogs.Add(new()
+            {
+                Action = "update",
+                Entity = "category",
+                EntityId = category.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+
             db.SaveChanges();
 
             TempData["Message"] = "Category updated successfully";
@@ -221,6 +239,15 @@ public class CategoryController : Controller
         if (category == null) return NotFound();
 
         clnSrv.CleanUp(category);
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "delete",
+            Entity = "category",
+            EntityId = category.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+        db.SaveChanges();
 
         TempData["Message"] = "Category deleted successfully";
         return Ok();

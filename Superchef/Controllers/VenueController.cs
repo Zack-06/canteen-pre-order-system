@@ -111,6 +111,15 @@ public class VenueController : Controller
             };
 
             db.Venues.Add(venue);
+
+            db.AuditLogs.Add(new()
+            {
+                Action = "create",
+                Entity = "venue",
+                EntityId = venue.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+
             db.SaveChanges();
 
             TempData["Message"] = "Venue created successfully";
@@ -154,6 +163,15 @@ public class VenueController : Controller
         if (ModelState.IsValid)
         {
             venue.Name = vm.Name;
+
+            db.AuditLogs.Add(new()
+            {
+                Action = "update",
+                Entity = "venue",
+                EntityId = venue.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+
             db.SaveChanges();
 
             TempData["Message"] = "Venue updated successfully";
@@ -172,6 +190,15 @@ public class VenueController : Controller
         if (venue == null) return NotFound();
 
         clnSrv.CleanUp(venue);
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "delete",
+            Entity = "venue",
+            EntityId = venue.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+        db.SaveChanges();
 
         TempData["Message"] = "Venue deleted successfully";
         return Ok();

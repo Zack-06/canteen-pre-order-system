@@ -142,6 +142,15 @@ public class AdminController : Controller
                 PasswordHash = secSrv.HashPassword(password),
             };
             db.Accounts.Add(account);
+
+            db.AuditLogs.Add(new()
+            {
+                Action = "create",
+                Entity = "admin account",
+                EntityId = account.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+
             db.SaveChanges();
 
             emlSrv.SendAccountCreatedEmail(account, password, Url.Action("Login", "Auth", null, Request.Scheme, Request.Host.Value));
@@ -182,6 +191,15 @@ public class AdminController : Controller
 
         clnSrv.CleanUp(account);
 
+        db.AuditLogs.Add(new()
+        {
+            Action = "delete",
+            Entity = "admin account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+        db.SaveChanges();
+
         TempData["Message"] = "Admin deleted successfully";
         return Ok();
     }
@@ -205,6 +223,14 @@ public class AdminController : Controller
         account.LockoutEnd = null;
         db.SaveChanges();
 
+        db.AuditLogs.Add(new()
+        {
+            Action = "timeout",
+            Entity = "admin account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+
         TempData["Message"] = "Remove timeout successfully!";
         return Ok();
     }
@@ -226,6 +252,15 @@ public class AdminController : Controller
             db.Verifications.RemoveRange(db.Verifications.Where(v => v.DeviceId == device.Id));
             db.Devices.Remove(device);
         }
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "logout",
+            Entity = "admin account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+
         db.SaveChanges();
 
         await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);

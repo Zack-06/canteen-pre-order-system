@@ -34,7 +34,6 @@ public class VendorController : Controller
         };
         ViewBag.Fields = sortOptions.Keys.ToList();
 
-
         if (vm.Sort == null || !sortOptions.ContainsKey(vm.Sort) || (vm.Dir != "asc" && vm.Dir != "desc"))
         {
             vm.Sort = sortOptions.Keys.First();
@@ -152,6 +151,15 @@ public class VendorController : Controller
                 PasswordHash = secSrv.HashPassword(password),
             };
             db.Accounts.Add(account);
+
+            db.AuditLogs.Add(new()
+            {
+                Action = "create",
+                Entity = "vendor account",
+                EntityId = account.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+
             db.SaveChanges();
 
             emlSrv.SendAccountCreatedEmail(account, password, Url.Action("Login", "Auth", null, Request.Scheme, Request.Host.Value));
@@ -201,6 +209,15 @@ public class VendorController : Controller
             db.Verifications.RemoveRange(db.Verifications.Where(v => v.DeviceId == device.Id));
             db.Devices.Remove(device);
         }
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "ban",
+            Entity = "vendor account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+        
         db.SaveChanges();
 
         await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);
@@ -224,6 +241,15 @@ public class VendorController : Controller
         }
 
         account.IsBanned = false;
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "unban",
+            Entity = "vendor account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+
         db.SaveChanges();
 
         TempData["Message"] = "Unbanned successfully!";
@@ -245,6 +271,15 @@ public class VendorController : Controller
         }
 
         account.DeletionAt = null;
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "revoke",
+            Entity = "vendor account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+
         db.SaveChanges();
 
         TempData["Message"] = "Revoke deletion successfully!";
@@ -266,6 +301,15 @@ public class VendorController : Controller
         }
 
         account.LockoutEnd = null;
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "timeout",
+            Entity = "vendor account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+
         db.SaveChanges();
 
         TempData["Message"] = "Remove timeout successfully!";
@@ -289,6 +333,15 @@ public class VendorController : Controller
             db.Verifications.RemoveRange(db.Verifications.Where(v => v.DeviceId == device.Id));
             db.Devices.Remove(device);
         }
+
+        db.AuditLogs.Add(new()
+        {
+            Action = "logout",
+            Entity = "vendor account",
+            EntityId = account.Id,
+            AccountId = HttpContext.GetAccount()!.Id
+        });
+
         db.SaveChanges();
 
         await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);

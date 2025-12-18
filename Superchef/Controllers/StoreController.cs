@@ -405,6 +405,17 @@ public class StoreController : Controller
                 }
             }
 
+            if (acc.AccountType.Name == "Admin")
+            {
+                db.AuditLogs.Add(new()
+                {
+                    Action = "update",
+                    Entity = "store",
+                    EntityId = store.Id,
+                    AccountId = HttpContext.GetAccount()!.Id
+                });
+            }
+
             db.SaveChanges();
 
             TempData["Message"] = "Store updated successfully";
@@ -1341,6 +1352,18 @@ public class StoreController : Controller
         if (error != null) return BadRequest(error);
 
         clnSrv.CleanUp(store);
+
+        if (acc.AccountType.Name == "Admin")
+        {
+            db.AuditLogs.Add(new()
+            {
+                Action = "delete",
+                Entity = "store",
+                EntityId = store.Id,
+                AccountId = HttpContext.GetAccount()!.Id
+            });
+            db.SaveChanges();
+        }
 
         TempData["Message"] = "Store deleted successfully";
         return Ok();
