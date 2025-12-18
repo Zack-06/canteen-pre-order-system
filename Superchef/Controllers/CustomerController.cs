@@ -116,7 +116,7 @@ public class CustomerController : Controller
         var customer = db.Accounts.FirstOrDefault(a => a.Id == id && !a.IsDeleted && a.AccountType.Name == "Customer");
         if (customer == null)
         {
-            return NotFound();
+            return NotFound("Customer not found");
         }
 
         return View(customer);

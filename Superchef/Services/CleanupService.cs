@@ -8,13 +8,15 @@ public class CleanupService
     private readonly PaymentService paySrv;
     private readonly ImageService imgSrv;
     private readonly SystemOrderService sysOrderSrv;
+    private readonly NotificationService ntfSrv;
 
-    public CleanupService(DB db, PaymentService paySrv, ImageService imgSrv, SystemOrderService sysOrderSrv)
+    public CleanupService(DB db, PaymentService paySrv, ImageService imgSrv, SystemOrderService sysOrderSrv, NotificationService ntfSrv)
     {
         this.db = db;
         this.paySrv = paySrv;
         this.imgSrv = imgSrv;
         this.sysOrderSrv = sysOrderSrv;
+        this.ntfSrv = ntfSrv;
     }
 
     public async Task ExpiryCleanup()
@@ -32,6 +34,8 @@ public class CleanupService
 
         // Handle all confirmed orders
         foreach (var order in db.Orders
+            .Include(o => o.Store)
+            .Include(o => o.Slot)
             .Where(b => 
                 b.Status == "Confirmed" &&
                 b.Slot.StartTime.AddMinutes(-30) < DateTime.Now
@@ -40,6 +44,13 @@ public class CleanupService
         )
         {
             order.Status = "Preparing";
+
+            var timeText = FormatHelper.ToDateTimeFormat(order.Slot.StartTime, "hh:mm tt");
+            await ntfSrv.SendNotification(
+                "New Order", 
+                $"Incoming order for {timeText}. Start cooking! 🍳",
+                order.Store
+            );
         }
         db.SaveChanges();
         
@@ -47,7 +58,7 @@ public class CleanupService
         foreach (var order in db.Orders
             .Where(b =>
                 (b.Status == "Preparing" || b.Status == "To Pickup") &&
-                b.Slot.EndTime < DateTime.Now
+                b.Slot.EndTime < DateTime.Now.AddHours(-2)
             )
             .ToList()
         )

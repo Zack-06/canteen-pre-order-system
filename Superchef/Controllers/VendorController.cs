@@ -182,7 +182,7 @@ public class VendorController : Controller
             );
         if (vendor == null)
         {
-            return NotFound();
+            return NotFound("Vendor not found");
         }
 
         return View(vendor);

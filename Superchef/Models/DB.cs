@@ -2,7 +2,6 @@
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq.Expressions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Models;
@@ -143,8 +142,14 @@ public class Session
     [MaxLength(50)]
     public string Token { get; set; }
     public DateTime ExpiresAt { get; set; }
+    public string? PushEndpoint { get; set; }
+    public string? PushP256dh { get; set; }
+    public string? PushAuth { get; set; }
+    public int? StoreId { get; set; }
     public int DeviceId { get; set; }
 
+    [DeleteBehavior(DeleteBehavior.SetNull)]
+    public Store? Store { get; set; }
     public Device Device { get; set; }
 }
 
@@ -196,6 +201,7 @@ public class Store
     public List<SlotTemplate> SlotTemplates { get; set; } = [];
     public List<Item> Items { get; set; } = [];
     public List<Order> Orders { get; set; } = [];
+    public List<Session> Sessions { get; set; } = [];
 }
 
 public class Item

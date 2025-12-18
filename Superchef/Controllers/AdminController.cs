@@ -167,7 +167,7 @@ public class AdminController : Controller
         var admin = db.Accounts.FirstOrDefault(a => a.Id == id && !a.IsDeleted && a.AccountType.Name == "Admin");
         if (admin == null)
         {
-            return NotFound();
+            return NotFound("Admin not found");
         }
 
         return View(admin);

@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using WebPush;
 
 namespace Superchef.Services;
 
@@ -62,5 +63,28 @@ public class GeneratorHelper
         }
 
         return new string(password);
+    }
+
+    public static string RandomReadyMessage(string storeName)
+    {
+        List<string> messages = [
+            $"Still here! Your meal at {storeName} is ready and waiting for your arrival. 🕒",
+            $"Don't leave it hanging! Your food from {storeName} is sitting pretty at the counter. 🍱",
+            $"Your stomach is calling! Your order at {storeName} has been ready for a while now. 📢",
+            $"Quick heads up! Your order from {storeName} is all set and waiting for you to collect. 🏃‍♂️",
+            $"Food's getting lonely! Your order is ready at {storeName}, come and get it! 🤗",
+            $"Hungry? Your food from {storeName} is ready and waiting to be picked up! 🥨",
+            $"Don't let it get cold! Your order from {storeName} is still waiting for you. ❄️"
+        ];
+
+        return messages[RandomNumberGenerator.GetInt32(messages.Count)];
+    }
+
+    // generate a new key
+    public static void GenerateVapidKey()
+    {
+        var keys = VapidHelper.GenerateVapidKeys();
+        Console.WriteLine($"VAPID_PUBLIC_KEY={keys.PublicKey}");
+        Console.WriteLine($"VAPID_PRIVATE_KEY={keys.PrivateKey}");
     }
 }

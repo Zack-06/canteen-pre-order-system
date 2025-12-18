@@ -10,11 +10,6 @@ using Stripe;
 
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddSignalR(options =>
-{
-    // testing
-    options.EnableDetailedErrors = true; // Shows full exception stack traces
-});
 builder.Services.AddControllersWithViews(o =>
 {
     o.Filters.Add(new ResponseCacheAttribute
@@ -66,6 +61,13 @@ builder.Services.AddDataProtection();
 // Add session
 builder.Services.AddSession();
 
+// SignalR
+builder.Services.AddSignalR(options =>
+{
+    // testing
+    options.EnableDetailedErrors = true; // Shows full exception stack traces
+});
+
 // Add services
 builder.Services.AddSingleton<ImageService>();
 
@@ -78,6 +80,7 @@ builder.Services.AddScoped<SystemOrderService>();
 builder.Services.AddScoped<GenerateLinkService>();
 builder.Services.AddScoped<CleanupService>();
 builder.Services.AddScoped<GenerateSlotService>();
+builder.Services.AddScoped<NotificationService>();
 
 // Add background worker
 builder.Services.AddHostedService<GenerateSlotBackgroundWorker>();

@@ -134,7 +134,7 @@ public class VenueController : Controller
         var venue = db.Venues.FirstOrDefault(v => v.Id == id && v.Id != 1);
         if (venue == null)
         {
-            return NotFound();
+            return NotFound("Venue not found");
         }
 
         var vm = new EditVenueVM
@@ -152,7 +152,7 @@ public class VenueController : Controller
         var venue = db.Venues.FirstOrDefault(v => v.Id == vm.Id && v.Id != 1);
         if (venue == null)
         {
-            return NotFound();
+            return NotFound("Venue not found");
         }
 
         if (ModelState.IsValid("Name") && !IsNameUnique(vm.Name, vm.Id))
@@ -187,7 +187,7 @@ public class VenueController : Controller
         if (!Request.IsAjax()) return NotFound();
 
         var venue = db.Venues.FirstOrDefault(v => v.Id == id && v.Id != 1);
-        if (venue == null) return NotFound();
+        if (venue == null) return NotFound("Venue not found");
 
         clnSrv.CleanUp(venue);
 

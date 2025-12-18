@@ -920,12 +920,13 @@ var accountConnectionId = null
 var accountConnectionDevice = null
 var accountConnectionToken = null
 accountConnection.on("Error", (message) => showToast(message))
-accountConnection.on("Initialized", (accountId, deviceId, hashedSessionToken) => {
+accountConnection.on("Initialized", (accountId, deviceId, hashedSessionToken, vapidPublicKey) => {
 	if (accountId == null || deviceId == null || hashedSessionToken == null) return
 
 	accountConnectionId = accountId
 	accountConnectionDevice = deviceId
 	accountConnectionToken = hashedSessionToken
+	initPushNotifications(vapidPublicKey)
 })
 accountConnection.on("Logout", (sessionToken) => {
 	if (sessionToken == null || !bcrypt.compareSync(sessionToken, accountConnectionToken)) return
@@ -959,4 +960,55 @@ function handleLoggedOut() {
 	} else {
 		notifyLoggedOut()
 	}
+}
+
+// ==========Web Push==========
+async function initPushNotifications(vapidPublicKey) {
+	if (!("serviceWorker" in navigator) || !("PushManager" in window)) return
+
+	const registration = await navigator.serviceWorker.register("/js/serviceWorker.js")
+
+	if (Notification.permission === "default") {
+		await Notification.requestPermission()
+	}
+
+	if (Notification.permission === "granted") {
+		try {
+			let subscription = await registration.pushManager.getSubscription()
+
+			if (!subscription) {
+				subscription = await registration.pushManager.subscribe({
+					userVisibleOnly: true,
+					applicationServerKey: urlBase64ToUint8Array(vapidPublicKey)
+				})
+			}
+
+            const subJson = subscription.toJSON()
+
+            // save or sync to server database
+			$.ajax({
+				url: "/Account/SaveSubscription",
+				type: "POST",
+				data: { 
+                    endpoint: subJson.endpoint,
+                    p256dh: subJson.keys.p256dh,
+                    auth: subJson.keys.auth
+                },
+			})
+		} catch (error) {
+			console.error("Push Error:", error)
+		}
+	}
+}
+function urlBase64ToUint8Array(base64String) {
+	const padding = "=".repeat((4 - (base64String.length % 4)) % 4)
+	const base64 = (base64String + padding).replace(/\-/g, "+").replace(/_/g, "/")
+
+	const rawData = window.atob(base64)
+	const outputArray = new Uint8Array(rawData.length)
+
+	for (let i = 0; i < rawData.length; ++i) {
+		outputArray[i] = rawData.charCodeAt(i)
+	}
+	return outputArray
 }

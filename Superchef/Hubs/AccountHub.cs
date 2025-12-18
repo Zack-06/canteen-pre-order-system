@@ -5,10 +5,12 @@ namespace Superchef.Hubs;
 public class AccountHub : Hub
 {
     private readonly DB db;
+    private readonly IConfiguration cf;
 
-    public AccountHub(DB db)
+    public AccountHub(DB db, IConfiguration cf)
     {
         this.db = db;
+        this.cf = cf;
     }
 
     public async Task Initialize()
@@ -40,6 +42,6 @@ public class AccountHub : Hub
 
         var hashedToken = BCrypt.Net.BCrypt.HashPassword(token);
 
-        await Clients.Caller.SendAsync("Initialized", account.Id, session.DeviceId, hashedToken);
+        await Clients.Caller.SendAsync("Initialized", account.Id, session.DeviceId, hashedToken, cf["Vapid:PublicKey"]);
     }
 }

@@ -62,7 +62,7 @@ public class CartController : Controller
             .FirstOrDefault(s => s.Id == id && !s.IsDeleted);
         if (store == null)
         {
-            return NotFound();
+            return NotFound("Store not found");
         }
 
         var cartItems = db.Carts
@@ -146,7 +146,7 @@ public class CartController : Controller
         var store = db.Stores.FirstOrDefault(s => s.Id == vm.Id && !s.IsDeleted);
         if (store == null)
         {
-            return NotFound();
+            return NotFound("Store not found");
         }
 
         var cartItems = db.Carts

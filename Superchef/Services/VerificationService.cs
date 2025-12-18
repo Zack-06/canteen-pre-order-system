@@ -65,7 +65,7 @@ public class VerificationService
         return db.Verifications.Include(v => v.Account).FirstOrDefault(u => u.Token == token && u.Action == action && u.ExpiresAt > DateTime.Now);
     }
 
-    async public Task<bool> VerifyRecaptcha(string recaptchaToken)
+    public async Task<bool> VerifyRecaptcha(string recaptchaToken)
     {
         var secretKey = cf["RecaptchaSettings:SecretKey"]!;
         var verificationUrl = cf["RecaptchaSettings:VerificationUrl"]!;

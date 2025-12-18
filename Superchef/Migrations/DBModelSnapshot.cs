@@ -496,9 +496,23 @@ namespace Superchef.Migrations
                     b.Property<DateTime>("ExpiresAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("PushAuth")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PushEndpoint")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PushP256dh")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int?>("StoreId")
+                        .HasColumnType("int");
+
                     b.HasKey("Token");
 
                     b.HasIndex("DeviceId");
+
+                    b.HasIndex("StoreId");
 
                     b.ToTable("Sessions");
                 });
@@ -917,7 +931,14 @@ namespace Superchef.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Superchef.Models.Store", "Store")
+                        .WithMany("Sessions")
+                        .HasForeignKey("StoreId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Device");
+
+                    b.Navigation("Store");
                 });
 
             modelBuilder.Entity("Superchef.Models.Slot", b =>
@@ -1040,6 +1061,8 @@ namespace Superchef.Migrations
                     b.Navigation("Items");
 
                     b.Navigation("Orders");
+
+                    b.Navigation("Sessions");
 
                     b.Navigation("Slots");
                 });

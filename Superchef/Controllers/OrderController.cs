@@ -12,13 +12,15 @@ public class OrderController : Controller
     private readonly DB db;
     private readonly SystemOrderService sysOrderSrv;
     private readonly PaymentService paySrv;
+    private readonly NotificationService ntfSrv;
     private readonly IHubContext<OrderHub> orderHubContext;
 
-    public OrderController(DB db, SystemOrderService sysOrderSrv, PaymentService paySrv, IHubContext<OrderHub> orderHubContext)
+    public OrderController(DB db, SystemOrderService sysOrderSrv, PaymentService paySrv, NotificationService ntfSrv, IHubContext<OrderHub> orderHubContext)
     {
         this.db = db;
         this.sysOrderSrv = sysOrderSrv;
         this.paySrv = paySrv;
+        this.ntfSrv = ntfSrv;
         this.orderHubContext = orderHubContext;
     }
 
@@ -34,7 +36,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound();
+            return NotFound("Order not found");
         }
 
         var vm = new OrderCustomerVM
@@ -68,7 +70,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound();
+            return NotFound("Order not found");
         }
 
         if (ModelState.IsValid)
@@ -105,7 +107,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound();
+            return NotFound("Order not found");
         }
 
         if (string.IsNullOrEmpty(order.PhoneNumber))
@@ -278,7 +280,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound();
+            return NotFound("Order not found");
         }
 
         if (order.PhoneNumber == null)
@@ -367,7 +369,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound();
+            return NotFound("Order not found");
         }
 
         // show order info
@@ -383,7 +385,7 @@ public class OrderController : Controller
         {
             if (acc.AccountType.Name == "Admin")
             {
-                return NotFound();
+                return NotFound("Store not found");
             }
 
             var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
@@ -402,7 +404,7 @@ public class OrderController : Controller
         );
         if (store == null)
         {
-            return NotFound();
+            return NotFound("Store not found");
         }
 
         if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
@@ -588,6 +590,7 @@ public class OrderController : Controller
     public async Task<IActionResult> Cancel(string id)
     {
         var order = db.Orders
+            .Include(o => o.Account)
             .Include(o => o.Store)
             .FirstOrDefault(o =>
                 o.Id == id &&
@@ -637,14 +640,24 @@ public class OrderController : Controller
 
         await sysOrderSrv.CancelOrder(order);
 
+        if (acc.AccountType.Name == "Vendor")
+        {
+            await ntfSrv.SendNotification("Order Cancelled", "Your order has been cancelled by the store owner", order.Account);
+        }
+        else if (acc.AccountType.Name == "Customer")
+        {
+            await ntfSrv.SendNotification("Order Cancelled", "Your order has been cancelled by an admin", order.Store);
+        }
+
         TempData["Message"] = "Order cancelled successfully";
         return Ok();
     }
 
     [Authorize(Roles = "Vendor")]
-    public IActionResult MarkReady(string id)
+    public async Task<IActionResult> MarkReady(string id)
     {
         var order = db.Orders
+            .Include(o => o.Account)
             .FirstOrDefault(o =>
                 o.Id == id &&
                 o.Store.AccountId == HttpContext.GetAccount()!.Id
@@ -663,9 +676,31 @@ public class OrderController : Controller
         order.Status = "To Pickup";
         db.SaveChanges();
 
-        // todo: notify customer
+        await ntfSrv.SendNotification("Order Ready", "Your order is ready to be picked up", order.Account);
 
         TempData["Message"] = "Order marked as ready successfully";
+        return Ok();
+    }
+
+    [Authorize(Roles = "Vendor")]
+    public async Task<IActionResult> RemindUser(string id)
+    {
+        var order = db.Orders
+            .Include(o => o.Account)
+            .Include(o => o.Store)
+            .FirstOrDefault(o =>
+                o.Id == id &&
+                o.Status == "To Pickup" &&
+                o.Store.AccountId == HttpContext.GetAccount()!.Id
+            );
+
+        if (order == null)
+        {
+            return NotFound("Order not found");
+        }
+
+        await ntfSrv.SendNotification("Order Ready", GeneratorHelper.RandomReadyMessage(order.Store.Name), order.Account);
+
         return Ok();
     }
 
@@ -706,8 +741,6 @@ public class OrderController : Controller
         db.SaveChanges();
 
         paySrv.TriggerPayout(order);
-
-        // todo: notify customer
 
         TempData["Message"] = "Order completed successfully";
         return Ok();

@@ -23,7 +23,6 @@ public class AuthSessionMiddleware
         var endpoint = context.GetEndpoint();
         var requiresAuth = endpoint?.Metadata?.GetMetadata<IAuthorizeData>() != null;
         var logout = false;
-        
 
         if (context.User.Identity?.IsAuthenticated == true)
         {

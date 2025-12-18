@@ -326,4 +326,27 @@ public class AccountController : Controller
 
         return Ok(verification.Token);
     }
+
+    [HttpPost]
+    public IActionResult SaveSubscription(PushSubscriptionVM vm)
+    {
+        var token = User.FindFirst("SessionToken");
+        if (token == null)
+        {
+            return BadRequest("No session token found");
+        }
+
+        var session = db.Sessions.FirstOrDefault(s => s.Token == token.Value);
+        if (session == null)
+        {
+            return BadRequest("No session found");
+        }
+
+        session.PushEndpoint = vm.Endpoint;
+        session.PushP256dh = vm.P256dh;
+        session.PushAuth = vm.Auth;
+        db.SaveChanges();
+
+        return Ok();
+    }
 }

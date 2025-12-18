@@ -156,7 +156,7 @@ public class CategoryController : Controller
         var category = db.Categories.FirstOrDefault(c => c.Id == id && c.Id != 1);
         if (category == null)
         {
-            return NotFound();
+            return NotFound("Category not found");
         }
 
         var vm = new EditCategoryVM
@@ -176,7 +176,7 @@ public class CategoryController : Controller
         var category = db.Categories.FirstOrDefault(c => c.Id == vm.Id && c.Id != 1);
         if (category == null)
         {
-            return NotFound();
+            return NotFound("Category not found");
         }
 
         if (ModelState.IsValid("Name") && !IsNameUnique(vm.Name, vm.Id))
@@ -236,7 +236,7 @@ public class CategoryController : Controller
         if (!Request.IsAjax()) return NotFound();
 
         var category = db.Categories.FirstOrDefault(c => c.Id == id && c.Id != 1);
-        if (category == null) return NotFound();
+        if (category == null) return NotFound("Category not found");
 
         clnSrv.CleanUp(category);
 

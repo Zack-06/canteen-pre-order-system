@@ -158,6 +158,13 @@
                     data-ajax-confirm="Are you sure you want to mark this order as ready for pickup?">Mark as Ready</a>
             }
 
+            @if (Model.Status == "To Pickup" && ViewBag.AccountType == "Vendor")
+            {
+                <a data-button="accent" data-ajax="true" data-ajax-url="@Url.Action("RemindUser", new { id = Model.Id })"
+                    data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="sendReminderSuccess">Send
+                    Reminder</a>
+            }
+
             @if (Model.Status == "Confirmed")
             {
                 <a data-button="danger" data-ajax="true" data-ajax-url="@Url.Action("Cancel", new { id = Model.Id })"
@@ -181,5 +188,9 @@
     <script>
         var bookingId = "@Model.Id";
         new QRCode(document.getElementById("qr-container"), bookingId);
+
+        function sendReminderSuccess() {
+            showToast("Reminder sent successfully")
+        }
     </script>
 }
