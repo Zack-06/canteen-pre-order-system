@@ -22,6 +22,9 @@ public class CleanupService
         // remove all expired verification reqeusts if more than 1 day
         db.Verifications.RemoveRange(db.Verifications.Where(u => u.ExpiresAt < DateTime.Now.AddDays(-1)));
 
+        // Remove all audit logs that are older than 30 days
+        db.AuditLogs.RemoveRange(db.AuditLogs.Where(a => a.CreatedAt < DateTime.Now.AddDays(-30)));
+
         // Cancel all expired pending orders
         HashSet<string> OrdersToCancel = [];
         OrdersToCancel.UnionWith(db.Orders.Where(b => b.ExpiresAt < DateTime.Now).Select(b => b.Id));
@@ -31,7 +34,7 @@ public class CleanupService
         foreach (var order in db.Orders
             .Where(b => 
                 b.Status == "Confirmed" &&
-                b.Slot.StartTime.AddMinutes(30) > DateTime.Now
+                b.Slot.StartTime.AddMinutes(-30) < DateTime.Now
             )
             .ToList()
         )
@@ -53,8 +56,6 @@ public class CleanupService
             paySrv.TriggerPayout(order);
         }
         db.SaveChanges();
-
-        // Handle all preparing orders 
 
         // Handle deletion of accounts
         var deletedUsers = db.Accounts.Where(a => a.DeletionAt < DateTime.Now && !a.IsDeleted).ToList();

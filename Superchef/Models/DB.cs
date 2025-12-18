@@ -421,10 +421,8 @@ public class AuditLog
             if (Action == "create") return $"Created {Entity} with ID {EntityId}";
             if (Action == "delete") return $"Deleted {Entity} with ID {EntityId}";
             if (Action == "update") return $"Updated {Entity} with ID {EntityId}";
-            if (Action == "cancel") return Action;
-            if (Action == "complete") return Action;
             if (Action == "generate-slot") return $"Auto generated new slots";
-            if (Entity == "error") return Action;
+            if (Entity == "error" || Entity == "cancel-order" || Entity == "complete-order") return Action;
 
             return "Unknown action";
         }
@@ -442,9 +440,9 @@ public class AuditLog
             if (Action == "create") return "➕";
             if (Action == "delete") return "🗑️";
             if (Action == "update") return "✏️";
-            if (Action == "cancel") return "❌";
-            if (Action == "complete") return "✅";
             if (Action == "generate-slot") return "🔄";
+            if (Entity == "cancel-order") return "❌";
+            if (Entity == "complete-order") return "✅";
             if (Entity == "error") return "⚠️";
 
             return "🤔";

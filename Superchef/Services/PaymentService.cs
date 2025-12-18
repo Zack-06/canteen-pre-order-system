@@ -155,7 +155,7 @@ public class PaymentService
         // BalanceTransaction.Net is the actual amount available to transfer
         long netAmountInCents = charge.BalanceTransaction.Net;
 
-        if (!string.IsNullOrEmpty(order.Store.StripeAccountId))
+        if (string.IsNullOrEmpty(order.Store.StripeAccountId))
         {
             db.AuditLogs.Add(new()
             {

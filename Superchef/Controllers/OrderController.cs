@@ -630,6 +630,7 @@ public class OrderController : Controller
             db.AuditLogs.Add(new()
             {
                 Action = $"Cancelled order with ID {order.Id}",
+                Entity = "cancel-order",
                 AccountId = HttpContext.GetAccount()!.Id
             });
         }
@@ -698,6 +699,7 @@ public class OrderController : Controller
             db.AuditLogs.Add(new()
             {
                 Action = $"Completed order with ID {order.Id}",
+                Entity = "complete-order",
                 AccountId = HttpContext.GetAccount()!.Id
             });
         }

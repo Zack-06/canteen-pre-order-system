@@ -142,7 +142,7 @@
     </div>
 </div>
 
-@if (Model.Status != "Cancelled")
+@if (Model.Status != "Cancelled" && Model.Status != "Completed")
 {
     <div class="container" data-limit-container>
         <div class="title">Action</div>
