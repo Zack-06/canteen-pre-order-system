@@ -114,11 +114,14 @@
                         <input type="password" asp-for="Email" value="@Model.Email" readonly />
                         <input type="checkbox" class="password-show-button">
 
-                        <a data-ajax="true" data-ajax-loading="#change-email-button-loader"
-                            data-ajax-url="@Url.Action("RequestChangeEmail", "Account")" data-ajax-method="post"
-                            data-ajax-confirm="Are you sure you want to change your email address?"
-                            data-ajax-begin="changeEmailBegin" data-ajax-complete="changeEmailComplete"
-                            data-ajax-success="changeEmailSuccess" id="change-email-button"></a>
+                        @if (Model.Email != "superchef.system@gmail.com")
+                        {
+                            <a data-ajax="true" data-ajax-loading="#change-email-button-loader"
+                                data-ajax-url="@Url.Action("RequestChangeEmail", "Account")" data-ajax-method="post"
+                                data-ajax-confirm="Are you sure you want to change your email address?"
+                                data-ajax-failure="defaultOnFailure" data-ajax-begin="changeEmailBegin" data-ajax-complete="changeEmailComplete"
+                                data-ajax-success="changeEmailSuccess" id="change-email-button"></a>
+                        }
 
                         <div id="change-email-button-loader" style="display: none;"></div>
                     </div>
@@ -130,12 +133,13 @@
                 <a href="@Url.Action("ChangePassword", "Account")" data-button="info">Change
                     Password</a>
 
-                <a data-ajax="true" data-ajax-method="post" data-ajax-url="@Url.Action("RequestDeleteAccount", "Account")"
-                    data-ajax-confirm="Are you sure you want to delete your account?"
-                    data-ajax-begin="deleteAccountBegin" data-ajax-complete="deleteAccountComplete"
-                    data-ajax-success="deleteAccountSuccess" id="delete-account-button" data-button="danger">Delete
-                    Account</a>
-
+                @if (Model.Email != "superchef.system@gmail.com")
+                {
+                    <a data-ajax="true" data-ajax-method="post" data-ajax-url="@Url.Action("RequestDeleteAccount", "Account")"
+                        data-ajax-confirm="Are you sure you want to delete your account?"
+                        data-ajax-begin="deleteAccountBegin" data-ajax-complete="deleteAccountComplete" data-ajax-failure="defaultOnFailure"
+                        data-ajax-success="deleteAccountSuccess" id="delete-account-button" data-button="danger">Delete Account</a>
+                }
             </div>
         </div>
 
@@ -199,8 +203,8 @@
             $(this).show()
         }
 
-        function changeEmailSuccess(data) {
-            window.location.href = `/Auth/Verify?Token=${data}`
+        function changeEmailSuccess(data, status, xhr) {
+            window.location.href = `/Auth/Verify?Token=${xhr.responseText}`
         }
 
         function deleteAccountBegin() {
@@ -213,8 +217,8 @@
             $(this).attr("data-button", "danger")
         }
 
-        function deleteAccountSuccess(data) {
-            window.location.href = `/Auth/Verify?Token=${data}`
+        function deleteAccountSuccess(data, status, xhr) {
+            window.location.href = `/Auth/Verify?Token=${xhr.responseText}`
         }
 
         const originalSrc = $("#profile-preview").attr("src")

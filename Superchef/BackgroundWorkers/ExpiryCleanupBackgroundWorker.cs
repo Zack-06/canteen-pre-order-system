@@ -11,15 +11,15 @@ public class ExpiryCleanupBackgroundWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
-        // while (!stoppingToken.IsCancellationRequested)
-        // {
-        //     using (var scope = _services.CreateScope())
-        //     {
-        //         var cleanupService = scope.ServiceProvider.GetRequiredService<CleanupService>();
-        //         await cleanupService.OrderExpiryCleanup();
-        //     }
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            using (var scope = _services.CreateScope())
+            {
+                var cleanupService = scope.ServiceProvider.GetRequiredService<CleanupService>();
+                await cleanupService.ExpiryCleanup();
+            }
 
-        //     await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // run every 1 minute
-        // }
+            await Task.Delay(TimeSpan.FromMinutes(1), stoppingToken); // run every 1 minute
+        }
     }
 }

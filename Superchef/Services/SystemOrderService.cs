@@ -67,4 +67,18 @@ public class SystemOrderService
         db.SaveChanges();
         await BroadcastStockReloads(reloads);
     }
+
+    public async Task BulkCancelOrders(HashSet<string> ids)
+    {
+        var orders = db.Orders.Where(o => ids.Contains(o.Id)).ToList();
+        List<int> reloads = [];
+
+        foreach (var order in orders)
+        {
+            ProcessOrderCancellation(order, reloads);
+        }
+
+        db.SaveChanges();
+        await BroadcastStockReloads(reloads);
+    }
 }

@@ -15,9 +15,10 @@ public class AccountController : Controller
     private readonly SecurityService secSrv;
     private readonly EmailService emlSrv;
     private readonly ImageService imgSrv;
+    private readonly CleanupService clnSrv;
     private readonly IHubContext<AccountHub> accHubCtx;
 
-    public AccountController(DB db, IWebHostEnvironment en, DeviceService devSrv, VerificationService verSrv, SecurityService secSrv, EmailService emlSrv, ImageService imgSrv, IHubContext<AccountHub> accHubCtx)
+    public AccountController(DB db, IWebHostEnvironment en, DeviceService devSrv, VerificationService verSrv, SecurityService secSrv, EmailService emlSrv, ImageService imgSrv, CleanupService clnSrv, IHubContext<AccountHub> accHubCtx)
     {
         this.db = db;
         this.en = en;
@@ -26,6 +27,7 @@ public class AccountController : Controller
         this.secSrv = secSrv;
         this.emlSrv = emlSrv;
         this.imgSrv = imgSrv;
+        this.clnSrv = clnSrv;
         this.accHubCtx = accHubCtx;
     }
 
@@ -295,20 +297,33 @@ public class AccountController : Controller
 
     // ==========REQUEST==========
     [HttpPost]
-    public string RequestChangeEmail()
+    public IActionResult RequestChangeEmail()
     {
+        var account = HttpContext.GetAccount()!;
+        if (account.Email == "superchef.system@gmail.com")
+        {
+            return BadRequest("You cannot change default system email");
+        }
+
         // Create verification
         var verification = verSrv.CreateVerification("ChangeEmail", Request.GetBaseUrl(), HttpContext.GetAccount()!.Id);
 
-        return verification.Token;
+        return Ok(verification.Token);
     }
 
     [HttpPost]
-    public string RequestDeleteAccount()
+    public IActionResult RequestDeleteAccount()
     {
+        var account = HttpContext.GetAccount()!;
+        var error = clnSrv.CanCleanUp(account);
+        if (error != null)
+        {
+            return BadRequest(error);
+        }
+
         // Create verification
         var verification = verSrv.CreateVerification("DeleteAccount", Request.GetBaseUrl(), HttpContext.GetAccount()!.Id);
 
-        return verification.Token;
+        return Ok(verification.Token);
     }
 }

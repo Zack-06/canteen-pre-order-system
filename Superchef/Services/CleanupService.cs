@@ -7,15 +7,17 @@ public class CleanupService
     private readonly DB db;
     private readonly PaymentService paySrv;
     private readonly ImageService imgSrv;
+    private readonly SystemOrderService sysOrderSrv;
 
-    public CleanupService(DB db, PaymentService paySrv, ImageService imgSrv)
+    public CleanupService(DB db, PaymentService paySrv, ImageService imgSrv, SystemOrderService sysOrderSrv)
     {
         this.db = db;
         this.paySrv = paySrv;
         this.imgSrv = imgSrv;
+        this.sysOrderSrv = sysOrderSrv;
     }
 
-    public async Task OrderExpiryCleanup()
+    public async Task ExpiryCleanup()
     {
         // remove all expired verification reqeusts if more than 1 day
         db.Verifications.RemoveRange(db.Verifications.Where(u => u.ExpiresAt < DateTime.Now.AddDays(-1)));
@@ -25,9 +27,6 @@ public class CleanupService
 
         // Cancel all expired pending orders
         OrdersToCancel.UnionWith(db.Orders.Where(b => b.ExpiresAt < DateTime.Now).Select(b => b.Id));
-
-        // Cancel all expired unpaid orders
-        // OrdersToCancel.UnionWith(db.Orders.Where(b => b.Payment != null && b.Payment.ExpiresAt < DateTime.Now).Select(b => b.Id));
 
         // Handle all confirmed orders
         foreach (var order in
@@ -44,6 +43,9 @@ public class CleanupService
         }
         db.SaveChanges();
 
+        // Process cancellation
+        await sysOrderSrv.BulkCancelOrders(OrdersToCancel);
+
         // Handle deletion of accounts
         var deletedUsers = db.Accounts.Where(a => a.DeletionAt < DateTime.Now && !a.IsDeleted).ToList();
         foreach (var account in deletedUsers)
@@ -51,6 +53,7 @@ public class CleanupService
             account.IsDeleted = true;
             account.DeletionAt = null;
         }
+        db.SaveChanges();
     }
 
     public void CleanUp(Variant variant)
@@ -238,7 +241,10 @@ public class CleanupService
         }
         else
         {
-            account.IsDeleted = true;
+            if (account.Email != "superchef.system@gmail.com")
+            {
+                account.IsDeleted = true;
+            }
         }
 
         db.SaveChanges();
@@ -247,6 +253,8 @@ public class CleanupService
     public string? CanCleanUp(Account account)
     {
         account = db.Accounts
+            .Include(a => a.Stores)
+            .Include(a => a.Orders)
             .Include(a => a.AccountType)
             .FirstOrDefault(a => a.Id == account.Id)!;
 
@@ -262,6 +270,12 @@ public class CleanupService
             if (account.Stores.Any(s => !s.IsDeleted))
             {
                 return "Please delete all stores before deleting this account.";
+            }
+        } else
+        {
+            if (account.Email == "superchef.system@gmail.com")
+            {
+                return "You cannot delete default system account.";
             }
         }
 
