@@ -177,31 +177,31 @@
 
 <div class="container" data-no="padding color">
     <div class="container stat-container sales-container" data-no="margin">
-        <div class="title normal" data-no="margin">Total Sales</div>
-        <div class="value">RM 12,540</div>
-        <div class="trend">12.8% this month</div>
+        <div class="title normal" data-no="margin">Total Sales (@Model.DisplayMonth)</div>
+        <div class="value">@FormatHelper.ToRMFormat(Model.TotalSales)</div>
+        <div class="trend @(Model.TotalSalesStat < 0 ? "down" : "")">@FormatHelper.ToPercentage(Model.TotalSalesStat) vs last month</div>
     </div>
 
     <div class="container stat-container orders-container" data-no="margin">
-        <div class="title normal" data-no="margin">Completed Orders</div>
-        <div class="value">309</div>
-        <div class="trend">21.5% this month</div>
+        <div class="title normal" data-no="margin">Completed Orders (@Model.DisplayMonth)</div>
+        <div class="value">@Model.TotalOrders</div>
+        <div class="trend @(Model.TotalOrdersStat < 0 ? "down" : "")">@FormatHelper.ToPercentage(Model.TotalOrdersStat) vs last month</div>
     </div>
 
     <div class="container stat-container customers-container" data-no="margin">
-        <div class="title normal" data-no="margin">New Customers</div>
-        <div class="value">48</div>
-        <div class="trend down">5.2% this month</div>
+        <div class="title normal" data-no="margin">New Customers (@Model.DisplayMonth)</div>
+        <div class="value">@Model.TotalCustomers</div>
+        <div class="trend @(Model.TotalCustomersStat < 0 ? "down" : "")">@FormatHelper.ToPercentage(Model.TotalCustomersStat) vs last month</div>
     </div>
 
     <div class="container performance-container" data-no="margin">
         <div class="title">Sales Performance (5 Months)</div>
-        <canvas id="order-frequency" data-months="1,2,3,4,5" data-orders="12,19,3,5,2"></canvas>
+        <canvas id="order-frequency"></canvas>
     </div>
 
     <div class="container devices-container" data-no="margin">
         <div class="title">Login Devices</div>
-        <canvas id="login-devices" data-devices="Phone,Computer,Tablet" data-devices-count="65,40,15"></canvas>
+        <canvas id="login-devices"></canvas>
     </div>
 
     <div class="container activity-container" data-no="margin overflow">
@@ -219,17 +219,14 @@
     <script src="/js/chart.min.js"></script>
     <script>
         // Line Graph
-        const orderCtx = $("#order-frequency")[0].getContext("2d");
-        const orderCanvas = $("#order-frequency");
-
-        new Chart(orderCtx, {
+        new Chart($("#order-frequency")[0].getContext("2d"), {
             type: "line",
             data: {
-                labels: orderCanvas.data("months").toString().split(","),
+                labels: Array.from(@Html.Raw(Json.Serialize(Model.SalesPerformanceMonths))),
                 datasets: [
                     {
                         label: " Orders",
-                        data: orderCanvas.data("orders").toString().split(","),
+                        data: Array.from(@Html.Raw(Json.Serialize(Model.SalesPerformanceOrders))),
                         borderColor: "#a38576",
                         borderWidth: 3,
                         tension: 0.35,
@@ -261,17 +258,14 @@
         });
 
         // Pie Chart
-        const deviceCtx = $("#login-devices")[0].getContext("2d");
-        const deviceCanvas = $("#login-devices");
-
-        new Chart(deviceCtx, {
+        new Chart($("#login-devices")[0].getContext("2d"), {
             type: "doughnut",
             data: {
-                labels: deviceCanvas.data("devices").toString().split(","),
+                labels: Array.from(@Html.Raw(Json.Serialize(Model.LoginDevices))),
                 datasets: [
                     {
                         label: " Login Count",
-                        data: deviceCanvas.data("devices-count").toString().split(","),
+                        data: Array.from(@Html.Raw(Json.Serialize(Model.LoginDevicesCount))),
                         backgroundColor: ["#613c25", "#a38576", "#d6c9ba"],
                         borderWidth: 0
                     }

@@ -640,6 +640,7 @@ public class HomePageVM
 
 public class AdminHomePageVM
 {
+    public string DisplayMonth { get; set; }
     public decimal TotalSales { get; set; }
     public decimal TotalSalesStat { get; set; }
     public int TotalOrders { get; set; }

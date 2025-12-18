@@ -103,7 +103,7 @@ public class HomeController : Controller
         var stores = db.Stores
             .Include(s => s.Items)
                 .ThenInclude(r => r.Reviews)
-            .Where(s => 
+            .Where(s =>
                 s.AccountId == HttpContext.GetAccount()!.Id &&
                 !s.IsDeleted
             )
@@ -117,17 +117,113 @@ public class HomeController : Controller
     [Authorize(Roles = "Admin")]
     public IActionResult Admin(AdminHomePageVM vm)
     {
-        vm.TotalSales = 0;
-        vm.TotalSalesStat = 0;
-        vm.TotalOrders = 0;
-        vm.TotalOrdersStat = 0;
-        vm.TotalCustomers = 0;
-        vm.TotalCustomersStat = 0;
-        vm.SalesPerformanceMonths = new List<string>();
-        vm.SalesPerformanceOrders = new List<int>();
-        vm.LoginDevices = new List<string>();
-        vm.LoginDevicesCount = new List<int>();
+        var activityLogs = db.AuditLogs
+            .Include(a => a.Account)
+            .OrderByDescending(a => a.CreatedAt);
+
+        var results = activityLogs.ToPagedList(vm.Page, 10);
+        if (results.Count == 0)
+        {
+            vm.Page = 1;
+            results = activityLogs.ToPagedList(vm.Page, 10);
+        }
+        vm.ActivityLogs = results;
+
+        if (Request.IsAjax())
+        {
+            return PartialView("_Admin", vm);
+        }
+
+        var tmpNow = DateTime.Now;
+        vm.DisplayMonth = FormatHelper.ToDateTimeFormat(tmpNow, "MMMM");
+
+        var firstDayCurrentMonth = new DateTime(tmpNow.Year, tmpNow.Month, 1);
+        var firstDayLastMonth = firstDayCurrentMonth.AddMonths(-1);
+        var lastDayLastMonth = firstDayLastMonth.AddDays(-1);
+
+        // Sales
+        var currentSales = db.Orders
+            .Where(o =>
+                o.Status == "Completed" &&
+                o.CreatedAt >= firstDayCurrentMonth)
+            .SelectMany(o => o.OrderItems)
+            .Sum(oi => oi.Quantity * oi.Price);
+
+        var lastMonthSales = db.Orders
+            .Where(o =>
+                o.Status == "Completed" &&
+                o.CreatedAt >= firstDayLastMonth &&
+                o.CreatedAt <= lastDayLastMonth)
+            .SelectMany(o => o.OrderItems)
+            .Sum(oi => oi.Quantity * oi.Price);
+
+        vm.TotalSales = currentSales;
+        vm.TotalSalesStat = CalculatePercentageChange(lastMonthSales, currentSales);
+
+        // Orders
+        var currentOrders = db.Orders.Count(o =>
+                o.Status == "Completed" &&
+                o.CreatedAt >= firstDayCurrentMonth
+            );
+
+        var lastMonthOrders = db.Orders.Count(o =>
+            o.Status == "Completed" &&
+            o.CreatedAt >= firstDayLastMonth &&
+            o.CreatedAt <= lastDayLastMonth
+        );
+
+        vm.TotalOrders = currentOrders;
+        vm.TotalOrdersStat = CalculatePercentageChange(lastMonthOrders, currentOrders);
+
+        // Customers
+        var currentCustomers = db.Accounts.Count(a =>
+            a.AccountType.Name == "Customer" &&
+            a.CreatedAt >= firstDayCurrentMonth
+        );
+
+        var lastMonthCustomers = db.Accounts.Count(a =>
+            a.AccountType.Name == "Customer" &&
+            a.CreatedAt >= firstDayLastMonth &&
+            a.CreatedAt <= lastDayLastMonth
+        );
+
+        vm.TotalCustomers = currentCustomers;
+        vm.TotalCustomersStat = CalculatePercentageChange(lastMonthCustomers, currentCustomers);
+
+        // Sales Performance
+        vm.SalesPerformanceMonths = [];
+        vm.SalesPerformanceOrders = [];
+        for (int i = 4; i >= 0; i--)
+        {
+            var monthDate = DateTime.Now.AddMonths(-i);
+            var firstDayOfMonth = new DateTime(monthDate.Year, monthDate.Month, 1);
+            var lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
+
+            var count = db.Orders.Count(o => o.CreatedAt >= firstDayOfMonth && o.CreatedAt <= lastDayOfMonth && o.Status == "Completed");
+
+            vm.SalesPerformanceMonths.Add(monthDate.ToString("MMM"));
+            vm.SalesPerformanceOrders.Add(count);
+        }
+
+        // Login Devices
+        vm.LoginDevices = ["Phone", "Computer", "Tablet"];
+        vm.LoginDevicesCount = [];
+        foreach (var device in vm.LoginDevices)
+        {
+            var count = db.Devices.Count(d => d.DeviceType.ToLower() == device.ToLower());
+            vm.LoginDevicesCount.Add(count);
+        }
 
         return View(vm);
+    }
+
+    private decimal CalculatePercentageChange(decimal previous, decimal current)
+    {
+        if (previous == 0)
+        {
+            return current > 0 ? 1m : 0m;
+        }
+
+        return (current - previous) / previous;
     }
 }

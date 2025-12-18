@@ -410,9 +410,9 @@ public class StoreController : Controller
     {
         var store = db.Stores
             .FirstOrDefault(s =>
-                s.Id == vm.Id &
-                !s.IsDeleted &
-                s.AccountId == HttpContext.GetAccount()!.Id &
+                s.Id == vm.Id &&
+                !s.IsDeleted &&
+                s.AccountId == HttpContext.GetAccount()!.Id &&
                 !s.HasPublishedFirstSlots
             );
         if (store == null)
@@ -491,8 +491,8 @@ public class StoreController : Controller
         var store = db.Stores
             .Include(s => s.SlotTemplates)
             .FirstOrDefault(s =>
-                s.Id == vm.Id &
-                !s.IsDeleted &
+                s.Id == vm.Id &&
+                !s.IsDeleted &&
                 s.AccountId == HttpContext.GetAccount()!.Id
             );
         if (store == null)
