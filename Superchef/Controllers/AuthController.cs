@@ -51,6 +51,15 @@ public class AuthController : Controller
             ModelState.AddModelError("Email", "Email is not registered.");
         }
 
+        if (ModelState.IsValid)
+        {
+            bool success = await verSrv.VerifyRecaptcha(vm.RepatchaToken);
+            if (!success)
+            {
+                ModelState.AddModelError("RepatchaToken", "Recaptcha verification failed. Please try again.");
+            }
+        }
+
         // Get account
         var account = db.Accounts
             .Include(a => a.AccountType)
@@ -59,36 +68,39 @@ public class AuthController : Controller
                 !a.IsDeleted
             );
 
-        if (account == null)
+        if (ModelState.IsValid)
         {
-            ModelState.AddModelError("Email", "Email is not registered.");
-        }
-        else if (account.IsBanned)
-        {
-            ModelState.AddModelError("Email", "Account is banned.");
-        }
-        else if (account.LockoutEnd != null && account.LockoutEnd > DateTime.Now)
-        {
-            ModelState.AddModelError("Email", "Account is locked. Please try again later.");
-        }
-        else if (!secSrv.VerifyPassword(account.PasswordHash, vm.Password))
-        {
-            account.FailedLoginAttempts++;
-
-            var attemptsLeft = 5 - account.FailedLoginAttempts;
-            if (attemptsLeft <= 0)
+            if (account == null)
+            {
+                ModelState.AddModelError("Email", "Email is not registered.");
+            }
+            else if (account.IsBanned)
+            {
+                ModelState.AddModelError("Email", "Account is banned.");
+            }
+            else if (account.LockoutEnd != null && account.LockoutEnd > DateTime.Now)
             {
                 ModelState.AddModelError("Email", "Account is locked. Please try again later.");
-                ModelState.AddModelError("Password", "Password is incorrect. No more attempts left.");
-                account.FailedLoginAttempts = 0;
-                account.LockoutEnd = DateTime.Now.AddMinutes(5);
             }
-            else
+            else if (!secSrv.VerifyPassword(account.PasswordHash, vm.Password))
             {
-                ModelState.AddModelError("Password", $"Password is incorrect. {attemptsLeft} attempt{(attemptsLeft > 1 ? "s" : "")} left.");
-            }
+                account.FailedLoginAttempts++;
 
-            db.SaveChanges();
+                var attemptsLeft = 5 - account.FailedLoginAttempts;
+                if (attemptsLeft <= 0)
+                {
+                    ModelState.AddModelError("Email", "Account is locked. Please try again later.");
+                    ModelState.AddModelError("Password", "Password is incorrect. No more attempts left.");
+                    account.FailedLoginAttempts = 0;
+                    account.LockoutEnd = DateTime.Now.AddMinutes(5);
+                }
+                else
+                {
+                    ModelState.AddModelError("Password", $"Password is incorrect. {attemptsLeft} attempt{(attemptsLeft > 1 ? "s" : "")} left.");
+                }
+
+                db.SaveChanges();
+            }
         }
 
         if (ModelState.IsValid && account != null)
@@ -320,11 +332,20 @@ public class AuthController : Controller
     }
 
     [HttpPost]
-    public IActionResult ForgotPassword(ForgotPasswordVM vm)
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordVM vm)
     {
-        if (ModelState.IsValid("Email") && !CheckEmailRegister(vm.Email))
+        if (ModelState.IsValid("Email") && !CheckEmailLogin(vm.Email))
         {
             ModelState.AddModelError("Email", "Email is not registered.");
+        }
+
+        if (ModelState.IsValid)
+        {
+            bool success = await verSrv.VerifyRecaptcha(vm.RepatchaToken);
+            if (!success)
+            {
+                ModelState.AddModelError("RepatchaToken", "Recaptcha verification failed. Please try again.");
+            }
         }
 
         if (ModelState.IsValid)

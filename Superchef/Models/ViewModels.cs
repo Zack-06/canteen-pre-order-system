@@ -20,6 +20,8 @@ public class LoginVM
     [StringLength(100, ErrorMessage = "{1} must not exceed {0} characters.")]
     [DataType(DataType.Password)]
     public string Password { get; set; }
+    [Required(ErrorMessage = "Please complete the reCAPTCHA verification.")]
+    public string RepatchaToken { get; set; }
 }
 
 public class RegisterVM
@@ -55,6 +57,8 @@ public class ForgotPasswordVM
     [EmailAddress(ErrorMessage = "Invalid email address.")]
     [Remote("CheckEmailLogin", "Auth", ErrorMessage = "{0} is not registered.")]
     public string Email { get; set; }
+    [Required(ErrorMessage = "Please complete the reCAPTCHA verification.")]
+    public string RepatchaToken { get; set; }
 }
 
 public class ResetPasswordVM
