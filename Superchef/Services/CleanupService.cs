@@ -230,6 +230,7 @@ public class CleanupService
             .Include(a => a.Favourites)
             .FirstOrDefault(a => a.Id == account.Id)!;
 
+        db.Sessions.RemoveRange(db.Sessions.Where(s => s.Device.AccountId == account.Id));
         db.Devices.RemoveRange(db.Devices.Where(d => d.AccountId == account.Id));
         db.Verifications.RemoveRange(db.Verifications.Where(v => v.AccountId == account.Id));
 
@@ -246,7 +247,7 @@ public class CleanupService
                 account.IsDeleted = true;
             }
         }
-
+        
         db.SaveChanges();
     }
 

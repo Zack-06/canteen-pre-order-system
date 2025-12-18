@@ -1,10 +1,12 @@
 using System.Linq.Expressions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Controllers;
 
+[Authorize(Roles = "Admin")]
 public class VendorController : Controller
 {
     private readonly DB db;

@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Stripe;
-using Stripe.Tax;
 
 namespace Superchef.Controllers;
 
@@ -240,11 +239,18 @@ public class StoreController : Controller
         return View(vm);
     }
 
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Edit(int? id)
     {
+        var acc = HttpContext.GetAccount()!;
+
         if (id == null)
         {
+            if (acc.AccountType.Name == "Admin")
+            {
+                return NotFound();
+            }
+
             var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
             if (sessionStoreId == null)
             {
@@ -257,13 +263,16 @@ public class StoreController : Controller
 
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == id &&
-            s.AccountId == HttpContext.GetAccount()!.Id &&
             !s.IsDeleted
         );
         if (store == null)
         {
-            TempData["Message"] = "Store not found! Please choose a store";
-            return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Edit") });
+            return NotFound("Store not found");
+        }
+
+        if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this store");
         }
 
         var vm = new EditStoreVM
@@ -287,18 +296,22 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Edit(EditStoreVM vm)
     {
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == vm.Id &&
-            s.AccountId == HttpContext.GetAccount()!.Id &&
             !s.IsDeleted
         );
         if (store == null)
         {
-            TempData["Message"] = "Store not found! Please choose a store";
-            return RedirectToAction("Vendor", "Home", new { ReturnUrl = Url.Action("Edit") });
+            return NotFound("Store not found");
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this store");
         }
 
         if (ModelState.IsValid("Name") && !IsNameUnique(vm.Name, vm.Venue, vm.Id))
@@ -669,13 +682,14 @@ public class StoreController : Controller
         return Ok();
     }
 
+    [Authorize(Roles = "Vendor")]
     public IActionResult GetRecurringSlots(int id, DateOnly date)
     {
         if (!Request.IsAjax()) return NotFound();
 
         var store = db.Stores
             .Include(s => s.SlotTemplates)
-            .FirstOrDefault(s => s.Id == id && !s.IsDeleted);
+            .FirstOrDefault(s => s.Id == id && !s.IsDeleted && s.AccountId == HttpContext.GetAccount()!.Id);
         if (store == null)
         {
             return NotFound("Store not found");
@@ -1207,10 +1221,17 @@ public class StoreController : Controller
         return Ok();
     }
 
+    [Authorize(Roles = "Vendor")]
     public IActionResult ConnectStripe(int id)
     {
+        var store = db.Stores.FirstOrDefault(s => s.Id == id && !s.IsDeleted && s.AccountId == HttpContext.GetAccount()!.Id);
+        if (store == null)
+        {
+            return NotFound("Store not found");
+        }
+
         string clientId = cf["Stripe:ClientId"] ?? "";
-        string redirectUri = "http://localhost:5245/store/callback";
+        string redirectUri = Request.GetBaseUrl() + "/Store/Callback";
         string state = id.ToString();
 
         string url = $"https://connect.stripe.com/oauth/authorize?response_type=code&client_id={clientId}&scope=read_write&redirect_uri={redirectUri}&state={state}";
@@ -1260,17 +1281,22 @@ public class StoreController : Controller
         return RedirectToAction("Edit", "Store", new { Id = storeId });
     }
 
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult GetStripeAccountEmail(int id)
     {
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == id &&
-            s.AccountId == HttpContext.GetAccount()!.Id &&
             !s.IsDeleted
         );
         if (store == null)
         {
             return NotFound("Store not found");
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this store");
         }
 
         string? stripeAccountId = store.StripeAccountId;
@@ -1294,17 +1320,22 @@ public class StoreController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Delete(int id)
     {
         if (!Request.IsAjax()) return NotFound();
 
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == id &&
-            s.AccountId == HttpContext.GetAccount()!.Id &&
             !s.IsDeleted
         );
         if (store == null) return NotFound("Store not found");
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this store");
+        }
 
         var error = clnSrv.CanCleanUp(store);
         if (error != null) return BadRequest(error);

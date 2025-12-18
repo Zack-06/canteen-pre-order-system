@@ -56,7 +56,7 @@
 <form data-ajax="true" data-ajax-update="#ajax-result-container" data-ajax-complete="closeOverlay('filter-overlay')"
     class="container" data-no="color padding">
     <input type="hidden" name="Page" value="1" data-clear-form-ignore>
-    
+
     <div id="filter-overlay" class="overlay sidebar-overlay">
         <div class="content">
             <div class="header">
@@ -117,7 +117,10 @@
                 <div class="custom-select">
                     <select asp-for="SearchOption" asp-items="Model.AvailableSearchOptions"></select>
                 </div>
-                <a href="/Variant/Add/@Model.Id" data-button="info">Add Variant</a>
+                @if (ViewBag.AccountType == "Vendor")
+                {
+                    <a href="/Variant/Add/@Model.Id" data-button="info">Add Variant</a>
+                }
                 <button type="button" id="filter-button">
                     Filter
                     <img src="/img/filter.png">

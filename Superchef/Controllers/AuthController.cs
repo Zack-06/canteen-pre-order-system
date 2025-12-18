@@ -13,10 +13,11 @@ public class AuthController : Controller
     private readonly VerificationService verSrv;
     private readonly DeviceService devSrv;
     private readonly EmailService emlSrv;
+    private readonly CleanupService clnSrv;
     private readonly IHubContext<VerificationHub> verHubCtx;
     private readonly IHubContext<AccountHub> accHubCtx;
 
-    public AuthController(DB db, IDataProtectionProvider dp, SecurityService secSrv, VerificationService verSrv, DeviceService devSrv, EmailService emlSrv, IHubContext<VerificationHub> verHubCtx, IHubContext<AccountHub> accHubCtx)
+    public AuthController(DB db, IDataProtectionProvider dp, SecurityService secSrv, VerificationService verSrv, DeviceService devSrv, EmailService emlSrv, CleanupService clnSrv, IHubContext<VerificationHub> verHubCtx, IHubContext<AccountHub> accHubCtx)
     {
         this.db = db;
         this.dp = dp;
@@ -24,6 +25,7 @@ public class AuthController : Controller
         this.verSrv = verSrv;
         this.devSrv = devSrv;
         this.emlSrv = emlSrv;
+        this.clnSrv = clnSrv;
         this.verHubCtx = verHubCtx;
         this.accHubCtx = accHubCtx;
     }
@@ -223,12 +225,6 @@ public class AuthController : Controller
     public async Task<IActionResult> Verify(string? token, string? otp, string? ReturnUrl)
     {
         ViewBag.ReturnUrl = ReturnUrl ?? "/";
-
-        // ViewBag.Status = "check";
-        // ViewBag.Status = "cross";
-        // ViewBag.Status = "incorrect";
-        // ViewBag.Status = "link";
-        // ViewBag.Status = "expired";
 
         var request = db.Verifications
             .Include(v => v.Device)
@@ -493,35 +489,10 @@ public class AuthController : Controller
 
         if (Request.Method == "POST")
         {
-            // Remove sessions
-            var sessions = db.Sessions.Where(s => s.Device.AccountId == request.Account.Id);
-            foreach (var session in sessions)
-            {
-                db.Sessions.Remove(session);
-            }
-
-            // Remove devices
-            var devices = db.Devices.Where(d => d.AccountId == request.Account.Id);
-            foreach (var device in devices)
-            {
-                db.Devices.Remove(device);
-            }
-
-            var message = "Account scheduled for deletion";
-            if (ViewBag.RequestAccountType == "Customer" || ViewBag.RequestAccountType == "Vendor")
-            {
-                request.Account.DeletionAt = DateTime.Now.AddDays(7);
-            }
-            else
-            {
-                message = "Account deleted successfully";
-                db.Accounts.Remove(request.Account);
-            }
-            db.Verifications.Remove(request);
-            db.SaveChanges();
-
+            clnSrv.CleanUp(request.Account);
             await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId);
-            TempData["Message"] = message;
+
+            TempData["Message"] = ViewBag.RequestAccountType == "Admin" ? "Account deleted successfully" : "Account scheduled for deletion";
             return RedirectToAction("Index", "Home");
         }
 

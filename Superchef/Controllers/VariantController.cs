@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Superchef.Controllers;
 
-[Authorize(Roles = "Vendor")]
+[Authorize(Roles = "Vendor,Admin")]
 public class VariantController : Controller
 {
     private readonly DB db;
@@ -22,14 +22,21 @@ public class VariantController : Controller
 
     public IActionResult Manage(ManageVariantVM vm)
     {
-        var item = db.Items.FirstOrDefault(i =>
-            i.Id == vm.Id &&
-            !i.IsDeleted &&
-            i.Store.AccountId == HttpContext.GetAccount()!.Id
-        );
+        var item = db.Items
+            .Include(i => i.Store)
+            .FirstOrDefault(i =>
+                i.Id == vm.Id &&
+                !i.IsDeleted
+            );
         if (item == null)
         {
             return NotFound();
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && item.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this item");
         }
 
         Dictionary<string, Expression<Func<Variant, object>>> sortOptions = new()
@@ -125,6 +132,7 @@ public class VariantController : Controller
         return View(vm);
     }
 
+    [Authorize(Roles = "Vendor")]
     public IActionResult Add(int id)
     {
         var item = db.Items.FirstOrDefault(i =>
@@ -148,6 +156,7 @@ public class VariantController : Controller
     }
 
     [HttpPost]
+    [Authorize(Roles = "Vendor")]
     public IActionResult Add(AddVariantVM vm)
     {
         var item = db.Items.FirstOrDefault(i =>
@@ -209,14 +218,20 @@ public class VariantController : Controller
     {
         var variant = db.Variants
             .Include(v => v.Item)
+                .ThenInclude(i => i.Store)
             .FirstOrDefault(v =>
                 v.Id == id &&
-                !v.IsDeleted &&
-                v.Item.Store.AccountId == HttpContext.GetAccount()!.Id
+                !v.IsDeleted
             );
         if (variant == null)
         {
             return NotFound();
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && variant.Item.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this item");
         }
 
         var vm = new EditVariantVM
@@ -241,14 +256,20 @@ public class VariantController : Controller
     {
         var variant = db.Variants
             .Include(v => v.Item)
+                .ThenInclude(i => i.Store)
             .FirstOrDefault(v =>
                 v.Id == vm.Id &&
-                !v.IsDeleted &&
-                v.Item.Store.AccountId == HttpContext.GetAccount()!.Id
+                !v.IsDeleted
             );
         if (variant == null)
         {
             return NotFound();
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && variant.Item.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this item");
         }
 
         if (ModelState.IsValid("Name") && !IsNameUniqueWhenEdit(vm.Name, vm.Id, vm.ItemId))
@@ -313,12 +334,18 @@ public class VariantController : Controller
 
         var variant = db.Variants
             .Include(v => v.Item)
+                .ThenInclude(i => i.Store)
             .FirstOrDefault(v =>
                 v.Id == id &&
-                !v.IsDeleted &&
-                v.Item.Store.AccountId == HttpContext.GetAccount()!.Id
+                !v.IsDeleted
             );
-        if (variant == null) return NotFound();
+        if (variant == null) return NotFound("Variant not found");
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && variant.Item.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this item");
+        }
 
         var error = clnSrv.CanCleanUp(variant);
         if (error != null) return BadRequest(error);

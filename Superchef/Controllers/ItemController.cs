@@ -105,7 +105,7 @@ public class ItemController : Controller
         });
     }
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPost]
     public IActionResult AddToCart(AddToCartVM vm)
     {
@@ -171,7 +171,7 @@ public class ItemController : Controller
         return Ok();
     }
 
-    [Authorize]
+    [Authorize(Roles = "Customer")]
     [HttpPost]
     public IActionResult ToggleFavourite(int id, bool isDelete)
     {
@@ -212,8 +212,8 @@ public class ItemController : Controller
     {
         if (!Request.IsAjax()) return NotFound();
 
-        var item = db.Items.FirstOrDefault(i => 
-            i.Id == vm.Id && 
+        var item = db.Items.FirstOrDefault(i =>
+            i.Id == vm.Id &&
             i.IsActive
         );
         if (item == null)
@@ -239,10 +239,10 @@ public class ItemController : Controller
             });
             db.SaveChanges();
         }
-        
+
         ViewBag.AccountImageUrl = acc.Image == null ? "/img/pfp.png" : $"/uploads/account/{acc.Image}";
         ViewBag.Authenticated = true;
-        
+
         ViewBag.HasBought = db.OrderItems.Any(oi => oi.Order.AccountId == acc.Id && oi.Variant.ItemId == item.Id && oi.Order.Status == "Completed");
         ViewBag.HasCommented = false;
         var ownReview = db.Reviews.FirstOrDefault(r => r.AccountId == acc.Id && r.ItemId == item.Id);
@@ -280,11 +280,18 @@ public class ItemController : Controller
         return Ok();
     }
 
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Manage(ManageItemVM vm)
     {
+        var acc = HttpContext.GetAccount()!;
+
         if (vm.Id == null)
         {
+            if (acc.AccountType.Name == "Admin")
+            {
+                return NotFound();
+            }
+
             var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
             if (sessionStoreId == null)
             {
@@ -297,12 +304,16 @@ public class ItemController : Controller
 
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == vm.Id &&
-            s.AccountId == HttpContext.GetAccount()!.Id &&
             !s.IsDeleted
         );
         if (store == null)
         {
             return NotFound();
+        }
+
+        if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this store");
         }
 
         Dictionary<string, Expression<Func<Item, object>>> sortOptions = new()
@@ -532,19 +543,26 @@ public class ItemController : Controller
         return View(vm);
     }
 
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Edit(int id)
     {
         var item = db.Items
+            .Include(i => i.Store)
             .Include(i => i.Keywords)
             .FirstOrDefault(i =>
                 i.Id == id &&
-                !i.IsDeleted &&
-                i.Store.AccountId == HttpContext.GetAccount()!.Id
+                !i.IsDeleted
             );
         if (item == null)
         {
             return NotFound();
+        }
+
+        var acc = HttpContext.GetAccount()!;
+
+        if (acc.AccountType.Name == "Vendor" && item.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this item");
         }
 
         var vm = new EditItemVM
@@ -568,7 +586,7 @@ public class ItemController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Edit(EditItemVM vm)
     {
         var item = db.Items
@@ -583,6 +601,12 @@ public class ItemController : Controller
         if (item == null)
         {
             return NotFound();
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && item.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this item");
         }
 
         if (ModelState.IsValid("Slug") && !IsSlugUnique(vm.Slug, vm.Id))
@@ -688,17 +712,27 @@ public class ItemController : Controller
     }
 
     [HttpPost]
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Delete(int id)
     {
         if (!Request.IsAjax()) return NotFound();
 
-        var item = db.Items.FirstOrDefault(i =>
-            i.Id == id &&
-            !i.IsDeleted &&
-            i.Store.AccountId == HttpContext.GetAccount()!.Id
-        );
-        if (item == null) return NotFound();
+        var item = db.Items
+            .Include(i => i.Store)
+            .FirstOrDefault(i =>
+                i.Id == id &&
+                !i.IsDeleted
+            );
+        if (item == null)
+        {
+            return NotFound("Item not found");
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && item.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this item");
+        }
 
         var error = clnSrv.CanCleanUp(item);
         if (error != null) return BadRequest(error);

@@ -147,7 +147,7 @@
     <div class="container" data-limit-container>
         <div class="title">Action</div>
         <div class="button-group" data-flex="inline column">
-            @if (Model.Status == "Preparing")
+            @if (Model.Status == "Preparing" && ViewBag.AccountType == "Vendor")
             {
                 <a data-button="accent" data-ajax="true" data-ajax-url="@Url.Action("MarkReady", new { id = Model.Id })"
                     data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="reloadPage"

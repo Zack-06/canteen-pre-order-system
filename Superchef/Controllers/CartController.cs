@@ -96,7 +96,10 @@ public class CartController : Controller
     {
         var cart = db.Carts
             .Include(c => c.Variant)
-            .FirstOrDefault(c => c.VariantId == id);
+            .FirstOrDefault(c => 
+                c.VariantId == id &&
+                c.AccountId == HttpContext.GetAccount()!.Id
+            );
         if (cart == null)
         {
             return NotFound("Invalid item");
@@ -123,7 +126,10 @@ public class CartController : Controller
     {
         var cart = db.Carts
             .Include(c => c.Variant)
-            .FirstOrDefault(c => c.VariantId == id);
+            .FirstOrDefault(c => 
+                c.VariantId == id &&
+                c.AccountId == HttpContext.GetAccount()!.Id
+            );
         if (cart == null)
         {
             return NotFound("Item not found");

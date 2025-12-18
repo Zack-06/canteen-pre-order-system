@@ -374,11 +374,18 @@ public class OrderController : Controller
         return View(order);
     }
 
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Manage(ManageOrderVM vm)
     {
+        var acc = HttpContext.GetAccount()!;
+
         if (vm.Id == null)
         {
+            if (acc.AccountType.Name == "Admin")
+            {
+                return NotFound();
+            }
+
             var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
             if (sessionStoreId == null)
             {
@@ -391,12 +398,16 @@ public class OrderController : Controller
 
         var store = db.Stores.FirstOrDefault(s =>
             s.Id == vm.Id &&
-            s.AccountId == HttpContext.GetAccount()!.Id &&
             !s.IsDeleted
         );
         if (store == null)
         {
             return NotFound();
+        }
+
+        if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this store");
         }
 
         Dictionary<string, Expression<Func<Order, object>>> sortOptions = new()
@@ -486,7 +497,7 @@ public class OrderController : Controller
         return View(vm);
     }
 
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Edit(string id)
     {
         var order = db.Orders
@@ -499,13 +510,18 @@ public class OrderController : Controller
                     .ThenInclude(v => v.Item)
             .FirstOrDefault(o =>
                 o.Id == id &&
-                o.Store.AccountId == HttpContext.GetAccount()!.Id &&
                 o.Status != "Pending"
             );
 
         if (order == null)
         {
             return NotFound("Order not found");
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && order.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this order");
         }
 
         return View(order);
@@ -568,7 +584,7 @@ public class OrderController : Controller
         return Ok(order.StoreId);
     }
 
-    [Authorize(Roles = "Customer,Vendor")]
+    [Authorize(Roles = "Customer,Vendor,Admin")]
     public async Task<IActionResult> Cancel(string id)
     {
         var order = db.Orders
@@ -603,7 +619,8 @@ public class OrderController : Controller
             {
                 return Unauthorized("You are not authorized to cancel this order");
             }
-        } else
+        }
+        else
         {
             if (order.Status == "Pending")
             {
@@ -633,7 +650,7 @@ public class OrderController : Controller
         {
             return BadRequest("Order unable to be marked as ready");
         }
-        
+
         order.Status = "To Pickup";
         db.SaveChanges();
 
@@ -642,18 +659,22 @@ public class OrderController : Controller
         return Ok();
     }
 
-    [Authorize(Roles = "Vendor")]
+    [Authorize(Roles = "Vendor,Admin")]
     public IActionResult Complete(string id)
     {
         var order = db.Orders
-            .FirstOrDefault(o =>
-                o.Id == id &&
-                o.Store.AccountId == HttpContext.GetAccount()!.Id
-            );
+            .Include(o => o.Store)
+            .FirstOrDefault(o =>o.Id == id);
 
         if (order == null)
         {
             return NotFound("Order not found");
+        }
+
+        var acc = HttpContext.GetAccount()!;
+        if (acc.AccountType.Name == "Vendor" && order.Store.AccountId != acc.Id)
+        {
+            return Unauthorized("You are not authorized to access this order");
         }
 
         if (order.Status != "To Pickup" && order.Status != "Preparing")
