@@ -11,23 +11,28 @@ public class GenerateSlotBackgroundWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        using (var scope = _services.CreateScope())
+        {
+            var slotGenService = scope.ServiceProvider.GetRequiredService<GenerateSlotService>();
+            slotGenService.InitializeSlots();
+        }
+
         // Calculate initial delay until next midnight
-        var now = DateTime.Now;
+        var tmpNow = DateTime.Now;
         var nextMidnight = DateTime.Today.AddDays(1);
-        var initialDelay = nextMidnight - now;
+        var initialDelay = nextMidnight - tmpNow;
 
-        // await Task.Delay(initialDelay, stoppingToken);
+        await Task.Delay(initialDelay, stoppingToken);
 
-        // while (!stoppingToken.IsCancellationRequested)
-        // {
-        //     using (var scope = _services.CreateScope())
-        //     {
-        //         var slotService = scope.ServiceProvider.GetRequiredService<>();
-        //         await slotService.GenerateSlotsForAllStores(stoppingToken);
-        //     }
-
-        //     // Wait 24 hours until next run
-        //     await Task.Delay(TimeSpan.FromHours(24), stoppingToken);
-        // }
+        while (!stoppingToken.IsCancellationRequested)
+        {
+            using (var scope = _services.CreateScope())
+            {
+                var slotGenService = scope.ServiceProvider.GetRequiredService<GenerateSlotService>();
+                slotGenService.StartSlotGeneration(DateTime.Now);
+            }
+            
+            await Task.Delay(TimeSpan.FromHours(24), stoppingToken); // Wait 24 hours until next run
+        }
     }
 }
