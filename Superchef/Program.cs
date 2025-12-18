@@ -92,7 +92,7 @@ app.UseSession();
 app.UseStatusCodePagesWithReExecute("/Error/{0}"); // hit error controller if error occurs
 
 // Add middlewares
-// app.UseMiddleware<ExpiryCleanupMiddleware>();
+app.UseMiddleware<ExpiryCleanupMiddleware>();
 app.UseMiddleware<AuthSessionMiddleware>();
 
 // Add hubs
