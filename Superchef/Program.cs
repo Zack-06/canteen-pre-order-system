@@ -7,6 +7,7 @@ using Superchef.BackgroundWorkers;
 using Superchef.Middlewares;
 using Microsoft.AspNetCore.Mvc;
 using Stripe;
+using Microsoft.AspNetCore.HttpOverrides;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -37,19 +38,27 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.Events.OnRedirectToLogin = context =>
     {
         // If it's AJAX
-        if (context.Request.Headers.XRequestedWith == "XMLHttpRequest") 
+        if (context.Request.Headers.XRequestedWith == "XMLHttpRequest")
         {
             // Set the HTTP status code to 401 Unauthorized
             context.Response.StatusCode = 401;
-            
+
             // Prevent the default redirect
             return Task.CompletedTask;
         }
-        
+
         // For standard (non-AJAX) browser requests, proceed with the default redirect
         context.Response.Redirect(context.RedirectUri);
         return Task.CompletedTask;
     };
+});
+
+// Look for X-Forwarded-Proto and X-Forwarded-For headers
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
 });
 
 // Add http context accessor
@@ -89,6 +98,7 @@ builder.Services.AddHostedService<ExpiryCleanupBackgroundWorker>();
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 var app = builder.Build();
+app.UseForwardedHeaders();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession();

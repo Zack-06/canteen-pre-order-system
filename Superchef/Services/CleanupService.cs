@@ -188,9 +188,15 @@ public class CleanupService
     {
         store = db.Stores
             .Include(s => s.Items)
+            .Include(s => s.Sessions)
             .FirstOrDefault(s => s.Id == store.Id)!;
 
         store.IsDeleted = true;
+
+        foreach (var session in store.Sessions)
+        {
+            session.StoreId = null;
+        }
 
         if (!string.IsNullOrEmpty(store.Image))
         {
