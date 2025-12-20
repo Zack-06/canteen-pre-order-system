@@ -170,16 +170,32 @@ public class PaymentService
 
         // Send money to vendor via Stripe Transfer
         var transferService = new TransferService();
-        var transferOptions = new TransferCreateOptions
-        {
-            Amount = netAmountInCents,
-            Currency = "myr",
-            SourceTransaction = order.Payment.StripeChargeId,
-            Destination = order.Store.StripeAccountId,
-            TransferGroup = order.Payment.StripePaymentIntentId
-        };
 
-        var transfer = transferService.Create(transferOptions);
+        // filter by TransferGroup as PaymentIntentId is unique per order
+        var existingTransfers = transferService.List(new TransferListOptions
+        {
+            TransferGroup = order.Payment.StripePaymentIntentId,
+            Limit = 1
+        });
+
+        Transfer transfer;
+        if (existingTransfers.Data.Count > 0)
+        {
+            transfer = existingTransfers.Data[0];
+        }
+        else
+        {
+            var transferOptions = new TransferCreateOptions
+            {
+                Amount = netAmountInCents,
+                Currency = "myr",
+                SourceTransaction = order.Payment.StripeChargeId,
+                Destination = order.Store.StripeAccountId,
+                TransferGroup = order.Payment.StripePaymentIntentId
+            };
+
+            transfer = transferService.Create(transferOptions);
+        }
 
         // Update transfer status
         order.Payment.PayoutTransferId = transfer.Id;
