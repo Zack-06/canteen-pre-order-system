@@ -106,6 +106,11 @@ public class SecurityService
                 return ("Session expired or invalid device", null);
             }
 
+            if (!session.Device.IsVerified)
+            {
+                return ("Device still not verified", null);
+            }
+
             // extend session
             session.ExpiresAt = DateTime.Now.AddDays(30);
             db.SaveChanges();
