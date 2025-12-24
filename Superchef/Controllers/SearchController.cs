@@ -85,8 +85,8 @@ public class SearchController : Controller
                     .ThenInclude(i => i.Reviews)
                 .Where(s =>
                     !s.IsDeleted &&
-                    s.Name.ToLower().Contains(vm.Query.ToLower()) ||
-                    s.Description.ToLower().Contains(vm.Query.ToLower())
+                    (s.Name.ToLower().Contains(vm.Query.ToLower()) ||
+                    s.Description.ToLower().Contains(vm.Query.ToLower()))
                 )
                 .AsQueryable();
 
@@ -154,9 +154,9 @@ public class SearchController : Controller
                 .Include(i => i.Variants)
                     .ThenInclude(v => v.OrderItems)
                 .Where(i =>
-                    i.IsActive &&
+                    i.IsActive && (
                     i.Name.ToLower().Contains(vm.Query.ToLower()) ||
-                    i.Description.ToLower().Contains(vm.Query.ToLower())
+                    i.Description.ToLower().Contains(vm.Query.ToLower()))
                 )
                 .AsQueryable();
 

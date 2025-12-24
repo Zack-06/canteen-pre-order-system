@@ -36,7 +36,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound("Order not found");
+            return NotFound();
         }
 
         var vm = new OrderCustomerVM
@@ -70,7 +70,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound("Order not found");
+            return NotFound();
         }
 
         if (ModelState.IsValid)
@@ -107,7 +107,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound("Order not found");
+            return NotFound();
         }
 
         if (string.IsNullOrEmpty(order.PhoneNumber))
@@ -182,7 +182,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound("Order not found");
+            return NotFound();
         }
 
         var tmpNow = DateTime.Now;
@@ -280,7 +280,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound("Order not found");
+            return NotFound();
         }
 
         if (order.PhoneNumber == null)
@@ -369,7 +369,7 @@ public class OrderController : Controller
             );
         if (order == null)
         {
-            return NotFound("Order not found");
+            return NotFound();
         }
 
         // show order info
@@ -385,7 +385,7 @@ public class OrderController : Controller
         {
             if (acc.AccountType.Name == "Admin")
             {
-                return NotFound("Store not found");
+                return NotFound();
             }
 
             var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
@@ -404,7 +404,7 @@ public class OrderController : Controller
         );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
@@ -517,7 +517,7 @@ public class OrderController : Controller
 
         if (order == null)
         {
-            return NotFound("Order not found");
+            return NotFound();
         }
 
         var acc = HttpContext.GetAccount()!;

@@ -34,7 +34,7 @@ SET IDENTITY_INSERT [dbo].[AccountTypes] OFF
 
 -- Create categories
 SET IDENTITY_INSERT [dbo].[Categories] ON
-INSERT INTO [dbo].[Categories] ([Id], [Name], [Image]) VALUES (1, N'Other', N'other.png')
+INSERT INTO [dbo].[Categories] ([Id], [Name], [Image]) VALUES (1, N'Others', N'other.png')
 INSERT INTO [dbo].[Categories] ([Id], [Name], [Image]) VALUES (2, N'Rice Meals', N'image2.png')
 INSERT INTO [dbo].[Categories] ([Id], [Name], [Image]) VALUES (3, N'Noodles', N'image3.png')
 INSERT INTO [dbo].[Categories] ([Id], [Name], [Image]) VALUES (4, N'Western Food', N'image4.png')

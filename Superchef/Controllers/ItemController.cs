@@ -34,7 +34,7 @@ public class ItemController : Controller
             .FirstOrDefault(i => i.Slug == slug && i.IsActive);
         if (item == null)
         {
-            return NotFound("Item not found");
+            return NotFound();
         }
 
         var acc = HttpContext.GetAccount();
@@ -88,6 +88,18 @@ public class ItemController : Controller
         }
 
         return View(vm);
+    }
+
+    public IActionResult VariantPrice(int id)
+    {
+        var variant = db.Variants.FirstOrDefault(v => v.Id == id && v.IsActive);
+
+        if (variant == null)
+        {
+            return NotFound("Variant not found");
+        }
+
+        return PartialView("_Price", (variant.Price, variant.Price));
     }
 
     public IActionResult VariantStockCount(int id)
@@ -289,7 +301,7 @@ public class ItemController : Controller
         {
             if (acc.AccountType.Name == "Admin")
             {
-                return NotFound("Store not found");
+                return NotFound();
             }
 
             var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
@@ -308,7 +320,7 @@ public class ItemController : Controller
         );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
@@ -443,7 +455,7 @@ public class ItemController : Controller
             );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         var vm = new AddItemVM
@@ -468,7 +480,7 @@ public class ItemController : Controller
             );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         if (ModelState.IsValid("Slug") && !IsSlugUnique(vm.Slug))
@@ -555,7 +567,7 @@ public class ItemController : Controller
             );
         if (item == null)
         {
-            return NotFound("Item not found");
+            return NotFound();
         }
 
         var acc = HttpContext.GetAccount()!;
@@ -600,7 +612,7 @@ public class ItemController : Controller
             );
         if (item == null)
         {
-            return NotFound("Item not found");
+            return NotFound();
         }
 
         var acc = HttpContext.GetAccount()!;

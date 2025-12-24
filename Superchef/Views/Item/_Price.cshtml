@@ -1,0 +1,7 @@
+@model (decimal minPrice, decimal maxPrice)
+
+<span>@FormatHelper.ToRMFormat(Model.minPrice, false)</span>
+@if (Model.maxPrice != Model.minPrice)
+{
+    <span>@FormatHelper.ToRMFormat(Model.maxPrice, false)</span>
+}

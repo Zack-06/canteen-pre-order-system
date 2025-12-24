@@ -282,7 +282,7 @@ public class AuthController : Controller
                     ViewBag.ReturnUrl = Url.Action(request.Action, "Auth", new { ReturnUrl = ReturnUrl });
 
                     // Update device is verified
-                    db.Devices.Where(d => d.Id == request.DeviceId).ExecuteUpdate(s => s.SetProperty(s => s.IsVerified, true));
+                    request.Device.IsVerified = true;
 
                     // Remove all associated verifications
                     db.Verifications.RemoveRange(db.Verifications.Where(v => v.DeviceId == request.DeviceId));
@@ -402,7 +402,7 @@ public class AuthController : Controller
             // Send email notification
             emlSrv.SendPasswordChangedEmail(request.Account, Url.Action("ForgotPassword", null, null, Request.Scheme, Request.Host.Value));
 
-            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId);
+            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId, HttpContext.GetDeviceId());
             TempData["Message"] = "Password reset successfully. Please login again";
             return RedirectToAction("Login");
         }
@@ -463,7 +463,7 @@ public class AuthController : Controller
             // Send email notification
             emlSrv.SendEmailChangedEmail(request.Account, originalEmail, Url.Action("Contact", "Info", null, Request.Scheme, Request.Host.Value));
 
-            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId);
+            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId, HttpContext.GetDeviceId());
             TempData["Message"] = "Email changed successfully. Please login again";
             return RedirectToAction("Login");
         }
@@ -490,7 +490,7 @@ public class AuthController : Controller
         if (Request.Method == "POST")
         {
             clnSrv.CleanUp(request.Account);
-            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId);
+            await accHubCtx.Clients.All.SendAsync("LogoutAll", request.AccountId, HttpContext.GetDeviceId());
 
             TempData["Message"] = ViewBag.RequestAccountType == "Admin" ? "Account deleted successfully" : "Account scheduled for deletion";
             return RedirectToAction("Index", "Home");

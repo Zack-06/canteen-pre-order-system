@@ -30,7 +30,7 @@ public class VariantController : Controller
             );
         if (item == null)
         {
-            return NotFound("Item not found");
+            return NotFound();
         }
 
         var acc = HttpContext.GetAccount()!;
@@ -142,7 +142,7 @@ public class VariantController : Controller
         );
         if (item == null)
         {
-            return NotFound("Item not found");
+            return NotFound();
         }
 
         var vm = new AddVariantVM
@@ -166,7 +166,7 @@ public class VariantController : Controller
         );
         if (item == null)
         {
-            return NotFound("Item not found");
+            return NotFound();
         }
 
         if (ModelState.IsValid("Name") && !IsNameUniqueWhenCreate(vm.Name, vm.Id))
@@ -225,7 +225,7 @@ public class VariantController : Controller
             );
         if (variant == null)
         {
-            return NotFound("Variant not found");
+            return NotFound();
         }
 
         var acc = HttpContext.GetAccount()!;
@@ -263,7 +263,7 @@ public class VariantController : Controller
             );
         if (variant == null)
         {
-            return NotFound("Variant not found");
+            return NotFound();
         }
 
         var acc = HttpContext.GetAccount()!;

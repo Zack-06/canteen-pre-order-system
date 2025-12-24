@@ -36,7 +36,7 @@ public class CleanupService
         foreach (var order in db.Orders
             .Include(o => o.Store)
             .Include(o => o.Slot)
-            .Where(b => 
+            .Where(b =>
                 b.Status == "Confirmed" &&
                 b.Slot.StartTime.AddMinutes(-30) < DateTime.Now
             )
@@ -45,15 +45,18 @@ public class CleanupService
         {
             order.Status = "Preparing";
 
-            var timeText = FormatHelper.ToDateTimeFormat(order.Slot.StartTime, "hh:mm tt");
-            await ntfSrv.SendNotification(
-                "New Order", 
-                $"Incoming order for {timeText}. Start cooking! 🍳",
-                order.Store
-            );
+            if (order.Slot.StartTime.Date == DateTime.Now.Date)
+            {
+                var timeText = FormatHelper.ToDateTimeFormat(order.Slot.StartTime, "hh:mm tt");
+                await ntfSrv.SendNotification(
+                    "New Order",
+                    $"Incoming order for {timeText}. Start cooking! 🍳",
+                    order.Store
+                );
+            }
         }
         db.SaveChanges();
-        
+
         // Handle all preparing orders
         foreach (var order in db.Orders
             .Where(b =>
@@ -80,6 +83,11 @@ public class CleanupService
 
     public void CleanUp(Variant variant)
     {
+        variant = db.Variants
+            .Include(v => v.Item)
+                .ThenInclude(i => i.Variants)
+            .FirstOrDefault(v => v.Id == variant.Id)!;
+
         variant.IsDeleted = true;
         variant.IsActive = false;
 
@@ -87,6 +95,11 @@ public class CleanupService
         {
             imgSrv.DeleteImage(variant.Image, "variant");
             variant.Image = "";
+        }
+
+        if (!variant.Item.Variants.Any(v => v.IsActive))
+        {
+            variant.Item.IsActive = false;
         }
 
         db.Carts.RemoveRange(db.Carts.Where(c => c.VariantId == variant.Id));

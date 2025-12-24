@@ -18,6 +18,18 @@
             flex-shrink: 0;
         }
 
+        .result-text div {
+            width: max-content;
+            white-space: nowrap;
+        }
+
+        .result-text strong {
+            word-break: normal;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         main form:has(input[name="Type"][value="Stores"]:checked) [data-form-group-store] {
             display: none !important;
         }

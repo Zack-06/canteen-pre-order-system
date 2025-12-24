@@ -250,15 +250,15 @@
                     $.ajax({
                         url: "/Auth/ClaimSession",
                         method: "post",
-                        success: function() {
+                        success: function () {
                             window.location.href = "@ViewBag.ReturnUrl";
                         },
-                        error: function(xhr, textStatus, errorThrown) {
+                        error: function (xhr, textStatus, errorThrown) {
                             showToast(xhr.responseText)
                         },
                     })
                 })
-
+                
                 verificationConnection.start().then(() => {
                     verificationConnection.invoke("Initialize", "@ViewBag.VerificationToken")
                 })

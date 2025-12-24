@@ -235,6 +235,10 @@
 
         $("#select-all-checkbox").on("change", function () {
             $("main > form input[type='checkbox']").prop("checked", this.checked)
+
+            mainForm.attr("method", "get")
+            mainForm.submit()
+            mainForm.attr("method", "post")
         })
 
         $("main > form input[type='checkbox']").on("change", function () {
@@ -288,19 +292,26 @@
         }
 
         $("#multiple-delete").on("click", async function () {
-            if ($("main > form input[type='checkbox']:checked").length === 0) return
+            const $checkedBoxes = $("main > form input[type='checkbox']:checked")
+
+            if ($checkedBoxes.length === 0) return
 
             if (!await confirmation("Are you sure you want to remove all selected items from your cart?")) return
 
-            $("main > form input[type='checkbox']:checked").each(function () {
-                $.ajax({
+            // array of promises (AJAX requests)
+            const deletePromises = $checkedBoxes.map(function () {
+                return $.ajax({
                     url: "/Cart/RemoveItem",
                     method: "POST",
                     data: { id: $(this).val() }
                 })
-            })
+            }).get() // convert jQuery obj to array
 
-            reloadPage()
+            try {
+                await Promise.all(deletePromises)
+
+                reloadPage()
+            } catch (e) {}
         })
     </script>
 }

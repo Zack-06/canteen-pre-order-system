@@ -697,12 +697,8 @@
             <span>|</span>
             <span>@Model.TotalSold Sold</span>
         </div>
-        <div class="price">
-            <span>@FormatHelper.ToRMFormat(minPrice, false)</span>
-            @if (maxPrice != minPrice)
-            {
-                <span>@FormatHelper.ToRMFormat(maxPrice, false)</span>
-            }
+        <div id="price-text" class="price">
+            <partial name="_Price" model="(minPrice, maxPrice)" />
         </div>
 
         <form asp-action="AddToCart" method="post" data-ajax="true" data-ajax-failure="addToCartFailure"
@@ -864,6 +860,9 @@
                 data: { id: variantId },
                 success: function (data) {
                     $("#stock-count").text(data.stock)
+                },
+                error: function (xhr, status, error) {
+                    showToast("Failed to get variant stock count: " + xhr.responseText)
                 }
             })
         }
@@ -876,6 +875,19 @@
                 variantImage.addClass("selected")
                 $(".image-container>img").attr("src", variantImage.attr("src"))
             }
+
+            // Update price
+            $.ajax({
+                url: '/Item/VariantPrice',
+                type: 'GET',
+                data: { id: $(this).val() },
+                success: function (data) {
+                    $("#price-text").html(data)
+                },
+                error: function (xhr, status, error) {
+                    showToast("Failed to get variant price: " + xhr.responseText)
+                }
+            })
 
             updateVariantStockCount($(this).val())
         })

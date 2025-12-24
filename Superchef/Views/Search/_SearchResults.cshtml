@@ -1,17 +1,43 @@
 @model SearchVM
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
+@using Microsoft.EntityFrameworkCore.Storage
 @using Superchef.Services
 @inject GenerateLinkService GenerateLinkService
+
+@{
+    string resultText = "";
+    if (!string.IsNullOrEmpty(Model.Query))
+    {
+        resultText = Model.Query;
+    }
+    else
+    {
+        bool init = false;
+        foreach (var category in Model.AvailableCategories)
+        {
+            if (Model.Categories.Contains(category.Id))
+            {
+                if (init) resultText += ", ";
+                init = true;
+                resultText += category.Name;
+            }
+        }
+    }
+}
 
 <div class="container" data-no="color padding">
     <div class="result-text title normal">
         <img src="/img/info.png">
-        Search results for &nbsp;&quot;<strong>@Model.Query</strong>&quot;
+        <div>Search results for &nbsp;&quot;</div>
+        <strong>@resultText</strong>
+        <div>&quot;</div>
     </div>
 </div>
 
 <div class="listing-container container" data-no="color padding" data-result-container>
-    @if (Model.Type == "Stores") {
-        @foreach (var obj in Model.Results) 
+    @if (Model.Type == "Stores")
+    {
+        @foreach (var obj in Model.Results)
         {
             Store store = (Store)obj;
             var card = new StoreCardDM
@@ -24,10 +50,10 @@
             };
             <partial name="_StoreCard" model="@card" />
         }
-    } 
+    }
     else if (Model.Type == "Items")
     {
-        @foreach (var obj in Model.Results) 
+        @foreach (var obj in Model.Results)
         {
             Item item = (Item)obj;
             ItemCardDM? card = new ItemCardDM
@@ -47,6 +73,7 @@
 <partial name="_NoResults" model="null" />
 
 @Html.PagedListPager(Model.Results,
-    page => GenerateLinkService.GetPageLink("Index", "Search", page.ToString()),
-    PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageHelper.GetPagedOption(), ManagePageHelper.GetAjaxOption())
+page => GenerateLinkService.GetPageLink("Index", "Search", page.ToString()),
+PagedListRenderOptions.EnableUnobtrusiveAjaxReplacing(ManagePageHelper.GetPagedOption(),
+ManagePageHelper.GetAjaxOption())
 )

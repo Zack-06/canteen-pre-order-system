@@ -922,7 +922,7 @@ var accountConnectionToken = null
 accountConnection.on("Error", (message) => showToast(message))
 accountConnection.on("Initialized", (accountId, deviceId, hashedSessionToken, vapidPublicKey) => {
 	if (accountId == null || deviceId == null || hashedSessionToken == null) return
-
+    
 	accountConnectionId = accountId
 	accountConnectionDevice = deviceId
 	accountConnectionToken = hashedSessionToken
@@ -938,14 +938,15 @@ accountConnection.on("LogoutDevice", (deviceId) => {
 
 	handleLoggedOut()
 })
-accountConnection.on("LogoutAll", (accountId) => {
+accountConnection.on("LogoutAll", (accountId, triggerDeviceId) => {
 	if (accountId == null || accountId != accountConnectionId) return
-
+    if (triggerDeviceId == null || triggerDeviceId == accountConnectionDevice) return
 	handleLoggedOut()
 })
 accountConnection.start().then(() => {
 	accountConnection.invoke("Initialize")
 })
+
 function notifyLoggedOut() {
 	showToast("You've been logged out. Reload to take effect.")
 }
@@ -983,17 +984,17 @@ async function initPushNotifications(vapidPublicKey) {
 				})
 			}
 
-            const subJson = subscription.toJSON()
+			const subJson = subscription.toJSON()
 
-            // save or sync to server database
+			// save or sync to server database
 			$.ajax({
 				url: "/Account/SaveSubscription",
 				type: "POST",
-				data: { 
-                    endpoint: subJson.endpoint,
-                    p256dh: subJson.keys.p256dh,
-                    auth: subJson.keys.auth
-                },
+				data: {
+					endpoint: subJson.endpoint,
+					p256dh: subJson.keys.p256dh,
+					auth: subJson.keys.auth
+				}
 			})
 		} catch (error) {
 			console.error("Push Error:", error)

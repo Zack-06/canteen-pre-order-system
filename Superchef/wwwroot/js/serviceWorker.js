@@ -7,8 +7,8 @@ self.addEventListener("push", function (event) {
 
             await self.registration.showNotification(title, {
                 body: body,
-                icon: "/img/logo/small.png",
-                badge: "/img/logo/small.png",
+                icon: "/img/logo/badge.png",
+                badge: "/img/logo/badge.png",
                 vibrate: [100, 50, 100],
                 requireInteraction: true, // keeps the notification open until the user clicks on it
             })

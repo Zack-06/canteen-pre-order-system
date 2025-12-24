@@ -1,9 +1,7 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.SignalR;
 
 namespace Superchef.Hubs;
 
-[Authorize(Roles = "Customer")]
 public class OrderHub : Hub
 {
     /*

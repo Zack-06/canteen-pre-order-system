@@ -167,7 +167,7 @@ public class AdminController : Controller
         var admin = db.Accounts.FirstOrDefault(a => a.Id == id && !a.IsDeleted && a.AccountType.Name == "Admin");
         if (admin == null)
         {
-            return NotFound("Admin not found");
+            return NotFound();
         }
 
         return View(admin);
@@ -263,7 +263,7 @@ public class AdminController : Controller
 
         db.SaveChanges();
 
-        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);
+        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id, HttpContext.GetDeviceId());
 
         TempData["Message"] = "Logged out all known devices successfully";
         return Ok();

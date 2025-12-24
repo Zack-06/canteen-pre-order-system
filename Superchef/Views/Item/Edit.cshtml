@@ -150,7 +150,7 @@
     <div class="title">Action</div>
     <div class="button-group" data-flex="inline column">
         <a data-button="danger" data-ajax="true" data-ajax-url="@Url.Action("Delete", new { id = Model.Id })"
-            data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="window.location.href = '/Manage/@ViewBag.StoreId'"
+            data-ajax-method="POST" data-ajax-failure="defaultOnFailure" data-ajax-success="window.location.href = 'Item/Manage/@ViewBag.StoreId'"
             data-ajax-confirm="Are you sure you want to delete this item?">Delete Item</a>
         <a data-button="info" href="/Variant/Manage/@Model.Id">Manage Variants</a>
     </div>

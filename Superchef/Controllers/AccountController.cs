@@ -147,7 +147,7 @@ public class AccountController : Controller
             // Send email notification
             emlSrv.SendPasswordChangedEmail(acc, Url.Action("ForgotPassword", null, null, Request.Scheme, Request.Host.Value));
 
-            await accHubCtx.Clients.All.SendAsync("LogoutAll", acc.Id);
+            await accHubCtx.Clients.All.SendAsync("LogoutAll", acc.Id, HttpContext.GetDeviceId());
 
             TempData["Message"] = "Password reset successfully. Please login again";
             return RedirectToAction("Login", "Auth");
@@ -217,7 +217,7 @@ public class AccountController : Controller
             db.Devices.Remove(device);
         }
         db.SaveChanges();
-        await accHubCtx.Clients.All.SendAsync("LogoutAll", accountId);
+        await accHubCtx.Clients.All.SendAsync("LogoutAll", accountId, HttpContext.GetDeviceId());
 
         TempData["Message"] = "Logged out all known devices successfully";
     }
@@ -348,5 +348,20 @@ public class AccountController : Controller
         db.SaveChanges();
 
         return Ok();
+    }
+
+    [HttpGet]
+    [Authorize]
+    public IActionResult GetIdentity()
+    {
+        var name = User.Identity?.Name ?? "Anonymous";
+        var claimsCount = User.Claims.Count();
+
+        return Ok(new
+        {
+            User = name,
+            ClaimsCount = claimsCount,
+            IsAuthenticated = User.Identity?.IsAuthenticated
+        });
     }
 }

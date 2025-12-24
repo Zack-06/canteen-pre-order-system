@@ -44,4 +44,12 @@ public class AccountHub : Hub
 
         await Clients.Caller.SendAsync("Initialized", account.Id, session.DeviceId, hashedToken, cf["Vapid:PublicKey"]);
     }
+
+    /*
+    await Clients.Caller.SendAsync("Error", errorMessage);
+    await Clients.Caller.SendAsync("Initialized", accountId, deviceId, hashedSessionToken, vapidPublicKey);
+    await Clients.Caller.SendAsync("Logout", sessionToken);
+    await Clients.Caller.SendAsync("LogoutDevice", deviceId);
+    await Clients.Caller.SendAsync("LogoutAll", accountId, triggerDeviceId);
+    */
 }

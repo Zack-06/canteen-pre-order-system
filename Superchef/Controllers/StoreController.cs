@@ -36,7 +36,7 @@ public class StoreController : Controller
             .FirstOrDefault(s => s.Slug == slug && !s.IsDeleted);
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         return View(store);
@@ -48,7 +48,7 @@ public class StoreController : Controller
         var vendor = db.Accounts.FirstOrDefault(a => a.Id == vm.Id && !a.IsDeleted && a.AccountType.Name == "Vendor");
         if (vendor == null)
         {
-            return NotFound("Vendor not found");
+            return NotFound();
         }
 
         Dictionary<string, Expression<Func<Store, object>>> sortOptions = new()
@@ -149,7 +149,7 @@ public class StoreController : Controller
 
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         var token = User.FindFirst("SessionToken");
@@ -259,7 +259,7 @@ public class StoreController : Controller
         {
             if (acc.AccountType.Name == "Admin")
             {
-                return NotFound("Store not found");
+                return NotFound();
             }
 
             var sessionStoreId = HttpContext.Session.GetInt32("StoreId");
@@ -278,7 +278,7 @@ public class StoreController : Controller
         );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         if (acc.AccountType.Name == "Vendor" && store.AccountId != acc.Id)
@@ -316,7 +316,7 @@ public class StoreController : Controller
         );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         var acc = HttpContext.GetAccount()!;
@@ -453,7 +453,7 @@ public class StoreController : Controller
             );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         var tmpNow = DateTime.Now;
@@ -533,7 +533,7 @@ public class StoreController : Controller
             );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         if (!store.HasPublishedFirstSlots)
@@ -1202,7 +1202,7 @@ public class StoreController : Controller
         );
         if (store == null)
         {
-            return NotFound("Store not found");
+            return NotFound();
         }
 
         return View(id);

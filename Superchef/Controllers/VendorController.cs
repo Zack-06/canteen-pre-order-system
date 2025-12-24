@@ -182,7 +182,7 @@ public class VendorController : Controller
             );
         if (vendor == null)
         {
-            return NotFound("Vendor not found");
+            return NotFound();
         }
 
         return View(vendor);
@@ -220,7 +220,7 @@ public class VendorController : Controller
         
         db.SaveChanges();
 
-        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);
+        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id, HttpContext.GetDeviceId());
 
         TempData["Message"] = "Banned successfully!";
         return Ok();
@@ -344,7 +344,7 @@ public class VendorController : Controller
 
         db.SaveChanges();
 
-        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);
+        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id, HttpContext.GetDeviceId());
 
         TempData["Message"] = "Logged out all known devices successfully";
         return Ok();

@@ -45,7 +45,7 @@ public class WebhookController : ControllerBase
 
                     return BadRequest("PaymentIntent not found");
                 }
-                
+
                 string? error = paySrv.HandlePaymentIntentSucceeded(paymentIntent);
                 if (error != null) return BadRequest(error);
             }
@@ -60,10 +60,10 @@ public class WebhookController : ControllerBase
                         Action = $"Stripe Webhook Error: Expected Charge object missing for event type '{EventTypes.ChargeRefunded}'. Event ID: {stripeEvent.Id}",
                     });
                     db.SaveChanges();
-                    
+
                     return BadRequest("Charge not found");
                 }
-                
+
                 string? error = paySrv.HandleChargeRefunded(charge);
                 if (error != null) return BadRequest(error);
             }

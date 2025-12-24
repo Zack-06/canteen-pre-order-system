@@ -116,7 +116,7 @@ public class CustomerController : Controller
         var customer = db.Accounts.FirstOrDefault(a => a.Id == id && !a.IsDeleted && a.AccountType.Name == "Customer");
         if (customer == null)
         {
-            return NotFound("Customer not found");
+            return NotFound();
         }
 
         return View(customer);
@@ -154,7 +154,7 @@ public class CustomerController : Controller
 
         db.SaveChanges();
 
-        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);
+        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id, HttpContext.GetDeviceId());
 
         TempData["Message"] = "Banned successfully!";
         return Ok();
@@ -274,7 +274,7 @@ public class CustomerController : Controller
         });
         db.SaveChanges();
 
-        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id);
+        await accHubCtx.Clients.All.SendAsync("LogoutAll", account.Id, HttpContext.GetDeviceId());
 
         TempData["Message"] = "Logged out all known devices successfully";
         return Ok();

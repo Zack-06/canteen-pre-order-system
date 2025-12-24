@@ -36,6 +36,8 @@ public class SecurityService
 
     public void SignIn(string accountId, string role, string sessionToken)
     {
+        Console.WriteLine("Sign in");
+
         // Claim, identity and principal
         List<Claim> claims = [
             new(ClaimTypes.Name, accountId),

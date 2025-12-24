@@ -19,6 +19,11 @@ public static class Extensions
         return context.Items["Account"] as Account;
     }
 
+    public static int? GetDeviceId(this HttpContext context)
+    {
+        return context.Items["DeviceId"] as int?;
+    }
+
     public static string GetBaseUrl(this HttpRequest request)
     {
         return $"{request.Scheme}://{request.Host}";

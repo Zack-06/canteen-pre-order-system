@@ -53,14 +53,6 @@ builder.Services.ConfigureApplicationCookie(options =>
     };
 });
 
-// Look for X-Forwarded-Proto and X-Forwarded-For headers
-builder.Services.Configure<ForwardedHeadersOptions>(options =>
-{
-    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    options.KnownNetworks.Clear();
-    options.KnownProxies.Clear();
-});
-
 // Add http context accessor
 builder.Services.AddHttpContextAccessor();
 
@@ -98,12 +90,20 @@ builder.Services.AddHostedService<ExpiryCleanupBackgroundWorker>();
 StripeConfiguration.ApiKey = builder.Configuration["Stripe:SecretKey"];
 
 var app = builder.Build();
-app.UseForwardedHeaders();
+
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedFor
+});
+
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession();
 
 app.UseStatusCodePagesWithReExecute("/Error/{0}"); // hit error controller if error occurs
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Add middlewares
 app.UseMiddleware<ExpiryCleanupMiddleware>();
