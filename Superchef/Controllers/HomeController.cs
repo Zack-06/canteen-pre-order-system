@@ -119,6 +119,7 @@ public class HomeController : Controller
     {
         var activityLogs = db.AuditLogs
             .Include(a => a.Account)
+            .Where(a => a.CreatedAt >= DateTime.Now.AddDays(-30))
             .OrderByDescending(a => a.CreatedAt);
 
         var results = activityLogs.ToPagedList(vm.Page, 10);
