@@ -13,12 +13,14 @@ public class ItemController : Controller
     private readonly DB db;
     private readonly ImageService imgSrv;
     private readonly CleanupService clnSrv;
+    private readonly InactiveService inaSrv;
 
-    public ItemController(DB db, ImageService imgSrv, CleanupService clnSrv)
+    public ItemController(DB db, ImageService imgSrv, CleanupService clnSrv, InactiveService inaSrv)
     {
         this.db = db;
         this.imgSrv = imgSrv;
         this.clnSrv = clnSrv;
+        this.inaSrv = inaSrv;
     }
 
     [HttpGet]
@@ -715,11 +717,7 @@ public class ItemController : Controller
 
             if (item.IsActive == false)
             {
-                foreach (var variant in item.Variants)
-                {
-                    variant.IsActive = false;
-                }
-                db.SaveChanges();
+                inaSrv.SetInactive(item);
             }
 
             TempData["Message"] = "Item updated successfully";

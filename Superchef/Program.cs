@@ -80,6 +80,7 @@ builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<SystemOrderService>();
 builder.Services.AddScoped<GenerateLinkService>();
 builder.Services.AddScoped<CleanupService>();
+builder.Services.AddScoped<InactiveService>();
 builder.Services.AddScoped<GenerateSlotService>();
 builder.Services.AddScoped<NotificationService>();
 

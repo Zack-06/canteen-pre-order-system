@@ -12,12 +12,14 @@ public class VariantController : Controller
     private readonly DB db;
     private readonly ImageService imgSrv;
     private readonly CleanupService clnSrv;
+    private readonly InactiveService inaSrv;
 
-    public VariantController(DB db, ImageService imgSrv, CleanupService clnSrv)
+    public VariantController(DB db, ImageService imgSrv, CleanupService clnSrv, InactiveService inaSrv)
     {
         this.db = db;
         this.imgSrv = imgSrv;
         this.clnSrv = clnSrv;
+        this.inaSrv = inaSrv;
     }
 
     public IActionResult Manage(ManageVariantVM vm)
@@ -328,6 +330,11 @@ public class VariantController : Controller
             }
 
             db.SaveChanges();
+
+            if (variant.IsActive == false)
+            {
+                inaSrv.SetInactive(variant);
+            }
 
             TempData["Message"] = "Variant updated successfully";
             return RedirectToAction("Edit", new { id = variant.Id });
