@@ -1,7 +1,5 @@
 ## 🍱 Canteen Pre-Order System
-A web-based system that allows students or staff to pre-order food and drinks from the campus canteen before arrival.
-The system reduces long queues, improves order accuracy, and helps vendors manage daily food preparation efficiently.
-It also provides an admin interface for canteen vendors to manage menus, order schedules, and track sales.
+A web-based system that allows students and staff to browse available canteen food, pre-order meals, select pickup times and make cashless payments easily.
 
 
 ## 🖥️ Preview
