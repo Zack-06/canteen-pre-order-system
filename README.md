@@ -6,7 +6,8 @@ A web-based system that allows students and staff to browse available canteen fo
 
 ### 🎟️ Food Pre-ordering
 Browse movies, choose a showtime, select seats, and confirm your booking.
-![Food Pre-ordering](./assets/order.gif)
+
+![Food Pre-ordering](<img src="./assets/order.gif" width="100%">)
 
 ### 🍿 Vendor Management
 Order snacks and drinks along with your movie ticket.
