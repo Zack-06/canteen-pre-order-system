@@ -9,6 +9,10 @@ Browse movies, choose a showtime, select seats, and confirm your booking.
 
 ![Food Pre-ordering](./assets/order.gif)
 
+<p align="center">
+  <img src="./assets/order.gif" width="700"/>
+</p>
+
 ### 🍿 Vendor Management
 Order snacks and drinks along with your movie ticket.
 
